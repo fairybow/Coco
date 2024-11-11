@@ -1,5 +1,5 @@
 /*
-* CocoAbstractPageWidget.h  Copyright (C) 2024  fairybow
+* Coco/AbstractPageWidget.h  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -13,7 +13,7 @@
 #pragma once
 
 #include "../src/CocoGlobal.hpp"
-#include "CocoStackedWidget.h"
+#include "StackedWidget.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

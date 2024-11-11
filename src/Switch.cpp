@@ -1,5 +1,5 @@
 /*
-* CocoSwitch.cpp  Copyright (C) 2024  fairybow
+* Coco Switch.cpp  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -13,7 +13,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/CocoSwitch.h"
+#include "../include/Coco/Switch.h"
 
 #include <QSizePolicy>
 

@@ -1,5 +1,5 @@
 /*
-* CocoPath.cpp  Copyright (C) 2024  fairybow
+* Coco Path.cpp  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -10,7 +10,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/CocoPath.h"
+#include "../include/Coco/Path.h"
 
 #include <QDir>
 #include <QDirIterator>

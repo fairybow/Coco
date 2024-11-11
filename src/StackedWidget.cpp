@@ -1,5 +1,5 @@
 /*
-* CocoStackedWidget.cpp  Copyright (C) 2024  fairybow
+* Coco StackedWidget.cpp  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -10,7 +10,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/CocoStackedWidget.h"
+#include "../include/Coco/StackedWidget.h"
 
 BEGIN_COCO_NAMESPACE
 

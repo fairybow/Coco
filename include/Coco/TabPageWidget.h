@@ -1,5 +1,5 @@
 /*
-* CocoDropDownPageWidget.h  Copyright (C) 2024  fairybow
+* Coco/TabPageWidget.h  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -13,46 +13,41 @@
 #pragma once
 
 #include "../src/CocoGlobal.hpp"
-#include "CocoAbstractPageWidget.h"
+#include "AbstractPageWidget.h"
 
-#include <QComboBox>
 #include <QHash>
 #include <QPointer>
 #include <QString>
+#include <QTabBar>
 #include <QUuid>
-#include <QVariant>
 
 BEGIN_COCO_NAMESPACE
 
-/// @todo Abstract away all possible
-class DropDownPageWidget : public AbstractPageWidget
+class TabPageWidget : public AbstractPageWidget
 {
     Q_OBJECT
 
 public:
-    DropDownPageWidget(QWidget* parent = nullptr);
+    TabPageWidget(QWidget* parent = nullptr);
 
     int addPage(QWidget* widget, const QString& label, const QVariant& data = {}) override;
-    QComboBox* comboBox() const;
-    bool isEditable() const;
-    void setEditable(bool editable);
-    bool duplicatesEnabled() const;
-    void setDuplicatesEnabled(bool enabled);
+    QTabBar* tabBar() const;
+    bool tabsMovable() const;
+    void setTabsMovable(bool movable);
     int indexOf(const QWidget* widget) const override;
     QWidget* widgetAt(int index) const override;
     int currentIndex() const override;
 
 public slots:
     void setCurrentIndex(int index) override;
-    void setCurrentText(const QString& text);
 
 private:
     /// @todo Need to be really clear about these temp data hashes used to find
     /// our widgets. They get confusing.
-    QHash<QUuid, QPointer<QWidget>> m_comboBoxItemIdsToWidgets{};
+    QHash<QUuid, QPointer<QWidget>> m_tabBarItemIdsToWidgets{};
 
-    void _initComboBox();
+    void _initTabBar();
 
-}; // class Coco::DropDownPageWidget
+}; // class Coco::TabPageWidget
 
 END_COCO_NAMESPACE

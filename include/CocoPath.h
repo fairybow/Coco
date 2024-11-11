@@ -20,7 +20,6 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QTextStream>
-#include <QWidget>
 
 #include <filesystem>
 #include <ostream>

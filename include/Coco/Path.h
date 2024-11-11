@@ -64,7 +64,7 @@ public:
         Cache,
         Config,
         Desktop,
-        Download,
+        Downloads,
         Documents,
         Fonts,
         GenericCache,

@@ -407,7 +407,7 @@ Path::_systemToQtType() const
         { Cache, QStandardPaths::CacheLocation },
         { Config, QStandardPaths::ConfigLocation },
         { Desktop, QStandardPaths::DesktopLocation },
-        { Download, QStandardPaths::DownloadLocation },
+        { Downloads, QStandardPaths::DownloadLocation },
         { Documents, QStandardPaths::DocumentsLocation },
         { Fonts, QStandardPaths::FontsLocation },
         { GenericCache, QStandardPaths::GenericCacheLocation },

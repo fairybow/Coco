@@ -63,8 +63,8 @@ bool Io::writeTxt
     }
 
     qDebug(log)
-            << __FUNCTION__
-            << "Failed to write text file.";
+        << __FUNCTION__
+        << "Failed to write text file.";
 
     return false;
 }

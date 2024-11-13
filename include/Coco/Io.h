@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-12
+* Updated: 2024-11-13
 */
 
 #pragma once
@@ -23,9 +23,9 @@ namespace Io
 {
     enum class CreateDirs { No = 0, Yes };
 
-    inline QString readTxt(const Path& path);
+    QString readTxt(const Path& path);
 
-    inline bool writeTxt
+    bool writeTxt
     (
         const Path& path,
         QString text = {},

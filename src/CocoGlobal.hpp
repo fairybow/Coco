@@ -24,8 +24,8 @@ BEGIN_COCO_NAMESPACE
 // Q_LOGGING_CATEGORY
 inline const QLoggingCategory& log()
 {
-	static const QLoggingCategory category("Coco");
-	return category;
+    static const QLoggingCategory category("Coco");
+    return category;
 }
 
 END_COCO_NAMESPACE

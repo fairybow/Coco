@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "../src/CocoGlobal.hpp"
+#include "../../src/CocoGlobal.hpp"
 
 #include <QAbstractButton>
 #include <QBrush>

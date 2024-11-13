@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "../src/CocoGlobal.hpp"
+#include "../../src/CocoGlobal.hpp"
 #include "AbstractPageWidget.h"
 
 #include <QComboBox>

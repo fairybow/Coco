@@ -1,0 +1,2 @@
+include/Coco/Global.h linguist-language=C++
+src/Debug.h linguist-language=C++

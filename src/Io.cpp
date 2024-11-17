@@ -7,10 +7,11 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-12
+* Updated: 2024-11-16
 */
 
 #include "../include/Coco/Io.h"
+#include "Debug.h"
 
 #include <QFile>
 #include <QTextStream>

@@ -10,12 +10,12 @@
 * Coco::Switch based on the hard work of user3559721, found here:
 * <https://codereview.stackexchange.com/questions/249076/>
 *
-* Updated: 2024-11-10
+* Updated: 2024-11-16
 */
 
 #pragma once
 
-#include "../../src/CocoGlobal.hpp"
+#include "Global.h"
 
 #include <QAbstractButton>
 #include <QBrush>

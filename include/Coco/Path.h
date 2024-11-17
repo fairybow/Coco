@@ -7,12 +7,12 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-10
+* Updated: 2024-11-16
 */
 
 #pragma once
 
-#include "../../src/CocoGlobal.hpp"
+#include "Global.h"
 
 #include <QChar>
 #include <QDebug>

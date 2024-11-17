@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-10
+* Updated: 2024-11-17
 */
 
 #include "../include/Coco/Path.h"
@@ -51,6 +51,23 @@ Path::Path(System location)
 bool Path::mkdir(const Path& path)
 {
     return std::filesystem::create_directories(path.m_path);
+}
+
+Path Path::resolveExt(const QString& ext)
+{
+    constexpr static auto dot = ".";
+
+    if (ext.isEmpty() || ext == dot || ext == "..")
+        return {};
+
+    constexpr static auto dummy = "C:/Dir/Stem";
+    QString resolved = dummy;
+
+    if (!ext.contains(dot))
+        resolved += dot;
+
+    resolved += ext;
+    return Path(resolved).extension();
 }
 
 /// @brief Returns a list of Paths from Qt application arguments

@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-16
+* Updated: 2024-11-17
 */
 
 #pragma once
@@ -89,6 +89,9 @@ public:
 
     /// @brief Creates all directories in the specified path
     static bool mkdir(const Path& path);
+
+    /// @brief Resolve an extension (with or without dot) to ".{ ext }"
+    static Path resolveExt(const QString& ext);
 
     /// @brief Returns a list of Paths from Qt application arguments
     static QList<Path> fromArgs

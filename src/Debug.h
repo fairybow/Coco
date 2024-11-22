@@ -1,5 +1,5 @@
 /*
-* Coco Debug.h  Copyright (C) 2024  fairybow
+* Coco: Debug.h  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -8,6 +8,9 @@
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
 * Updated: 2024-11-16
+*
+* Note: This header is part of the internal implementation of Coco and not
+* intended for use by users. It may change without notice.
 */
 
 #pragma once

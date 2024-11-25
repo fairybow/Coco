@@ -7,13 +7,13 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-17
+* Updated: 2024-11-24
 */
 
 #include "../include/Coco/Path.h"
+#include "Debug.h"
 
 #include <QDir>
-#include <QDirIterator>
 #include <QFileDialog>
 #include <QFileInfo>
 
@@ -53,24 +53,35 @@ bool Path::mkdir(const Path& path)
     return std::filesystem::create_directories(path.m_path);
 }
 
-Path Path::resolveExt(const QString& ext)
+Path Path::resolveExtension(const QString& extension)
 {
+    auto ext = extension.trimmed();
     constexpr static auto dot = ".";
-
     if (ext.isEmpty() || ext == dot || ext == "..")
         return {};
 
     constexpr static auto dummy = "C:/Dir/Stem";
-    QString resolved = dummy;
+    QString resolved_dummy_path = dummy;
 
     if (!ext.contains(dot))
-        resolved += dot;
+        resolved_dummy_path += dot;
 
-    resolved += ext;
-    return Path(resolved).extension();
+    resolved_dummy_path += ext;
+    auto resolved = Path(resolved_dummy_path).extension();
+
+    if (resolved != extension)
+    {
+        constexpr static auto format = \
+            "Resolved extension \"%1\" to \"%2\"";
+
+        qDebug(log) << qUtf8Printable(QString(format)
+            .arg(extension)
+            .arg(resolved.toQString()));
+    }
+
+    return resolved;
 }
 
-/// @brief Returns a list of Paths from Qt application arguments
 QList<Path> Path::fromArgs
 (
     const QStringList& args,
@@ -81,12 +92,11 @@ QList<Path> Path::fromArgs
     QList<Path> paths{};
 
     for (int i = (skipArg0 == SkipArg0::Yes); i < args.size(); ++i)
-        _argHelper(args[i], paths, validOnly);
+        _fromArgs_helper(args[i], paths, validOnly);
 
     return paths;
 }
 
-/// @brief Returns a list of Paths from application arguments
 QList<Path> Path::fromArgs
 (
     int argc,
@@ -98,37 +108,63 @@ QList<Path> Path::fromArgs
     QList<Path> paths{};
 
     for (int i = (skipArg0 == SkipArg0::Yes); i < argc; ++i)
-        _argHelper(argv[i], paths, validOnly);
+        _fromArgs_helper(argv[i], paths, validOnly);
 
     return paths;
 }
 
-/// @todo Sort?
 QList<Path> Path::findIn
 (
     const Path& directory,
-    const QString& extension,
+    const QString& extensions,
     Recursive recursive
 )
 {
     QList<Path> paths{};
 
-    auto iterator_flag = (recursive == Recursive::Yes)
-        ? QDirIterator::Subdirectories
-        : QDirIterator::NoIteratorFlags;
-
     QDirIterator it
     (
         directory.toQString(),
-        QStringList{} << "*." + extension,
+        _findIn_extHelper(extensions),
         QDir::Files,
-        iterator_flag
+        _findIn_flagsHelper(recursive)
     );
 
     while (it.hasNext())
     {
         it.next();
         paths << it.filePath();
+    }
+
+    return paths;
+}
+
+QList<Path> Path::findIn
+(
+    const QList<Path>& directories,
+    const QString& extensions,
+    Recursive recursive
+)
+{
+    QList<Path> paths{};
+    auto exts = _findIn_extHelper(extensions);
+    auto flags = _findIn_flagsHelper(recursive);
+
+    for (auto& dir : directories)
+    {
+        QDirIterator it
+        (
+            dir.toQString(),
+            exts,
+            QDir::Files,
+            flags
+        );
+
+        while (it.hasNext())
+        {
+            it.next();
+            paths << it.filePath();
+        }
     }
 
     return paths;
@@ -144,10 +180,9 @@ std::ostream& operator<<(std::ostream& outStream, const Path& path)
     return outStream << path.toString(Path::Normalize::Yes);
 }
 
-/// @brief By returning a QDebug object (not a reference), we allow the
-/// chaining of multiple operator<< calls. This is similar to how
-/// std::ostream works, but with the added benefit of managing QDebug's
-/// internal state
+// By returning a QDebug object (not a reference), we allow the chaining of
+// multiple operator<< calls. This is similar to how std::ostream works, but
+// with the added benefit of managing QDebug's internal state
 QDebug operator<<(QDebug debug, const Path& path)
 {
     //debug.nospace() << path.toQString();
@@ -359,7 +394,7 @@ Path& Path::makePreferred() noexcept
     return *this;
 }
 
-void Path::_argHelper
+void Path::_fromArgs_helper
 (
     const QString& arg,
     QList<Path>& paths,
@@ -375,6 +410,24 @@ void Path::_argHelper
     }
     else
         paths << path;
+}
+
+QStringList Path::_findIn_extHelper(const QString& extensions)
+{
+    QStringList resolved{};
+
+    for (auto& ext : extensions.split(","))
+        resolved << "*" + resolveExtension(ext).toQString();
+
+    return resolved;
+}
+
+// Handle other flags in future, maybe
+QDirIterator::IteratorFlags Path::_findIn_flagsHelper(Recursive recursive)
+{
+    return (recursive == Recursive::Yes)
+        ? QDirIterator::Subdirectories
+        : QDirIterator::NoIteratorFlags;
 }
 
 Path Path::_qStandardLocation(QStandardPaths::StandardLocation type) const

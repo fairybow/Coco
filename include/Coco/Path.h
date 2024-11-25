@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-17
+* Updated: 2024-11-24
 */
 
 #pragma once
@@ -16,6 +16,7 @@
 
 #include <QChar>
 #include <QDebug>
+#include <QDirIterator>
 #include <QList>
 #include <QStandardPaths>
 #include <QString>
@@ -42,10 +43,10 @@ namespace std
 
 BEGIN_COCO_NAMESPACE
 
-/// @todo Error handling, other fs methods
-/// @todo Fully document
-/// @todo Make path always preferred / native separators?
-/// @brief Wraps std::filesystem::path for use with Qt
+// TODO: Error handling, other fs methods
+// TODO: Fully document
+// TODO: Make path always preferred / native separators?
+// Wraps std::filesystem::path for use with Qt
 class Path
 {
 public:
@@ -87,13 +88,13 @@ public:
     Path(const QString& path);
     Path(System location);
 
-    /// @brief Creates all directories in the specified path
+    // Creates all directories in the specified path
     static bool mkdir(const Path& path);
 
-    /// @brief Resolve an extension (with or without dot) to ".{ ext }"
-    static Path resolveExt(const QString& ext);
+    // Resolve an extension (with or without dot) to ".{ extension }"
+    static Path resolveExtension(const QString& extension);
 
-    /// @brief Returns a list of Paths from Qt application arguments
+    // Returns a list of Paths from Qt application arguments
     static QList<Path> fromArgs
     (
         const QStringList& args,
@@ -101,7 +102,7 @@ public:
         SkipArg0 skipArg0 = SkipArg0::Yes
     );
 
-    /// @brief Returns a list of Paths from application arguments
+    // Returns a list of Paths from application arguments
     static QList<Path> fromArgs
     (
         int argc,
@@ -110,11 +111,19 @@ public:
         SkipArg0 skipArg0 = SkipArg0::Yes
     );
 
-    /// @todo Sort?
+    // Add sorting option
+    // Provide extensions as ".h, .cpp" (one QString)
     static QList<Path> findIn
     (
         const Path& directory,
-        const QString& extension,
+        const QString& extensions,
+        Recursive recursive = Recursive::Yes
+    );
+
+    static QList<Path> findIn
+    (
+        const QList<Path>& directories,
+        const QString& extensions,
         Recursive recursive = Recursive::Yes
     );
 
@@ -122,10 +131,9 @@ public:
     friend QTextStream& operator<<(QTextStream& outStream, const Path& path);
     friend std::ostream& operator<<(std::ostream& outStream, const Path& path);
 
-    /// @brief By returning a QDebug object (not a reference), we allow the
-    /// chaining of multiple operator<< calls. This is similar to how
-    /// std::ostream works, but with the added benefit of managing QDebug's
-    /// internal state
+    // By returning a QDebug object (not a reference), we allow the chaining of
+    // multiple operator<< calls. This is similar to how std::ostream works, but
+    // with the added benefit of managing QDebug's internal state
     friend QDebug operator<<(QDebug debug, const Path& path);
 
     // Assignment
@@ -183,13 +191,15 @@ public:
 private:
     std::filesystem::path m_path;
 
-    static void _argHelper
+    static void _fromArgs_helper
     (
         const QString& arg,
         QList<Path>& paths,
         ValidOnly validOnly
     );
 
+    static QStringList _findIn_extHelper(const QString& extensions);
+    static QDirIterator::IteratorFlags _findIn_flagsHelper(Recursive recursive);
     Path _qStandardLocation(QStandardPaths::StandardLocation type) const;
     Path _fromSystem(System type) const;
     const std::unordered_map<System, QStandardPaths::StandardLocation> _systemToQtType() const;

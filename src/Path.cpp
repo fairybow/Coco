@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-24
+* Updated: 2024-11-27
 */
 
 #include "../include/Coco/Path.h"
@@ -17,12 +17,20 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
+//------------------------------------------------------------
+// std::hash definition
+//------------------------------------------------------------
+
 std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
 {
     return std::hash<std::filesystem::path>()(path.toStd());
 }
 
 BEGIN_COCO_NAMESPACE
+
+//------------------------------------------------------------
+// Path definitions
+//------------------------------------------------------------
 
 Path::Path()
     : m_path(std::filesystem::path{})
@@ -47,128 +55,6 @@ Path::Path(const QString& path)
 Path::Path(System location)
     : m_path(_fromSystem(location))
 {}
-
-bool Path::mkdir(const Path& path)
-{
-    return std::filesystem::create_directories(path.m_path);
-}
-
-Path Path::resolveExtension(const QString& extension)
-{
-    auto ext = extension.trimmed();
-    constexpr static auto dot = ".";
-    if (ext.isEmpty() || ext == dot || ext == "..")
-        return {};
-
-    constexpr static auto dummy = "C:/Dir/Stem";
-    QString resolved_dummy_path = dummy;
-
-    if (!ext.contains(dot))
-        resolved_dummy_path += dot;
-
-    resolved_dummy_path += ext;
-    auto resolved = Path(resolved_dummy_path).extension();
-
-    if (resolved != extension)
-    {
-        constexpr static auto format = \
-            "Resolved extension \"%1\" to \"%2\"";
-
-        qDebug(log) << qUtf8Printable(QString(format)
-            .arg(extension)
-            .arg(resolved.toQString()));
-    }
-
-    return resolved;
-}
-
-QList<Path> Path::fromArgs
-(
-    const QStringList& args,
-    ValidOnly validOnly,
-    SkipArg0 skipArg0
-)
-{
-    QList<Path> paths{};
-
-    for (int i = (skipArg0 == SkipArg0::Yes); i < args.size(); ++i)
-        _fromArgs_helper(args[i], paths, validOnly);
-
-    return paths;
-}
-
-QList<Path> Path::fromArgs
-(
-    int argc,
-    char* argv[],
-    ValidOnly validOnly,
-    SkipArg0 skipArg0
-)
-{
-    QList<Path> paths{};
-
-    for (int i = (skipArg0 == SkipArg0::Yes); i < argc; ++i)
-        _fromArgs_helper(argv[i], paths, validOnly);
-
-    return paths;
-}
-
-QList<Path> Path::findIn
-(
-    const Path& directory,
-    const QString& extensions,
-    Recursive recursive
-)
-{
-    QList<Path> paths{};
-
-    QDirIterator it
-    (
-        directory.toQString(),
-        _findIn_extHelper(extensions),
-        QDir::Files,
-        _findIn_flagsHelper(recursive)
-    );
-
-    while (it.hasNext())
-    {
-        it.next();
-        paths << it.filePath();
-    }
-
-    return paths;
-}
-
-QList<Path> Path::findIn
-(
-    const QList<Path>& directories,
-    const QString& extensions,
-    Recursive recursive
-)
-{
-    QList<Path> paths{};
-    auto exts = _findIn_extHelper(extensions);
-    auto flags = _findIn_flagsHelper(recursive);
-
-    for (auto& dir : directories)
-    {
-        QDirIterator it
-        (
-            dir.toQString(),
-            exts,
-            QDir::Files,
-            flags
-        );
-
-        while (it.hasNext())
-        {
-            it.next();
-            paths << it.filePath();
-        }
-    }
-
-    return paths;
-}
 
 QTextStream& operator<<(QTextStream& outStream, const Path& path)
 {
@@ -233,165 +119,25 @@ Path::operator std::filesystem::path() const
 //     return toQVariant();
 // }
 
-std::string Path::extString() const
+// A-Z
+//------------------------------------------------------------
+
+QStringList Path::_findIn_extHelper(const QString& extensions)
 {
-    return extension().toString();
+    QStringList resolved{};
+
+    for (auto& ext : extensions.split(","))
+        resolved << "*" + resolveExtension(ext).toQString();
+
+    return resolved;
 }
 
-QString Path::extQString() const
+// Handle other flags in future, maybe
+QDirIterator::IteratorFlags Path::_findIn_flagsHelper(Recursive recursive)
 {
-    return extension().toQString();
-}
-
-QString Path::fileQString() const
-{
-    return file().toQString();
-}
-
-std::string Path::fileString() const
-{
-    return file().toString();
-}
-
-std::string Path::stemString() const
-{
-    return stem().toString();
-}
-
-QString Path::stemQString() const
-{
-    return stem().toQString();
-}
-
-QString Path::toQString(Normalize normalize, char separator) const
-{
-    return QString::fromStdString
-    (
-        toString(normalize, separator)
-    );
-}
-
-// QVariant Path::toQVariant() const
-// {
-//     return QVariant::fromValue(toQString());
-// }
-
-std::filesystem::path Path::toStd() const
-{
-    return m_path;
-}
-
-std::string Path::toString(Normalize normalize, char separator) const
-{
-    auto string = m_path.string();
-
-    if (normalize == Normalize::Yes)
-        return _normalizer(string, separator);
-
-    return string;
-}
-
-bool Path::isEmpty() const
-{
-    return m_path.empty();
-}
-
-bool Path::isFile() const
-{
-    //return std::filesystem::is_regular_file(m_path);
-    // ^ Valid paths with non-standard characters won't return valid
-    return QFileInfo(toQString()).isFile();
-}
-
-bool Path::isFolder() const
-{
-    //return std::filesystem::is_directory(m_path);
-    // ^ Valid paths with non-standard characters won't return valid
-    return QFileInfo(toQString()).isDir();
-}
-
-bool Path::isValid() const
-{
-    //return std::filesystem::exists(m_path);
-    // ^ Valid paths with non-standard characters won't return valid
-    return QFileInfo(toQString()).exists();
-}
-
-Path Path::rootName() const
-{
-    return m_path.root_name();
-}
-
-Path Path::rootDirectory() const
-{
-    return m_path.root_directory();
-}
-
-Path Path::root() const
-{
-    return m_path.root_path();
-}
-
-Path Path::relative() const
-{
-    return m_path.relative_path();
-}
-
-Path Path::parent() const
-{
-    return m_path.parent_path();
-}
-
-Path Path::file() const
-{
-    return m_path.filename();
-}
-
-Path Path::stem() const
-{
-    return m_path.stem();
-}
-
-Path Path::extension() const
-{
-    return m_path.extension();
-}
-
-void Path::clear() noexcept
-{
-    m_path.clear();
-}
-
-Path& Path::replaceExt(const Path& replacement)
-{
-    m_path.replace_extension(replacement);
-    return *this;
-}
-
-Path Path::arg(const QString& a, int fieldWidth, QChar fillChar) const
-{
-    return toQString().arg(a, fieldWidth, fillChar);
-}
-
-Path Path::arg(int a, int fieldWidth, int base, QChar fillChar) const
-{
-    return toQString().arg(a, fieldWidth, base, fillChar);
-}
-
-Path Path::arg(char a, int fieldWidth, QChar fillChar) const
-{
-    return toQString().arg(a, fieldWidth, fillChar);
-}
-
-Path Path::arg(QChar a, int fieldWidth, QChar fillChar) const
-{
-    return toQString().arg(a, fieldWidth, fillChar);
-}
-
-Path& Path::makePreferred() noexcept
-{
-    m_path.make_preferred();
-    return *this;
+    return (recursive == Recursive::Yes)
+        ? QDirIterator::Subdirectories
+        : QDirIterator::NoIteratorFlags;
 }
 
 void Path::_fromArgs_helper
@@ -412,22 +158,43 @@ void Path::_fromArgs_helper
         paths << path;
 }
 
-QStringList Path::_findIn_extHelper(const QString& extensions)
+Path Path::_fromSystem(System type) const
 {
-    QStringList resolved{};
+    if (type == Root)
+        return Path(QDir::rootPath());
 
-    for (auto& ext : extensions.split(","))
-        resolved << "*" + resolveExtension(ext).toQString();
+    auto type_map = _systemToQtType();
+    auto it = type_map.find(type);
 
-    return resolved;
+    if (it != type_map.end())
+        return _qStandardLocation(it->second);
+
+    return {};
 }
 
-// Handle other flags in future, maybe
-QDirIterator::IteratorFlags Path::_findIn_flagsHelper(Recursive recursive)
+std::string Path::_normalizer(const std::string& str, char separator) const
 {
-    return (recursive == Recursive::Yes)
-        ? QDirIterator::Subdirectories
-        : QDirIterator::NoIteratorFlags;
+    std::string normalized{};
+    auto last_ch_was_sep = false;
+
+    for (auto& ch : str)
+    {
+        if (ch == '/' || ch == '\\')
+        {
+            if (!last_ch_was_sep)
+            {
+                normalized += separator;
+                last_ch_was_sep = true;
+            }
+        }
+        else
+        {
+            normalized += ch;
+            last_ch_was_sep = false;
+        }
+    }
+
+    return normalized;
 }
 
 Path Path::_qStandardLocation(QStandardPaths::StandardLocation type) const
@@ -441,20 +208,6 @@ Path Path::_qStandardLocation(QStandardPaths::StandardLocation type) const
             QStandardPaths::LocateDirectory
         )
     );
-}
-
-Path Path::_fromSystem(System type) const
-{
-    if (type == Root)
-        return Path(QDir::rootPath());
-
-    auto type_map = _systemToQtType();
-    auto it = type_map.find(type);
-
-    if (it != type_map.end())
-        return _qStandardLocation(it->second);
-
-    return {};
 }
 
 const std::unordered_map
@@ -496,30 +249,312 @@ Path::_systemToQtType() const
     return map;
 }
 
-std::string Path::_normalizer(const std::string& str, char separator) const
+Path Path::arg(const QString& a, int fieldWidth, QChar fillChar) const
 {
-    std::string normalized{};
-    auto last_ch_was_sep = false;
+    return toQString().arg(a, fieldWidth, fillChar);
+}
 
-    for (auto& ch : str)
+Path Path::arg(int a, int fieldWidth, int base, QChar fillChar) const
+{
+    return toQString().arg(a, fieldWidth, base, fillChar);
+}
+
+Path Path::arg(char a, int fieldWidth, QChar fillChar) const
+{
+    return toQString().arg(a, fieldWidth, fillChar);
+}
+
+Path Path::arg(QChar a, int fieldWidth, QChar fillChar) const
+{
+    return toQString().arg(a, fieldWidth, fillChar);
+}
+
+void Path::clear() noexcept
+{
+    m_path.clear();
+}
+
+Path Path::extension() const
+{
+    return m_path.extension();
+}
+
+std::string Path::extString() const
+{
+    return extension().toString();
+}
+
+QString Path::extQString() const
+{
+    return extension().toQString();
+}
+
+Path Path::file() const
+{
+    return m_path.filename();
+}
+
+std::string Path::fileString() const
+{
+    return file().toString();
+}
+
+QString Path::fileQString() const
+{
+    return file().toQString();
+}
+
+QList<Path> Path::findIn
+(
+    const Path& directory,
+    const QString& extensions,
+    Recursive recursive
+)
+{
+    QList<Path> paths{};
+
+    QDirIterator it
+    (
+        directory.toQString(),
+        _findIn_extHelper(extensions),
+        QDir::Files,
+        _findIn_flagsHelper(recursive)
+    );
+
+    while (it.hasNext())
     {
-        if (ch == '/' || ch == '\\')
+        it.next();
+        paths << it.filePath();
+    }
+
+    return paths;
+}
+
+QList<Path> Path::findIn
+(
+    const QList<Path>& directories,
+    const QString& extensions,
+    Recursive recursive
+)
+{
+    QList<Path> paths{};
+    auto exts = _findIn_extHelper(extensions);
+    auto flags = _findIn_flagsHelper(recursive);
+
+    for (auto& dir : directories)
+    {
+        QDirIterator it
+        (
+            dir.toQString(),
+            exts,
+            QDir::Files,
+            flags
+        );
+
+        while (it.hasNext())
         {
-            if (!last_ch_was_sep)
-            {
-                normalized += separator;
-                last_ch_was_sep = true;
-            }
-        }
-        else
-        {
-            normalized += ch;
-            last_ch_was_sep = false;
+            it.next();
+            paths << it.filePath();
         }
     }
 
-    return normalized;
+    return paths;
 }
+
+QList<Path> Path::fromArgs
+(
+    const QStringList& args,
+    ValidOnly validOnly,
+    SkipArg0 skipArg0
+)
+{
+    QList<Path> paths{};
+
+    for (int i = (skipArg0 == SkipArg0::Yes); i < args.size(); ++i)
+        _fromArgs_helper(args[i], paths, validOnly);
+
+    return paths;
+}
+
+QList<Path> Path::fromArgs
+(
+    int argc,
+    char* argv[],
+    ValidOnly validOnly,
+    SkipArg0 skipArg0
+)
+{
+    QList<Path> paths{};
+
+    for (int i = (skipArg0 == SkipArg0::Yes); i < argc; ++i)
+        _fromArgs_helper(argv[i], paths, validOnly);
+
+    return paths;
+}
+
+bool Path::isEmpty() const
+{
+    return m_path.empty();
+}
+
+bool Path::isEmpty(const Path& path)
+{
+    return path.isEmpty();
+}
+
+bool Path::isFile() const
+{
+    //return std::filesystem::is_regular_file(m_path);
+    // ^ Valid paths with non-standard characters won't return valid
+    return QFileInfo(toQString()).isFile();
+}
+
+bool Path::isFile(const Path& path)
+{
+    return path.isFile();
+}
+
+bool Path::isFolder() const
+{
+    //return std::filesystem::is_directory(m_path);
+    // ^ Valid paths with non-standard characters won't return valid
+    return QFileInfo(toQString()).isDir();
+}
+
+bool Path::isFolder(const Path& path)
+{
+    return path.isFolder();
+}
+
+bool Path::isValid() const
+{
+    //return std::filesystem::exists(m_path);
+    // ^ Valid paths with non-standard characters won't return valid
+    return QFileInfo(toQString()).exists();
+}
+
+bool Path::isValid(const Path& path)
+{
+    return path.isValid();
+}
+
+Path& Path::makePreferred() noexcept
+{
+    m_path.make_preferred();
+    return *this;
+}
+
+bool Path::mkdir(const Path& path)
+{
+    return std::filesystem::create_directories(path.m_path);
+}
+
+Path Path::parent() const
+{
+    return m_path.parent_path();
+}
+
+Path Path::relative() const
+{
+    return m_path.relative_path();
+}
+
+Path& Path::replaceExt(const Path& replacement)
+{
+    m_path.replace_extension(replacement);
+    return *this;
+}
+
+Path Path::resolveExtension(const QString& extension)
+{
+    auto ext = extension.trimmed();
+    constexpr static auto dot = ".";
+    if (ext.isEmpty() || ext == dot || ext == "..")
+        return {};
+
+    constexpr static auto dummy = "C:/Dir/Stem";
+    QString resolved_dummy_path = dummy;
+
+    if (!ext.contains(dot))
+        resolved_dummy_path += dot;
+
+    resolved_dummy_path += ext;
+    auto resolved = Path(resolved_dummy_path).extension();
+
+    if (resolved != extension)
+    {
+        constexpr static auto format = \
+            "Resolved extension \"%1\" to \"%2\"";
+
+        qDebug(log) << qUtf8Printable(QString(format)
+            .arg(extension)
+            .arg(resolved.toQString()));
+    }
+
+    return resolved;
+}
+
+Path Path::root() const
+{
+    return m_path.root_path();
+}
+
+Path Path::rootDirectory() const
+{
+    return m_path.root_directory();
+}
+
+Path Path::rootName() const
+{
+    return m_path.root_name();
+}
+
+Path Path::stem() const
+{
+    return m_path.stem();
+}
+
+QString Path::stemQString() const
+{
+    return stem().toQString();
+}
+
+std::string Path::stemString() const
+{
+    return stem().toString();
+}
+
+QString Path::toQString(Normalize normalize, char separator) const
+{
+    return QString::fromStdString
+    (
+        toString(normalize, separator)
+    );
+}
+
+std::filesystem::path Path::toStd() const
+{
+    return m_path;
+}
+
+std::string Path::toString(Normalize normalize, char separator) const
+{
+    auto string = m_path.string();
+
+    if (normalize == Normalize::Yes)
+        return _normalizer(string, separator);
+
+    return string;
+}
+
+// QVariant Path::toQVariant() const
+// {
+//     return QVariant::fromValue(toQString());
+// }
+
+//------------------------------------------------------------
+// Utility
+//------------------------------------------------------------
 
 Path PathDialog::directory
 (

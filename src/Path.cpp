@@ -32,7 +32,9 @@ BEGIN_COCO_NAMESPACE
 // Path definitions
 //------------------------------------------------------------
 
-Path::Path() noexcept = default;
+// Default constructor implicitly noexcept if member var constructors are (which
+// it is here)
+Path::Path() = default;
 Path::Path(const Path& path) = default;
 Path::Path(Path&& path) noexcept = default;
 

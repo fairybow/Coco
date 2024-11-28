@@ -86,7 +86,7 @@ public:
         Templates
     };
 
-    Path() noexcept;
+    Path();
     Path(const Path& path);
     Path(Path&& path) noexcept;
     Path(const std::filesystem::path& path);

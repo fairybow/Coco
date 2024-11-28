@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-27
+* Updated: 2024-11-28
 */
 
 #pragma once
@@ -86,7 +86,9 @@ public:
         Templates
     };
 
-    Path();
+    Path() noexcept;
+    Path(const Path& path);
+    Path(Path&& path) noexcept;
     Path(const std::filesystem::path& path);
     Path(const char* path);
     Path(const std::string& path);
@@ -112,12 +114,13 @@ public:
     //------------------------------------------------------------
 
     Path& operator=(const Path& other);
+    Path& operator=(Path&& other) noexcept;
 
     // Comparison
     //------------------------------------------------------------
     
-    bool operator==(const Path& other) const = default;
-    bool operator!=(const Path& other) const = default;
+    bool operator==(const Path& other) const;
+    bool operator!=(const Path& other) const;
 
     // Concatenation
     //------------------------------------------------------------
@@ -129,19 +132,19 @@ public:
     // Conversion
     //------------------------------------------------------------
 
-    explicit operator bool() const;
-    operator std::filesystem::path() const;
+    explicit operator bool() const noexcept;
+    operator std::filesystem::path() const noexcept;
     // operator QVariant() const;
 
     //------------------------------------------------------------
     // Queries
     //------------------------------------------------------------
 
-    bool isEmpty() const;
+    bool isEmpty() const noexcept;
     bool isFile() const;
     bool isFolder() const;
     bool isValid() const;
-    static bool isEmpty(const Path& path);
+    static bool isEmpty(const Path& path) noexcept;
     static bool isFile(const Path& path);
     static bool isFolder(const Path& path);
     static bool isValid(const Path& path);
@@ -163,12 +166,37 @@ public:
     // Modification
     //------------------------------------------------------------
 
+    Path arg
+    (
+        const QString& a,
+        int fieldWidth = 0,
+        QChar fillChar = u' '
+    ) const;
+    
+    Path arg
+    (
+        int a,
+        int fieldWidth = 0,
+        int base = 10,
+        QChar fillChar = u' '
+    ) const;
+    
+    Path arg
+    (
+        char a,
+        int fieldWidth = 0,
+        QChar fillChar = u' '
+    ) const;
+    
+    Path arg
+    (
+        QChar a,
+        int fieldWidth = 0,
+        QChar fillChar = u' '
+    ) const;
+
     void clear() noexcept;
     Path& replaceExt(const Path& replacement = {});
-    Path arg(const QString& a, int fieldWidth = 0, QChar fillChar = u' ') const;
-    Path arg(int a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const;
-    Path arg(char a, int fieldWidth = 0, QChar fillChar = u' ') const;
-    Path arg(QChar a, int fieldWidth = 0, QChar fillChar = u' ') const;
     Path& makePreferred() noexcept;
 
     //------------------------------------------------------------
@@ -183,7 +211,7 @@ public:
     QString stemQString() const;
     QString toQString(Normalize normalize = Normalize::No, char separator = '/') const;
     // QVariant toQVariant() const;
-    std::filesystem::path toStd() const;
+    std::filesystem::path toStd() const noexcept;
     std::string toString(Normalize normalize = Normalize::No, char separator = '/') const;
 
     //------------------------------------------------------------
@@ -230,10 +258,12 @@ public:
     );
 
 private:
-    std::filesystem::path m_path;
+    std::filesystem::path m_path{};
 
     static QStringList _findIn_extHelper(const QString& extensions);
-    static QDirIterator::IteratorFlags _findIn_flagsHelper(Recursive recursive);
+
+    constexpr static QDirIterator::IteratorFlags
+        _findIn_flagsHelper(Recursive recursive) noexcept;
 
     static void _fromArgs_helper
     (
@@ -243,14 +273,14 @@ private:
     );
 
     Path _fromSystem(System type) const;
-    std::string _normalizer(const std::string& str, char separator) const;
+    std::string _normalizer(const std::string& str, char separator) const noexcept;
     Path _qStandardLocation(QStandardPaths::StandardLocation type) const;
 
     const std::unordered_map
         <
         System,
         QStandardPaths::StandardLocation
-        > _systemToQtType() const;
+        > _systemToQtType() const noexcept;
 
 }; // class Coco::Path
 
@@ -260,14 +290,14 @@ private:
 
 namespace PathDialog
 {
-    inline Path directory
+    Path directory
     (
         QWidget* parent = nullptr,
         const QString& caption = {},
         const Path& startPath = {}
     );
 
-    inline Path file
+    Path file
     (
         QWidget* parent = nullptr,
         const QString& caption = {},
@@ -276,7 +306,7 @@ namespace PathDialog
         QString* selectedFilter = nullptr
     );
 
-    inline Path save
+    Path save
     (
         QWidget* parent = nullptr,
         const QString& caption = {},

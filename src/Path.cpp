@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-27
+* Updated: 2024-11-28
 */
 
 #include "../include/Coco/Path.h"
@@ -32,29 +32,34 @@ BEGIN_COCO_NAMESPACE
 // Path definitions
 //------------------------------------------------------------
 
-Path::Path()
-    : m_path(std::filesystem::path{})
-{}
+Path::Path() noexcept = default;
+Path::Path(const Path& path) = default;
+Path::Path(Path&& path) noexcept = default;
 
 Path::Path(const std::filesystem::path& path)
     : m_path(path)
-{}
+{
+}
 
 Path::Path(const char* path)
     : m_path(path)
-{}
+{
+}
 
 Path::Path(const std::string& path)
     : m_path(path)
-{}
+{
+}
 
 Path::Path(const QString& path)
     : m_path(path.toStdString())
-{}
+{
+}
 
 Path::Path(System location)
     : m_path(_fromSystem(location))
-{}
+{
+}
 
 QTextStream& operator<<(QTextStream& outStream, const Path& path)
 {
@@ -76,13 +81,10 @@ QDebug operator<<(QDebug debug, const Path& path)
     return debug << path.toQString(Path::Normalize::Yes);
 }
 
-Path& Path::operator=(const Path& other)
-{
-    if (this != &other)
-        m_path = other.m_path;
-
-    return *this;
-}
+Path& Path::operator=(const Path& other) = default;
+Path& Path::operator=(Path&& other) noexcept = default;
+bool Path::operator==(const Path& other) const = default;
+bool Path::operator!=(const Path& other) const = default;
 
 Path Path::operator/(const Path& other) const
 {
@@ -104,12 +106,12 @@ Path& Path::operator+=(const Path& other)
     return *this;
 }
 
-Path::operator bool() const
+Path::operator bool() const noexcept
 {
     return !m_path.empty();
 }
 
-Path::operator std::filesystem::path() const
+Path::operator std::filesystem::path() const noexcept
 {
     return m_path;
 }
@@ -133,7 +135,7 @@ QStringList Path::_findIn_extHelper(const QString& extensions)
 }
 
 // Handle other flags in future, maybe
-QDirIterator::IteratorFlags Path::_findIn_flagsHelper(Recursive recursive)
+constexpr QDirIterator::IteratorFlags Path::_findIn_flagsHelper(Recursive recursive) noexcept
 {
     return (recursive == Recursive::Yes)
         ? QDirIterator::Subdirectories
@@ -172,7 +174,7 @@ Path Path::_fromSystem(System type) const
     return {};
 }
 
-std::string Path::_normalizer(const std::string& str, char separator) const
+std::string Path::_normalizer(const std::string& str, char separator) const noexcept
 {
     std::string normalized{};
     auto last_ch_was_sep = false;
@@ -215,7 +217,7 @@ const std::unordered_map
     Path::System,
     QStandardPaths::StandardLocation
 >
-Path::_systemToQtType() const
+Path::_systemToQtType() const noexcept
 {
     static const std::unordered_map
         <
@@ -249,22 +251,47 @@ Path::_systemToQtType() const
     return map;
 }
 
-Path Path::arg(const QString& a, int fieldWidth, QChar fillChar) const
+Path Path::arg
+(
+    const QString& a,
+    int fieldWidth,
+    QChar fillChar
+)
+const
 {
     return toQString().arg(a, fieldWidth, fillChar);
 }
 
-Path Path::arg(int a, int fieldWidth, int base, QChar fillChar) const
+Path Path::arg
+(
+    int a,
+    int fieldWidth,
+    int base,
+    QChar fillChar
+)
+const
 {
     return toQString().arg(a, fieldWidth, base, fillChar);
 }
 
-Path Path::arg(char a, int fieldWidth, QChar fillChar) const
+Path Path::arg
+(
+    char a,
+    int fieldWidth,
+    QChar fillChar
+)
+const
 {
     return toQString().arg(a, fieldWidth, fillChar);
 }
 
-Path Path::arg(QChar a, int fieldWidth, QChar fillChar) const
+Path Path::arg
+(
+    QChar a,
+    int fieldWidth,
+    QChar fillChar
+)
+const
 {
     return toQString().arg(a, fieldWidth, fillChar);
 }
@@ -392,12 +419,12 @@ QList<Path> Path::fromArgs
     return paths;
 }
 
-bool Path::isEmpty() const
+bool Path::isEmpty() const noexcept
 {
     return m_path.empty();
 }
 
-bool Path::isEmpty(const Path& path)
+bool Path::isEmpty(const Path& path) noexcept
 {
     return path.isEmpty();
 }
@@ -532,7 +559,7 @@ QString Path::toQString(Normalize normalize, char separator) const
     );
 }
 
-std::filesystem::path Path::toStd() const
+std::filesystem::path Path::toStd() const noexcept
 {
     return m_path;
 }

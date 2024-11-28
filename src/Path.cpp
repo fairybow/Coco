@@ -497,11 +497,11 @@ Path& Path::replaceExt(const Path& replacement)
 Path Path::resolveExtension(const QString& extension)
 {
     auto ext = extension.trimmed();
-    constexpr static auto dot = ".";
+    constexpr auto dot = ".";
     if (ext.isEmpty() || ext == dot || ext == "..")
         return {};
 
-    constexpr static auto dummy = "C:/Dir/Stem";
+    constexpr auto dummy = "C:/Dir/Stem";
     QString resolved_dummy_path = dummy;
 
     if (!ext.contains(dot))
@@ -512,7 +512,7 @@ Path Path::resolveExtension(const QString& extension)
 
     if (resolved != extension)
     {
-        constexpr static auto format = \
+        constexpr auto format = \
             "Resolved extension \"%1\" to \"%2\"";
 
         qDebug(log) << qUtf8Printable(QString(format)

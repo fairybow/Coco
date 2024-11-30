@@ -14,6 +14,7 @@
 
 #include "Global.h"
 
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 

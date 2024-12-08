@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "Global.h"
+/*#include "Global.h"
 #include "StackedWidget.h"
 
 #include <QHBoxLayout>
@@ -141,4 +141,4 @@ private slots:
 
 }; // class Coco::AbstractPageWidget
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

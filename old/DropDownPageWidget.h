@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "AbstractPageWidget.h"
+/*#include "AbstractPageWidget.h"
 #include "Global.h"
 
 #include <QComboBox>
@@ -55,4 +55,4 @@ private:
 
 }; // class Coco::DropDownPageWidget
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

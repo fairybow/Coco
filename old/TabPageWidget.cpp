@@ -10,7 +10,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/Coco/TabPageWidget.h"
+/*#include "../include/Coco/TabPageWidget.h"
 
 BEGIN_COCO_NAMESPACE
 
@@ -111,4 +111,4 @@ void TabPageWidget::_initTabBar()
     setController(tab_bar);
 }
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

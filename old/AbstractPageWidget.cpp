@@ -10,7 +10,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/Coco/AbstractPageWidget.h"
+/*#include "../include/Coco/AbstractPageWidget.h"
 
 #include <QVBoxLayout>
 
@@ -257,4 +257,4 @@ void AbstractPageWidget::_onWidgetStackCountChanged(int count)
     emit widgetCountChanged(count);
 }
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

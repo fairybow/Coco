@@ -13,7 +13,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/Coco/Switch.h"
+/*#include "../include/Coco/Switch.h"
 
 #include <QSizePolicy>
 
@@ -205,4 +205,4 @@ void Switch::_paintBall(QPainter& painter) const
     );
 }
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

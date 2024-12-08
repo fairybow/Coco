@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "AbstractPageWidget.h"
+/*#include "AbstractPageWidget.h"
 #include "Global.h"
 
 #include <QHash>
@@ -50,4 +50,4 @@ private:
 
 }; // class Coco::TabPageWidget
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

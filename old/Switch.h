@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "Global.h"
+/*#include "Global.h"
 
 #include <QAbstractButton>
 #include <QBrush>
@@ -74,4 +74,4 @@ private:
 
 }; // class Coco::Switch
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

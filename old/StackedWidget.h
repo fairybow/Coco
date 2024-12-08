@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "Global.h"
+/*#include "Global.h"
 
 #include <QHash>
 #include <QStackedWidget>
@@ -51,4 +51,4 @@ private:
 
 }; // class Coco::StackedWidget
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

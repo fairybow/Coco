@@ -12,7 +12,7 @@
 
 #include "../include/Coco/DropDownPageWidget.h"
 
-BEGIN_COCO_NAMESPACE
+/*BEGIN_COCO_NAMESPACE
 
 DropDownPageWidget::DropDownPageWidget(QWidget* parent)
     : AbstractPageWidget(parent)
@@ -120,4 +120,4 @@ void DropDownPageWidget::_initComboBox()
     setController(combo_box);
 }
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

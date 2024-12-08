@@ -10,7 +10,7 @@
 * Updated: 2024-11-10
 */
 
-#include "../include/Coco/StackedWidget.h"
+/*#include "../include/Coco/StackedWidget.h"
 
 BEGIN_COCO_NAMESPACE
 
@@ -72,4 +72,4 @@ QWidget* StackedWidget::findData(const QVariant& data) const
 //     return widget(index);
 // }
 
-END_COCO_NAMESPACE
+END_COCO_NAMESPACE*/

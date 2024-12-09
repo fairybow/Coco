@@ -24,7 +24,7 @@
 //  {
 //      StartCop start_cop("MyApplication");
 //
-//      if (start_cop.exists())
+//      if (start_cop.alreadyRunning())
 //      {
 //          // ...
 //
@@ -43,7 +43,6 @@
 
 #include "Global.h"
 
-#include <QObject>
 #include <QString>
 #include <QTimer>
 
@@ -56,7 +55,7 @@ class StartCop : public QObject
 public:
     StartCop(const QString& keyWord);
     StartCop(const QString& keyWord, int signalTimeout);
-    bool exists();
+    bool alreadyRunning();
 
 signals:
     void relaunched(QPrivateSignal);

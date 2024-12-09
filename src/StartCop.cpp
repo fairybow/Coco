@@ -68,7 +68,7 @@ void StartCop::_serverStart()
     );
 }
 
-bool StartCop::exists()
+bool StartCop::alreadyRunning()
 {
     if (_serverExists())
         return true;

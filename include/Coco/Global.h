@@ -12,7 +12,5 @@
 
 #pragma once
 
-#include <QWidget>
-
 #define BEGIN_COCO_NAMESPACE namespace Coco {
 #define END_COCO_NAMESPACE }

@@ -13,6 +13,8 @@
 #include "../include/Coco/Layout.h"
 #include "Debug.h"
 
-using namespace Coco;
+BEGIN_COCO_NAMESPACE
 
 //...
+
+END_COCO_NAMESPACE

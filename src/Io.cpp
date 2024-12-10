@@ -16,7 +16,7 @@
 #include <QFile>
 #include <QTextStream>
 
-using namespace Coco;
+BEGIN_COCO_NAMESPACE
 
 QString Io::readTxt(const Path& path)
 {
@@ -69,3 +69,5 @@ bool Io::writeTxt
 
     return false;
 }
+
+END_COCO_NAMESPACE

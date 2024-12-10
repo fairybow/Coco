@@ -1,5 +1,5 @@
 /*
-* Coco: NestedPrivate.h  Copyright (C) 2024  fairybow
+* Coco: Private.h  Copyright (C) 2024  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -15,10 +15,10 @@ BEGIN_COCO_NAMESPACE
 
 // Will I be embarrassed about this later?
 template <typename PublicT>
-class NestedPrivate
+class Private
 {
 public:
-    NestedPrivate(PublicT* publicClass = nullptr)
+    Private(PublicT* publicClass = nullptr)
         : m_public(publicClass)
     {
     }
@@ -32,6 +32,6 @@ protected:
 private:
     PublicT* m_public;
 
-}; // class Coco::NestedPrivate
+}; // class Coco::Private
 
 END_COCO_NAMESPACE

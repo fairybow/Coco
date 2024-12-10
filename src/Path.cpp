@@ -17,16 +17,16 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
+using namespace Coco;
+
 //------------------------------------------------------------
 // std::hash definition
 //------------------------------------------------------------
 
-std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
+std::size_t std::hash<Path>::operator()(const Path& path) const
 {
     return std::hash<std::filesystem::path>()(path.toStd());
 }
-
-BEGIN_COCO_NAMESPACE
 
 //------------------------------------------------------------
 // Path definitions
@@ -646,5 +646,3 @@ Path PathDialog::save
         )
     );
 }
-
-END_COCO_NAMESPACE

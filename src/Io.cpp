@@ -7,16 +7,36 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-16
+* Updated: 2024-12-12
 */
 
 #include "../include/Coco/Io.h"
 #include "Debug.h"
 
 #include <QFile>
+#include <QJsonParseError>
 #include <QTextStream>
 
 BEGIN_COCO_NAMESPACE
+
+//------------------------------------------------------------
+// Internal
+//------------------------------------------------------------
+
+static void _maybeCreateDirs(const Path& path, Io::CreateDirs createDirectories)
+{
+    if (createDirectories == Io::CreateDirs::Yes)
+    {
+        auto parent_path = path.parent();
+
+        if (!parent_path.isValid())
+            Path::mkdir(parent_path);
+    }
+}
+
+//------------------------------------------------------------
+// Plain text
+//------------------------------------------------------------
 
 QString Io::readTxt(const Path& path)
 {
@@ -41,17 +61,11 @@ QString Io::readTxt(const Path& path)
 bool Io::writeTxt
 (
     const Path& path,
-    QString text,
+    const QString& text,
     CreateDirs createDirectories
 )
 {
-    if (createDirectories == CreateDirs::Yes)
-    {
-        auto parent_path = path.parent();
-
-        if (!parent_path.isValid())
-            Path::mkdir(parent_path);
-    }
+    _maybeCreateDirs(path, createDirectories);
 
     QFile file(path.toQString());
 
@@ -66,6 +80,69 @@ bool Io::writeTxt
     qDebug(log)
         << __FUNCTION__
         << "Failed to write text file.";
+
+    return false;
+}
+
+//------------------------------------------------------------
+// JSON
+//------------------------------------------------------------
+
+QJsonDocument Io::readJson(const Path& path)
+{
+    QFile file(path.toQString());
+
+    if (file.open(QFile::ReadOnly | QIODevice::Text))
+    {
+        QString text{};
+        QTextStream in(&file);
+        text = in.readAll();
+
+        QJsonParseError err{};
+        auto json = QJsonDocument::fromJson(text.toUtf8(), &err);
+
+        if (err.error != QJsonParseError::NoError)
+        {
+            qDebug(log)
+                << __FUNCTION__
+                << "JSON parse error:"
+                << err.errorString();
+
+            return {};
+        }
+
+        return json;
+    }
+
+    qDebug(log)
+        << __FUNCTION__
+        << "Failed to read JSON file.";
+
+    return {};
+}
+
+bool Io::writeJson
+(
+    const Path& path,
+    const QJsonDocument& document,
+    CreateDirs createDirectories
+)
+{
+    _maybeCreateDirs(path, createDirectories);
+
+    QFile file(path.toQString());
+
+    if (file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+    {
+        QTextStream out(&file);
+        out << document.toJson(QJsonDocument::Indented);
+
+        return true;
+    }
+
+    qDebug(log)
+        << __FUNCTION__
+        << "Failed to write JSON file.";
 
     return false;
 }

@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-11-28
+* Updated: 2024-12-12
 */
 
 #include "../include/Coco/Path.h"
@@ -16,6 +16,8 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
+
+#include <algorithm>
 
 //------------------------------------------------------------
 // std::hash definition
@@ -85,8 +87,8 @@ QDebug operator<<(QDebug debug, const Path& path)
 
 Path& Path::operator=(const Path& other) = default;
 Path& Path::operator=(Path&& other) noexcept = default;
-bool Path::operator==(const Path& other) const = default;
-bool Path::operator!=(const Path& other) const = default;
+bool Path::operator==(const Path& other) const noexcept = default;
+bool Path::operator!=(const Path& other) const noexcept = default;
 
 Path Path::operator/(const Path& other) const
 {
@@ -126,7 +128,17 @@ Path::operator std::filesystem::path() const noexcept
 // A-Z
 //------------------------------------------------------------
 
-QStringList Path::_findIn_extHelper(const QString& extensions)
+QStringList Path::_findInArgs_extHelper(const QString& extensions)
+{
+    QStringList resolved{};
+
+    for (auto& ext : extensions.split(","))
+        resolved << resolveExtension(ext).toQString();
+
+    return resolved;
+}
+
+QStringList Path::_findInDir_extHelper(const QString& extensions)
 {
     QStringList resolved{};
 
@@ -142,24 +154,6 @@ constexpr QDirIterator::IteratorFlags Path::_findIn_flagsHelper(Recursive recurs
     return (recursive == Recursive::Yes)
         ? QDirIterator::Subdirectories
         : QDirIterator::NoIteratorFlags;
-}
-
-void Path::_fromArgs_helper
-(
-    const QString& arg,
-    QList<Path>& paths,
-    ValidOnly validOnly
-)
-{
-    Path path(arg);
-
-    if (validOnly == ValidOnly::Yes)
-    {
-        if (path.isValid())
-            paths << path;
-    }
-    else
-        paths << path;
 }
 
 Path Path::_fromSystem(System type) const
@@ -333,7 +327,7 @@ QString Path::fileQString() const
     return file().toQString();
 }
 
-QList<Path> Path::findIn
+QList<Path> Path::findInDir
 (
     const Path& directory,
     const QString& extensions,
@@ -345,7 +339,7 @@ QList<Path> Path::findIn
     QDirIterator it
     (
         directory.toQString(),
-        _findIn_extHelper(extensions),
+        _findInDir_extHelper(extensions),
         QDir::Files,
         _findIn_flagsHelper(recursive)
     );
@@ -359,7 +353,7 @@ QList<Path> Path::findIn
     return paths;
 }
 
-QList<Path> Path::findIn
+QList<Path> Path::findInDir
 (
     const QList<Path>& directories,
     const QString& extensions,
@@ -367,7 +361,7 @@ QList<Path> Path::findIn
 )
 {
     QList<Path> paths{};
-    auto exts = _findIn_extHelper(extensions);
+    auto exts = _findInDir_extHelper(extensions);
     auto flags = _findIn_flagsHelper(recursive);
 
     for (auto& dir : directories)
@@ -390,35 +384,42 @@ QList<Path> Path::findIn
     return paths;
 }
 
-QList<Path> Path::fromArgs
+QList<Path> Path::findInArgs
 (
     const QStringList& args,
-    ValidOnly validOnly,
-    SkipArg0 skipArg0
+    const QString& extensions
 )
 {
     QList<Path> paths{};
+    auto exts = _findInArgs_extHelper(extensions);
 
-    for (int i = (skipArg0 == SkipArg0::Yes); i < args.size(); ++i)
-        _fromArgs_helper(args[i], paths, validOnly);
+    std::copy_if
+    (
+        args.begin(),
+        args.end(),
+        std::back_inserter(paths),
+        [&exts](const Path& path)
+        {
+            return exts.contains(path.extQString());
+        }
+    );
 
     return paths;
 }
 
-QList<Path> Path::fromArgs
+// For isolating paths from main function arguments
+QList<Path> Path::findInArgs
 (
     int argc,
     char* argv[],
-    ValidOnly validOnly,
-    SkipArg0 skipArg0
+    const QString& extensions
 )
 {
-    QList<Path> paths{};
+    QStringList args{};
+    for (auto i = 0; i < argc; ++i)
+        args << QString::fromUtf8(argv[i]);
 
-    for (int i = (skipArg0 == SkipArg0::Yes); i < argc; ++i)
-        _fromArgs_helper(argv[i], paths, validOnly);
-
-    return paths;
+    return findInArgs(args, extensions);
 }
 
 bool Path::isEmpty() const noexcept

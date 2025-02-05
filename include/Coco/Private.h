@@ -4,7 +4,7 @@
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
 *
-* Updated: 2024-12-10
+* Updated: 2025-2-5
 */
 
 #pragma once
@@ -23,8 +23,11 @@ public:
     {
     }
 
+    // NTS: not needed, but a reminder that this is not to be inherited
+    ~Private() = default;
+
 protected:
-    PublicT* publicClass()
+    PublicT* publicClass() const noexcept
     {
         return m_public;
     }

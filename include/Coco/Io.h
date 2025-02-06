@@ -7,20 +7,17 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-12-12
+* Updated: 2025-2-5
 */
 
 #pragma once
 
-#include "Global.h"
 #include "Path.h"
 
 #include <QJsonDocument>
 #include <QString>
 
-BEGIN_COCO_NAMESPACE
-
-namespace Io
+namespace Coco::Io
 {
     enum class CreateDirs { No = 0, Yes };
 
@@ -44,5 +41,3 @@ namespace Io
     );
 
 } // namespace Coco::Io
-
-END_COCO_NAMESPACE

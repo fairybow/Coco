@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-12-12
+* Updated: 2025-2-5
 */
 
 #include "../include/Coco/Path.h"
@@ -19,16 +19,16 @@
 
 #include <algorithm>
 
+using namespace Coco;
+
 //------------------------------------------------------------
 // std::hash definition
 //------------------------------------------------------------
 
-std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
+std::size_t std::hash<Path>::operator()(const Path& path) const
 {
     return std::hash<std::filesystem::path>()(path.toStd());
 }
-
-BEGIN_COCO_NAMESPACE
 
 //------------------------------------------------------------
 // Path definitions
@@ -65,12 +65,12 @@ Path::Path(System location)
 {
 }
 
-QTextStream& operator<<(QTextStream& outStream, const Path& path)
+QTextStream& Coco::operator<<(QTextStream& outStream, const Path& path)
 {
     return outStream << path.toQString(Path::Normalize::Yes);
 }
 
-std::ostream& operator<<(std::ostream& outStream, const Path& path)
+std::ostream& Coco::operator<<(std::ostream& outStream, const Path& path)
 {
     return outStream << path.toString(Path::Normalize::Yes);
 }
@@ -78,7 +78,7 @@ std::ostream& operator<<(std::ostream& outStream, const Path& path)
 // By returning a QDebug object (not a reference), we allow the chaining of
 // multiple operator<< calls. This is similar to how std::ostream works, but
 // with the added benefit of managing QDebug's internal state
-QDebug operator<<(QDebug debug, const Path& path)
+QDebug Coco::operator<<(QDebug debug, const Path& path)
 {
     //debug.nospace() << path.toQString();
     //return debug.maybeSpace();
@@ -647,5 +647,3 @@ Path PathDialog::save
         )
     );
 }
-
-END_COCO_NAMESPACE

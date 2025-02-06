@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2024-12-12
+* Updated: 2025-2-5
 */
 
 #include "../include/Coco/Io.h"
@@ -17,7 +17,7 @@
 #include <QJsonParseError>
 #include <QTextStream>
 
-BEGIN_COCO_NAMESPACE
+using namespace Coco;
 
 //------------------------------------------------------------
 // Internal
@@ -146,5 +146,3 @@ bool Io::writeJson
 
     return false;
 }
-
-END_COCO_NAMESPACE

@@ -18,6 +18,7 @@
 #include <QList>
 #include <QStandardPaths>
 #include <QString>
+#include <QStringList>
 #include <QTextStream>
 #include <QWidget>
 

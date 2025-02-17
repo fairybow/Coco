@@ -252,8 +252,8 @@ namespace Coco
         // For isolating paths from main function arguments
         static QList<Path> findInArgs
         (
-            int argc,
-            char* argv[],
+            const int& argc,
+            const char* const* argv,
             const QString& extensions
         );
 

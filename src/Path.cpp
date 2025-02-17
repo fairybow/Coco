@@ -410,8 +410,8 @@ QList<Path> Path::findInArgs
 // For isolating paths from main function arguments
 QList<Path> Path::findInArgs
 (
-    int argc,
-    char* argv[],
+    const int& argc,
+    const char* const* argv,
     const QString& extensions
 )
 {

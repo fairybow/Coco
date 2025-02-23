@@ -13,6 +13,7 @@
 /// @todo Code style (for all)
 /// @todo Documentation (for all)
 /// @todo IWYU (for all)
+/// @todo No using namespace declarations for Coco ns
 
 #pragma once
 

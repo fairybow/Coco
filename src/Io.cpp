@@ -11,7 +11,6 @@
 */
 
 #include "../include/Coco/Io.h"
-#include "Debug.h"
 
 #include <QFile>
 #include <QJsonParseError>
@@ -50,7 +49,7 @@ QString Io::readTxt(const Path& path)
     }
     else
     {
-        qDebug(log)
+        qDebug()
             << __FUNCTION__
             << "Failed to read text file.";
     }
@@ -77,7 +76,7 @@ bool Io::writeTxt
         return true;
     }
 
-    qDebug(log)
+    qDebug()
         << __FUNCTION__
         << "Failed to write text file.";
 
@@ -103,7 +102,7 @@ QJsonDocument Io::readJson(const Path& path)
 
         if (err.error != QJsonParseError::NoError)
         {
-            qDebug(log)
+            qDebug()
                 << __FUNCTION__
                 << "JSON parse error:"
                 << err.errorString();
@@ -114,7 +113,7 @@ QJsonDocument Io::readJson(const Path& path)
         return json;
     }
 
-    qDebug(log)
+    qDebug()
         << __FUNCTION__
         << "Failed to read JSON file.";
 
@@ -140,7 +139,7 @@ bool Io::writeJson
         return true;
     }
 
-    qDebug(log)
+    qDebug()
         << __FUNCTION__
         << "Failed to write JSON file.";
 

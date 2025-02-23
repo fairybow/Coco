@@ -11,8 +11,5 @@
 */
 
 #include "../include/Coco/Layout.h"
-#include "Debug.h"
-
-using namespace Coco;
 
 //...

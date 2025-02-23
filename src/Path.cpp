@@ -11,7 +11,6 @@
 */
 
 #include "../include/Coco/Path.h"
-#include "Debug.h"
 
 #include <QDir>
 #include <QFileDialog>
@@ -516,7 +515,7 @@ Path Path::resolveExtension(const QString& extension)
         constexpr auto format = \
             "Resolved extension \"%1\" to \"%2\"";
 
-        qDebug(log) << qUtf8Printable(QString(format)
+        qDebug() << qUtf8Printable(QString(format)
             .arg(extension)
             .arg(resolved.toQString()));
     }

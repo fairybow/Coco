@@ -10,6 +10,10 @@
 * Updated: 2025-2-5
 */
 
+/// @todo Code style (for all)
+/// @todo Documentation (for all)
+/// @todo IWYU (for all)
+
 #pragma once
 
 #include <QChar>

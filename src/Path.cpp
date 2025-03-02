@@ -1,5 +1,5 @@
 /*
-* Coco: Path.cpp  Copyright (C) 2024  fairybow
+* Coco: Path.cpp  Copyright (C) 2025  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2025-2-5
+* Updated: 2025-03-02
 */
 
 #include "../include/Coco/Path.h"
@@ -19,15 +19,6 @@
 #include <algorithm>
 
 using namespace Coco;
-
-//------------------------------------------------------------
-// std::hash definition
-//------------------------------------------------------------
-
-std::size_t std::hash<Path>::operator()(const Path& path) const
-{
-    return std::hash<std::filesystem::path>()(path.toStd());
-}
 
 //------------------------------------------------------------
 // Path definitions
@@ -645,4 +636,13 @@ Path PathDialog::save
             selectedFilter
         )
     );
+}
+
+//------------------------------------------------------------
+// std::hash definition
+//------------------------------------------------------------
+
+std::size_t std::hash<Path>::operator()(const Path& path) const
+{
+    return std::hash<std::filesystem::path>()(path.toStd());
 }

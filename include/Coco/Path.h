@@ -1,5 +1,5 @@
 /*
-* Coco: Path.h  Copyright (C) 2024  fairybow
+* Coco: Path.h  Copyright (C) 2025  fairybow
 *
 * You should have received a copy of the GNU General Public License along with
 * this program. If not, see <https://www.gnu.org/licenses/>.
@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2025-2-5
+* Updated: 2025-03-02
 */
 
 /// @todo Code style (for all)
@@ -35,17 +35,6 @@
 //------------------------------------------------------------
 // std::hash
 //------------------------------------------------------------
-
-namespace Coco { class Path; }
-
-namespace std
-{
-    template <>
-    struct hash<Coco::Path>
-    {
-        inline std::size_t operator()(const Coco::Path& path) const;
-    };
-}
 
 namespace Coco
 {
@@ -324,3 +313,12 @@ namespace Coco
     } // namespace Coco::PathDialog
 
 } // namespace Coco
+
+namespace std
+{
+    template <>
+    struct hash<Coco::Path>
+    {
+        std::size_t operator()(const Coco::Path& path) const;
+    };
+}

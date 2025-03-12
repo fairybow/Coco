@@ -54,11 +54,11 @@ static void maybeCreateDirs_(const Coco::Path& path, Coco::Io::CreateDirs create
         Coco::Path::mkdir(parent_path);
 }
 
-Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes types)
+Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes possibleTypes)
 {
-    // If the caller does not provide any types (or intentionally passes None),
-    // compute the union of all types based on PAIRS.
-    if (types == Unknown)
+    // If the caller does not provide any possible types (or intentionally
+    // passes UnknownOrUtf8), compute the union of all types based on PAIRS_.
+    if (possibleTypes == UnknownOrUtf8)
     {
         static const auto all = []
             {
@@ -70,32 +70,36 @@ Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes types)
                 return types;
             }();
 
-        types = all;
+        possibleTypes = all;
     }
 
     QFile file(path.toQString());
     if (!file.open(QIODevice::ReadOnly))
     {
         qDebug() << "Unable to open file:" << path.toQString();
-        return Unknown;
+        return UnknownOrUtf8;
     }
 
     // Determine max signature length required
     auto length = 0;
 
     for (const auto& pair : PAIRS_)
-        if (types & pair.type)
+    {
+        if (possibleTypes & pair.type)
             length = qMax(length, pair.signature.size());
+    }
 
     // Read file header
     auto file_header = file.read(length);
 
     // Check against available signatures
     for (const auto& pair : PAIRS_)
-        if ((types & pair.type) && file_header.startsWith(pair.signature))
+    {
+        if ((possibleTypes & pair.type) && file_header.startsWith(pair.signature))
             return pair.type;
+    }
 
-    return Unknown;
+    return UnknownOrUtf8;
 }
 
 //------------------------------------------------------------

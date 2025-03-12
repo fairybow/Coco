@@ -28,17 +28,17 @@ namespace Coco::Io
 
     enum FileType
     {
-        Unknown     = 0,
-        Png         = 1 << 0,
-        SevenZip    = 1 << 1,
-        Pdf         = 1 << 2,
-        Jpg         = 1 << 3,
-        Utf8Bom     = 1 << 4
+        UnknownOrUtf8   = 0,
+        Png             = 1 << 0,
+        SevenZip        = 1 << 1,
+        Pdf             = 1 << 2,
+        Jpg             = 1 << 3,
+        Utf8Bom         = 1 << 4
     };
 
     Q_DECLARE_FLAGS(FileTypes, FileType);
 
-    FileType fileType(const Path& path, FileTypes types = Unknown);
+    FileType fileType(const Path& path, FileTypes possibleTypes = UnknownOrUtf8);
 
     QString readTxt(const Path& path);
 

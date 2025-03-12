@@ -8,5 +8,4 @@
 #define Q_OBJECT
 #define qDebug QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE, QT_MESSAGELOG_FUNC).debug
 #define qDebug
-#define BEGIN_COCO_NAMESPACE namespace Coco {
-#define END_COCO_NAMESPACE }
+#define Q_DECLARE_FLAGS(Flags, Enum)

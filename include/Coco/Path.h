@@ -87,8 +87,6 @@ namespace Coco
         Path(const QString& path);
         Path(System location);
 
-        // NTS: not needed, but a reminder that this is not to be inherited (obvious
-        // for Path, less obvious for Private<T>)
         ~Path() = default;
 
         //------------------------------------------------------------

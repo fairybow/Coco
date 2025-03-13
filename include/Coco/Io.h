@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2025-03-12
+* Updated: 2025-03-13
 */
 
 #pragma once
@@ -36,12 +36,16 @@ namespace Coco::Io
         Utf8Bom         = 1 << 4
     };
 
-    Q_DECLARE_FLAGS(FileTypes, FileType);
+    typedef QFlags<FileType> FileTypes;
 
-    FileType fileType(const Path& path, FileTypes possibleTypes = UnknownOrUtf8);
+    /// @brief Determines the file type based on its signature.
+    /// @param filter Limit the types checked.
+    FileType fileType(const Path& path, FileTypes filter = UnknownOrUtf8);
 
+    /// @brief Reads the content of a text file.
     QString readTxt(const Path& path);
 
+    /// @brief Writes text to a file.
     bool writeTxt
     (
         const Path& path,
@@ -49,9 +53,11 @@ namespace Coco::Io
         CreateDirs createDirectories = CreateDirs::Yes
     );
 
-    // May return a null document
+    /// @brief Reads the content of a JSON file.
+    /// @details May return a null document.
     QJsonDocument readJson(const Path& path);
 
+    /// @brief Writes a JSON document to a file.
     bool writeJson
     (
         const Path& path,

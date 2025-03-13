@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2025-03-12
+* Updated: 2025-03-13
 */
 
 #include "../include/Coco/Io.h"
@@ -23,10 +23,6 @@
 #include <QList>
 #include <QString>
 #include <QTextStream>
-
-//------------------------------------------------------------
-// Internal
-//------------------------------------------------------------
 
 struct Pair_
 {
@@ -54,11 +50,11 @@ static void maybeCreateDirs_(const Coco::Path& path, Coco::Io::CreateDirs create
         Coco::Path::mkdir(parent_path);
 }
 
-Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes possibleTypes)
+Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes filter)
 {
     // If the caller does not provide any possible types (or intentionally
     // passes UnknownOrUtf8), compute the union of all types based on PAIRS_.
-    if (possibleTypes == UnknownOrUtf8)
+    if (filter == UnknownOrUtf8)
     {
         static const auto all = []
             {
@@ -70,7 +66,7 @@ Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes possibleTypes)
                 return types;
             }();
 
-        possibleTypes = all;
+        filter = all;
     }
 
     QFile file(path.toQString());
@@ -85,7 +81,7 @@ Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes possibleTypes)
 
     for (const auto& pair : PAIRS_)
     {
-        if (possibleTypes & pair.type)
+        if (filter & pair.type)
             length = qMax(length, pair.signature.size());
     }
 
@@ -95,16 +91,12 @@ Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes possibleTypes)
     // Check against available signatures
     for (const auto& pair : PAIRS_)
     {
-        if ((possibleTypes & pair.type) && file_header.startsWith(pair.signature))
+        if ((filter & pair.type) && file_header.startsWith(pair.signature))
             return pair.type;
     }
 
     return UnknownOrUtf8;
 }
-
-//------------------------------------------------------------
-// Plain text
-//------------------------------------------------------------
 
 QString Coco::Io::readTxt(const Path& path)
 {
@@ -151,10 +143,6 @@ bool Coco::Io::writeTxt
 
     return false;
 }
-
-//------------------------------------------------------------
-// JSON
-//------------------------------------------------------------
 
 QJsonDocument Coco::Io::readJson(const Path& path)
 {

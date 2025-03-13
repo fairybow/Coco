@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "CocoGlobal.h"
 #include "Path.h"
 
 #include <QFlags>
@@ -20,27 +21,12 @@
 
 namespace Coco::Io
 {
-    enum class CreateDirs
-    {
-        No = 0,
-        Yes
-    };
-
-    enum FileType
-    {
-        UnknownOrUtf8   = 0,
-        Png             = 1 << 0,
-        SevenZip        = 1 << 1,
-        Pdf             = 1 << 2,
-        Jpg             = 1 << 3,
-        Utf8Bom         = 1 << 4
-    };
-
-    typedef QFlags<FileType> FileTypes;
-
     /// @brief Determines the file type based on its signature.
     /// @param filter Limit the types checked.
     FileType fileType(const Path& path, FileTypes filter = UnknownOrUtf8);
+
+    /// @brief Determines whether the file is type.
+    bool is(FileType type, const Path& path);
 
     /// @brief Reads the content of a text file.
     QString readTxt(const Path& path);
@@ -66,5 +52,3 @@ namespace Coco::Io
     );
 
 } // namespace Coco::Io
-
-Q_DECLARE_OPERATORS_FOR_FLAGS(Coco::Io::FileTypes)

@@ -10,6 +10,7 @@
 * Updated: 2025-03-13
 */
 
+#include "../include/Coco/CocoGlobal.h"
 #include "../include/Coco/Io.h"
 #include "../include/Coco/Path.h"
 
@@ -26,23 +27,29 @@
 
 struct Pair_
 {
-    Coco::Io::FileType type{};
+    Coco::FileType type{};
     QByteArray signature{};
 };
 
 // https://en.wikipedia.org/wiki/List_of_file_signatures
 static const QList<Pair_> PAIRS_ =
 {
-    { Coco::Io::Png,       QByteArray::fromHex("89504E470D0A1A0A") },
-    { Coco::Io::SevenZip,  QByteArray::fromHex("377ABCAF271C") },
-    { Coco::Io::Pdf,       QByteArray::fromHex("255044462D") },
-    { Coco::Io::Jpg,       QByteArray::fromHex("FFD8FF") },
-    { Coco::Io::Utf8Bom,   QByteArray::fromHex("EFBBBF") }
+    // For zip, there are 3 signatures, but they all share the same first 2
+    // bytes. And, to be fair, we could probably check only the first 3 or so
+    // bytes for any signature. I don't see many sharing similar first bytes.
+    { Coco::Png,        QByteArray::fromHex("89504E470D0A1A0A") },  // 8 bytes
+    { Coco::SevenZip,   QByteArray::fromHex("377ABCAF271C") },      // 6
+    { Coco::Rtf,        QByteArray::fromHex("7B5C72746631") },      // 6
+    { Coco::Pdf,        QByteArray::fromHex("255044462D") },        // 5
+    { Coco::Gif,        QByteArray::fromHex("47494638") },          // 4
+    { Coco::Jpg,        QByteArray::fromHex("FFD8FF") },            // 3
+    { Coco::Utf8Bom,    QByteArray::fromHex("EFBBBF") },            // 3
+    { Coco::Zip,        QByteArray::fromHex("504B") }               // 2
 };
 
-static void maybeCreateDirs_(const Coco::Path& path, Coco::Io::CreateDirs createDirectories)
+static void maybeCreateDirs_(const Coco::Path& path, Coco::CreateDirs createDirectories)
 {
-    if (createDirectories != Coco::Io::CreateDirs::Yes) return;
+    if (createDirectories != Coco::CreateDirs::Yes) return;
 
     auto parent_path = path.parent();
 
@@ -50,7 +57,7 @@ static void maybeCreateDirs_(const Coco::Path& path, Coco::Io::CreateDirs create
         Coco::Path::mkdir(parent_path);
 }
 
-Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes filter)
+Coco::FileType Coco::Io::fileType(const Path& path, FileTypes filter)
 {
     // If the caller does not provide any possible types (or intentionally
     // passes UnknownOrUtf8), compute the union of all types based on PAIRS_.
@@ -96,6 +103,11 @@ Coco::Io::FileType Coco::Io::fileType(const Path& path, FileTypes filter)
     }
 
     return UnknownOrUtf8;
+}
+
+bool Coco::Io::is(FileType type, const Path& path)
+{
+    return fileType(path, type) == type;
 }
 
 QString Coco::Io::readTxt(const Path& path)

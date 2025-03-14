@@ -28,11 +28,14 @@ namespace Coco
         Png             = 1 << 0,
         SevenZip        = 1 << 1,
         Rtf             = 1 << 2,
-        Pdf             = 1 << 3,
-        Gif             = 1 << 4,
-        Jpg             = 1 << 5,
-        Utf8Bom         = 1 << 6,
-        Zip             = 1 << 7
+        TarXz           = 1 << 3,
+        Pdf             = 1 << 4,
+        Tar             = 1 << 5,
+        Gif             = 1 << 6,
+        Jpg             = 1 << 7,
+        Utf8Bom         = 1 << 8,
+        Zip             = 1 << 9,
+        TarGz           = 1 << 10
     };
 
     typedef QFlags<FileType> FileTypes;

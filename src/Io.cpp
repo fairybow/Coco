@@ -121,11 +121,6 @@ Coco::FileType Coco::Io::fileType(const Path& path, FileTypes filter)
     return UnknownOrUtf8;
 }
 
-bool Coco::Io::is(FileType type, const Path& path)
-{
-    return fileType(path, type) == type;
-}
-
 QString Coco::Io::readTxt(const Path& path)
 {
     QString text{};

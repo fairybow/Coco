@@ -21,12 +21,20 @@
 
 namespace Coco::Io
 {
-    /// @brief Determines the file type based on its signature.
-    /// @param filter Limit the types checked.
+    /// @brief Identifies the file type based on its signature.
+    /// @param filter Specifies the file types to check against. For example,
+    /// `Coco::Pdf | Coco::Png` will limit the checks to PDFs and PNGs. If no
+    /// matching type is found, UnknownOrUtf8 is always returned.
+    /// @details Allows exclusion of specific file types by applying a bitwise
+    /// negation. For instance, use `Coco::FileTypes() & ~Coco::Pdf` to check
+    /// all types except PDF.
     FileType fileType(const Path& path, FileTypes filter = UnknownOrUtf8);
 
-    /// @brief Determines whether the file is type.
-    bool is(FileType type, const Path& path);
+    /// @brief Checks if the file matches the specified type.
+    inline bool is(FileType type, const Path& path)
+    {
+        return fileType(path, type) == type;
+    }
 
     /// @brief Reads the content of a text file.
     QString readTxt(const Path& path);

@@ -210,6 +210,9 @@ bool Coco::Io::writeJson
     CreateDirs createDirectories
 )
 {
+    if (path.isEmpty())
+        return false;
+
     maybeCreateDirs_(path, createDirectories);
 
     QFile file(path.toQString());

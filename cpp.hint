@@ -9,3 +9,9 @@
 #define qDebug QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE, QT_MESSAGELOG_FUNC).debug
 #define qDebug
 #define Q_DECLARE_FLAGS(Flags, Enum)
+#define Q_ALWAYS_INLINE
+#define Q_ALWAYS_INLINE inline __attribute__((always_inline))
+#define TO_QSTRING(StdFsPath) QString::fromStdString(StdFsPath.string())
+#define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
+#define CACHED_STRING(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
+#define GEN_SYS_UTIL(EnumValue) Q_ALWAYS_INLINE static Path EnumValue() { return Path(System::EnumValue); }

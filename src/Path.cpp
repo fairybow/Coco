@@ -24,6 +24,9 @@
 #include <cstddef>
 #include <filesystem>
 
+#define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
+#define CACHED_STRING(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
+
 std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
 {
     return std::hash<std::filesystem::path>()(path.toStd());
@@ -54,31 +57,6 @@ static const QHash<Coco::System, QStandardPaths::StandardLocation> SYSTEM_MAP_ =
     { Coco::System::Templates, QStandardPaths::TemplatesLocation }
 };
 
-std::string Coco::Path::prettyString() const
-{
-    std::string pretty{};
-    auto last_ch_was_sep = false;
-
-    for (auto& ch : d_->path.string())
-    {
-        if (ch == '/' || ch == '\\')
-        {
-            if (!last_ch_was_sep)
-            {
-                pretty += '/';
-                last_ch_was_sep = true;
-            }
-        }
-        else
-        {
-            pretty += ch;
-            last_ch_was_sep = false;
-        }
-    }
-
-    return pretty;
-}
-
 static QStringList findInArgsExtHelper_(const QString& extensions)
 {
     QStringList resolved{};
@@ -105,6 +83,31 @@ static constexpr QDirIterator::IteratorFlags findInFlagsHelper_(Coco::Path::Recu
     return (recursive == Coco::Path::Recursive::Yes)
         ? QDirIterator::Subdirectories
         : QDirIterator::NoIteratorFlags;
+}
+
+std::string Coco::Path::prettyString() const
+{
+    std::string pretty{};
+    auto last_ch_was_sep = false;
+
+    for (auto& ch : CACHED_STRING(d_))
+    {
+        if (ch == '/' || ch == '\\')
+        {
+            if (!last_ch_was_sep)
+            {
+                pretty += '/';
+                last_ch_was_sep = true;
+            }
+        }
+        else
+        {
+            pretty += ch;
+            last_ch_was_sep = false;
+        }
+    }
+
+    return pretty;
 }
 
 Coco::Path Coco::Path::resolveExtension(const QString& extension)
@@ -226,3 +229,6 @@ QString Coco::Path::fromSystem_(System value) const
 
     return {};
 }
+
+#undef CACHED_QSTRING
+#undef CACHED_STRING

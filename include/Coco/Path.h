@@ -36,9 +36,12 @@
 #include <string>
 #include <utility>
 
+/// @todo Would possibly prefer to cache strings when needed instead of right
+/// away.
+
 #define TO_QSTRING(StdFsPath) QString::fromStdString(StdFsPath.string())
-#define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
 #define CACHED_STRING(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
+#define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
 #define GEN_SYS_UTIL(EnumValue) Q_ALWAYS_INLINE static Path EnumValue() { return Path(System::EnumValue); }
 
 namespace Coco
@@ -50,16 +53,16 @@ namespace Coco
 
         explicit PathData(const std::filesystem::path& other)
             : path(other)
-            , cachedQString(TO_QSTRING(other))
             , cachedString(path.string())
+            , cachedQString(QString::fromStdString(cachedString))
         {
         }
 
         std::filesystem::path path;
 
         // Cached conversions
-        QString cachedQString;
         std::string cachedString;
+        QString cachedQString;
 
         // Memoization flag
         bool cacheValid = true;
@@ -67,8 +70,8 @@ namespace Coco
         Q_ALWAYS_INLINE void invalidateCache()
         {
             cacheValid = false;
-            cachedQString = TO_QSTRING(path);
             cachedString = path.string();
+            cachedQString = QString::fromStdString(cachedString);
             cacheValid = true;
         }
     };
@@ -236,13 +239,13 @@ namespace Coco
 
         // ----- Modification -----
 
-        Q_ALWAYS_INLINE void clear()
+        Q_ALWAYS_INLINE void clear() //noexcept
         {
             d_->path.clear();
             d_->invalidateCache();
         }
 
-        Q_ALWAYS_INLINE Path& makePreferred()
+        Q_ALWAYS_INLINE Path& makePreferred() //noexcept
         {
             d_->path.make_preferred();
             d_->invalidateCache();
@@ -263,14 +266,14 @@ namespace Coco
             return *this;
         }
 
-        Q_ALWAYS_INLINE Path& removeFilename()
+        Q_ALWAYS_INLINE Path& removeFilename() //noexcept
         {
             d_->path.remove_filename();
             d_->invalidateCache();
             return *this;
         }
 
-        Q_ALWAYS_INLINE void swap(Path& other)
+        Q_ALWAYS_INLINE void swap(Path& other) //noexcept
         {
             d_->path.swap(other.d_->path);
             d_->invalidateCache();

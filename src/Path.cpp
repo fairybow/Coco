@@ -24,7 +24,6 @@
 #include <cstddef>
 #include <filesystem>
 
-#define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
 #define CACHED_STRING(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
 
 std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
@@ -230,5 +229,4 @@ QString Coco::Path::fromSystem_(System value) const
     return {};
 }
 
-#undef CACHED_QSTRING
 #undef CACHED_STRING

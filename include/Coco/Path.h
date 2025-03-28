@@ -235,7 +235,7 @@ namespace Coco
             return *this;
         }
 
-        Path& removeFilename()
+        Path& removeFilename() noexcept
         {
             d_->path.remove_filename();
             return *this;

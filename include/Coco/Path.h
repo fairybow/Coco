@@ -12,22 +12,29 @@
 
 #pragma once
 
+#include "CocoGlobal.h"
+
+#include <QChar>
 #include <QDebug>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QLatin1StringView>
 #include <QList>
 #include <QSharedData>
 #include <QSharedDataPointer>
 #include <QStandardPaths>
 #include <QString>
 #include <QStringList>
+#include <QStringView>
 #include <QTextStream>
+#include <QtTypes>
 #include <QWidget>
 
 #include <cstddef>
 #include <filesystem>
 #include <ostream>
 #include <string>
+#include <utility>
 
 /// @todo Cache the string and QString versions in PathData.
 // To avoid excess function calls.
@@ -49,32 +56,6 @@ namespace Coco
     public:
         enum class Recursive { No = 0, Yes };
 
-        enum class System
-        {
-            Root,
-            AppConfig,
-            AppData,
-            AppLocalData,
-            Applications,
-            Cache,
-            Config,
-            Desktop,
-            Downloads,
-            Documents,
-            Fonts,
-            GenericCache,
-            GenericConfig,
-            GenericData,
-            Home,
-            Movies,
-            Music,
-            Pictures,
-            PublicShare,
-            Runtime,
-            Temp,
-            Templates
-        };
-
         Path() : d_(new PathData) {}
         Path(const Path& other) : d_(other.d_) {}
         Path(Path&& other) noexcept = default;
@@ -83,7 +64,7 @@ namespace Coco
         Path(const char* path) : d_(new PathData(path)) {}
         Path(const std::string& path) : d_(new PathData(path)) {}
         Path(const QString& path) : d_(new PathData(path.toStdString())) {}
-        Path(System location) : d_(new PathData(fromSystem_(location))) {}
+        Path(System location) : d_(new PathData(fromSystem_(location).toStdString())) {}
 
         // ----- Stream output operators -----
 
@@ -204,6 +185,11 @@ namespace Coco
             return d_->path.parent_path();
         }
 
+        Path filename() const
+        {
+            return d_->path.filename();
+        }
+
         Path file() const
         {
             return d_->path.filename();
@@ -212,6 +198,11 @@ namespace Coco
         Path stem() const
         {
             return d_->path.stem();
+        }
+
+        Path ext() const
+        {
+            return d_->path.extension();
         }
 
         Path extension() const
@@ -236,6 +227,23 @@ namespace Coco
         {
             d_->path.replace_extension(replacement);
             return *this;
+        }
+
+        Path& replaceFilename(const Path& replacement)
+        {
+            d_->path.replace_filename(replacement);
+            return *this;
+        }
+
+        Path& removeFilename()
+        {
+            d_->path.remove_filename();
+            return *this;
+        }
+
+        void swap(Path& other) noexcept
+        {
+            d_->path.swap(other.d_->path);
         }
 
         // ----- Conversion -----
@@ -317,6 +325,82 @@ namespace Coco
         GEN_SYS_UTIL(Temp);
         GEN_SYS_UTIL(Templates);
 
+        template <typename... Args>
+        Path arg(Args&&... args) const
+        {
+            return TO_QSTRING(d_->path).arg(std::forward<Args>(args)...);
+        }
+
+        Path arg(const QString& a, int fieldWidth = 0, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, fillChar);
+        }
+
+        Path arg(QChar a, int fieldWidth = 0, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, fillChar);
+        }
+
+        Path arg(QLatin1StringView a, int fieldWidth = 0, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, fillChar);
+        }
+
+        Path arg(QStringView a, int fieldWidth = 0, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, fillChar);
+        }
+
+        Path arg(char a, int fieldWidth = 0, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, fillChar);
+        }
+
+        Path arg(int a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(long a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(qlonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(qulonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(short a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(uint a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(ulong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(ushort a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, base, fillChar);
+        }
+
+        Path arg(double a, int fieldWidth = 0, char format = 'g', int precision = -1, QChar fillChar = u' ') const
+        {
+            return TO_QSTRING(d_->path).arg(a, fieldWidth, format, precision, fillChar);
+        }
+
         // Creates all directories in the specified path.
         static bool mkdir(const Path& path)
         {
@@ -360,16 +444,15 @@ namespace Coco
     private:
         QSharedDataPointer<PathData> d_;
 
-        std::filesystem::path fromSystem_(System value) const;
-
-        std::filesystem::path standardLocation_(QStandardPaths::StandardLocation value) const
+        QString fromSystem_(System value) const;
+        QString standardLocation_(QStandardPaths::StandardLocation value) const
         {
             return QStandardPaths::locate
             (
                 value,
                 {},
                 QStandardPaths::LocateDirectory
-            ).toStdString();
+            );
         }
 
     }; // class Coco::Path
@@ -458,35 +541,3 @@ namespace std
 
 #undef TO_QSTRING
 #undef GEN_SYS_UTIL
-
-// OLD CODE:
-/*
-Path arg
-(
-    const QString& a,
-    int fieldWidth = 0,
-    QChar fillChar = u' '
-) const;
-
-Path arg
-(
-    int a,
-    int fieldWidth = 0,
-    int base = 10,
-    QChar fillChar = u' '
-) const;
-
-Path arg
-(
-    char a,
-    int fieldWidth = 0,
-    QChar fillChar = u' '
-) const;
-
-Path arg
-(
-    QChar a,
-    int fieldWidth = 0,
-    QChar fillChar = u' '
-) const;
-*/

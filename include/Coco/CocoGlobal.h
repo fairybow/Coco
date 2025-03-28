@@ -7,7 +7,7 @@
 * This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
 * graphical user interfaces. For more information, visit <https://www.qt.io/>.
 *
-* Updated: 2025-03-13
+* Updated: 2025-03-27
 */
 
 #pragma once
@@ -39,6 +39,32 @@ namespace Coco
     };
 
     typedef QFlags<FileType> FileTypes;
+
+    enum class System
+    {
+        Root,
+        AppConfig,
+        AppData,
+        AppLocalData,
+        Applications,
+        Cache,
+        Config,
+        Desktop,
+        Downloads,
+        Documents,
+        Fonts,
+        GenericCache,
+        GenericConfig,
+        GenericData,
+        Home,
+        Movies,
+        Music,
+        Pictures,
+        PublicShare,
+        Runtime,
+        Temp,
+        Templates
+    };
 
 } // namespace Coco
 

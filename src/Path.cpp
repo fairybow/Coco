@@ -10,6 +10,7 @@
 * Updated: 2025-03-27
 */
 
+#include "../include/Coco/CocoGlobal.h"
 #include "../include/Coco/Path.h"
 
 #include <QDir>
@@ -28,29 +29,29 @@ std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
     return std::hash<std::filesystem::path>()(path.toStd());
 }
 
-static const QHash<Coco::Path::System, QStandardPaths::StandardLocation> SYSTEM_MAP_ =
+static const QHash<Coco::System, QStandardPaths::StandardLocation> SYSTEM_MAP_ =
 {
-    { Coco::Path::System::AppConfig, QStandardPaths::AppConfigLocation },
-    { Coco::Path::System::AppData, QStandardPaths::AppDataLocation },
-    { Coco::Path::System::AppLocalData, QStandardPaths::AppLocalDataLocation },
-    { Coco::Path::System::Applications, QStandardPaths::ApplicationsLocation },
-    { Coco::Path::System::Cache, QStandardPaths::CacheLocation },
-    { Coco::Path::System::Config, QStandardPaths::ConfigLocation },
-    { Coco::Path::System::Desktop, QStandardPaths::DesktopLocation },
-    { Coco::Path::System::Downloads, QStandardPaths::DownloadLocation },
-    { Coco::Path::System::Documents, QStandardPaths::DocumentsLocation },
-    { Coco::Path::System::Fonts, QStandardPaths::FontsLocation },
-    { Coco::Path::System::GenericCache, QStandardPaths::GenericCacheLocation },
-    { Coco::Path::System::GenericConfig, QStandardPaths::GenericConfigLocation },
-    { Coco::Path::System::GenericData, QStandardPaths::GenericDataLocation },
-    { Coco::Path::System::Home, QStandardPaths::HomeLocation },
-    { Coco::Path::System::Movies, QStandardPaths::MoviesLocation },
-    { Coco::Path::System::Music, QStandardPaths::MusicLocation },
-    { Coco::Path::System::Pictures, QStandardPaths::PicturesLocation },
-    { Coco::Path::System::PublicShare, QStandardPaths::PublicShareLocation },
-    { Coco::Path::System::Runtime, QStandardPaths::RuntimeLocation },
-    { Coco::Path::System::Temp, QStandardPaths::TempLocation },
-    { Coco::Path::System::Templates, QStandardPaths::TemplatesLocation }
+    { Coco::System::AppConfig, QStandardPaths::AppConfigLocation },
+    { Coco::System::AppData, QStandardPaths::AppDataLocation },
+    { Coco::System::AppLocalData, QStandardPaths::AppLocalDataLocation },
+    { Coco::System::Applications, QStandardPaths::ApplicationsLocation },
+    { Coco::System::Cache, QStandardPaths::CacheLocation },
+    { Coco::System::Config, QStandardPaths::ConfigLocation },
+    { Coco::System::Desktop, QStandardPaths::DesktopLocation },
+    { Coco::System::Downloads, QStandardPaths::DownloadLocation },
+    { Coco::System::Documents, QStandardPaths::DocumentsLocation },
+    { Coco::System::Fonts, QStandardPaths::FontsLocation },
+    { Coco::System::GenericCache, QStandardPaths::GenericCacheLocation },
+    { Coco::System::GenericConfig, QStandardPaths::GenericConfigLocation },
+    { Coco::System::GenericData, QStandardPaths::GenericDataLocation },
+    { Coco::System::Home, QStandardPaths::HomeLocation },
+    { Coco::System::Movies, QStandardPaths::MoviesLocation },
+    { Coco::System::Music, QStandardPaths::MusicLocation },
+    { Coco::System::Pictures, QStandardPaths::PicturesLocation },
+    { Coco::System::PublicShare, QStandardPaths::PublicShareLocation },
+    { Coco::System::Runtime, QStandardPaths::RuntimeLocation },
+    { Coco::System::Temp, QStandardPaths::TempLocation },
+    { Coco::System::Templates, QStandardPaths::TemplatesLocation }
 };
 
 std::string Coco::Path::prettyString() const
@@ -213,10 +214,10 @@ QList<Coco::Path> Coco::Path::findInArgs
     return findInArgs(args, extensions);
 }
 
-std::filesystem::path Coco::Path::fromSystem_(System value) const
+QString Coco::Path::fromSystem_(System value) const
 {
     if (value == System::Root)
-        return QDir::rootPath().toStdString();
+        return QDir::rootPath();
 
     auto it = SYSTEM_MAP_.find(value);
 
@@ -225,51 +226,3 @@ std::filesystem::path Coco::Path::fromSystem_(System value) const
 
     return {};
 }
-
-// OLD CODE:
-/*
-Path Path::arg
-(
-    const QString& a,
-    int fieldWidth,
-    QChar fillChar
-)
-const
-{
-    return toQString().arg(a, fieldWidth, fillChar);
-}
-
-Path Path::arg
-(
-    int a,
-    int fieldWidth,
-    int base,
-    QChar fillChar
-)
-const
-{
-    return toQString().arg(a, fieldWidth, base, fillChar);
-}
-
-Path Path::arg
-(
-    char a,
-    int fieldWidth,
-    QChar fillChar
-)
-const
-{
-    return toQString().arg(a, fieldWidth, fillChar);
-}
-
-Path Path::arg
-(
-    QChar a,
-    int fieldWidth,
-    QChar fillChar
-)
-const
-{
-    return toQString().arg(a, fieldWidth, fillChar);
-}
-*/

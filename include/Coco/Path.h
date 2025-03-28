@@ -32,6 +32,7 @@
 /// @todo Cache the string and QString versions in PathData.
 // To avoid excess function calls.
 #define TO_QSTRING(Path) QString::fromStdString(Path.string())
+#define GEN_SYS_UTIL(EnumValue) static Path EnumValue() { return Path(System::EnumValue); }
 
 namespace Coco
 {
@@ -48,7 +49,7 @@ namespace Coco
     public:
         enum class Recursive { No = 0, Yes };
 
-        enum System
+        enum class System
         {
             Root,
             AppConfig,
@@ -107,7 +108,6 @@ namespace Coco
 
         // ----- Assignment operators -----
 
-        // Will paths assigned be normalized?
         Path& operator=(const Path& other) = default;
         Path& operator=(Path&& other) noexcept = default;
 
@@ -294,6 +294,29 @@ namespace Coco
 
         // ----- Utility -----
 
+        GEN_SYS_UTIL(Root);
+        GEN_SYS_UTIL(AppConfig);
+        GEN_SYS_UTIL(AppData);
+        GEN_SYS_UTIL(AppLocalData);
+        GEN_SYS_UTIL(Applications);
+        GEN_SYS_UTIL(Cache);
+        GEN_SYS_UTIL(Config);
+        GEN_SYS_UTIL(Desktop);
+        GEN_SYS_UTIL(Downloads);
+        GEN_SYS_UTIL(Documents);
+        GEN_SYS_UTIL(Fonts);
+        GEN_SYS_UTIL(GenericCache);
+        GEN_SYS_UTIL(GenericConfig);
+        GEN_SYS_UTIL(GenericData);
+        GEN_SYS_UTIL(Home);
+        GEN_SYS_UTIL(Movies);
+        GEN_SYS_UTIL(Music);
+        GEN_SYS_UTIL(Pictures);
+        GEN_SYS_UTIL(PublicShare);
+        GEN_SYS_UTIL(Runtime);
+        GEN_SYS_UTIL(Temp);
+        GEN_SYS_UTIL(Templates);
+
         // Creates all directories in the specified path.
         static bool mkdir(const Path& path)
         {
@@ -337,13 +360,13 @@ namespace Coco
     private:
         QSharedDataPointer<PathData> d_;
 
-        std::filesystem::path fromSystem_(System type) const;
+        std::filesystem::path fromSystem_(System value) const;
 
-        std::filesystem::path standardLocation_(QStandardPaths::StandardLocation type) const
+        std::filesystem::path standardLocation_(QStandardPaths::StandardLocation value) const
         {
             return QStandardPaths::locate
             (
-                type,
+                value,
                 {},
                 QStandardPaths::LocateDirectory
             ).toStdString();
@@ -419,6 +442,11 @@ namespace Coco
 
 } // namespace Coco
 
+inline Coco::Path operator"" _ccpath(const char* cString, std::size_t)
+{
+    return Coco::Path(cString);
+}
+
 namespace std
 {
     template <>
@@ -429,6 +457,7 @@ namespace std
 }
 
 #undef TO_QSTRING
+#undef GEN_SYS_UTIL
 
 // OLD CODE:
 /*

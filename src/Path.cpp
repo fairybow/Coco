@@ -30,27 +30,27 @@ std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
 
 static const QHash<Coco::Path::System, QStandardPaths::StandardLocation> SYSTEM_MAP_ =
 {
-    { Coco::Path::AppConfig, QStandardPaths::AppConfigLocation },
-    { Coco::Path::AppData, QStandardPaths::AppDataLocation },
-    { Coco::Path::AppLocalData, QStandardPaths::AppLocalDataLocation },
-    { Coco::Path::Applications, QStandardPaths::ApplicationsLocation },
-    { Coco::Path::Cache, QStandardPaths::CacheLocation },
-    { Coco::Path::Config, QStandardPaths::ConfigLocation },
-    { Coco::Path::Desktop, QStandardPaths::DesktopLocation },
-    { Coco::Path::Downloads, QStandardPaths::DownloadLocation },
-    { Coco::Path::Documents, QStandardPaths::DocumentsLocation },
-    { Coco::Path::Fonts, QStandardPaths::FontsLocation },
-    { Coco::Path::GenericCache, QStandardPaths::GenericCacheLocation },
-    { Coco::Path::GenericConfig, QStandardPaths::GenericConfigLocation },
-    { Coco::Path::GenericData, QStandardPaths::GenericDataLocation },
-    { Coco::Path::Home, QStandardPaths::HomeLocation },
-    { Coco::Path::Movies, QStandardPaths::MoviesLocation },
-    { Coco::Path::Music, QStandardPaths::MusicLocation },
-    { Coco::Path::Pictures, QStandardPaths::PicturesLocation },
-    { Coco::Path::PublicShare, QStandardPaths::PublicShareLocation },
-    { Coco::Path::Runtime, QStandardPaths::RuntimeLocation },
-    { Coco::Path::Temp, QStandardPaths::TempLocation },
-    { Coco::Path::Templates, QStandardPaths::TemplatesLocation }
+    { Coco::Path::System::AppConfig, QStandardPaths::AppConfigLocation },
+    { Coco::Path::System::AppData, QStandardPaths::AppDataLocation },
+    { Coco::Path::System::AppLocalData, QStandardPaths::AppLocalDataLocation },
+    { Coco::Path::System::Applications, QStandardPaths::ApplicationsLocation },
+    { Coco::Path::System::Cache, QStandardPaths::CacheLocation },
+    { Coco::Path::System::Config, QStandardPaths::ConfigLocation },
+    { Coco::Path::System::Desktop, QStandardPaths::DesktopLocation },
+    { Coco::Path::System::Downloads, QStandardPaths::DownloadLocation },
+    { Coco::Path::System::Documents, QStandardPaths::DocumentsLocation },
+    { Coco::Path::System::Fonts, QStandardPaths::FontsLocation },
+    { Coco::Path::System::GenericCache, QStandardPaths::GenericCacheLocation },
+    { Coco::Path::System::GenericConfig, QStandardPaths::GenericConfigLocation },
+    { Coco::Path::System::GenericData, QStandardPaths::GenericDataLocation },
+    { Coco::Path::System::Home, QStandardPaths::HomeLocation },
+    { Coco::Path::System::Movies, QStandardPaths::MoviesLocation },
+    { Coco::Path::System::Music, QStandardPaths::MusicLocation },
+    { Coco::Path::System::Pictures, QStandardPaths::PicturesLocation },
+    { Coco::Path::System::PublicShare, QStandardPaths::PublicShareLocation },
+    { Coco::Path::System::Runtime, QStandardPaths::RuntimeLocation },
+    { Coco::Path::System::Temp, QStandardPaths::TempLocation },
+    { Coco::Path::System::Templates, QStandardPaths::TemplatesLocation }
 };
 
 std::string Coco::Path::prettyString() const
@@ -213,12 +213,12 @@ QList<Coco::Path> Coco::Path::findInArgs
     return findInArgs(args, extensions);
 }
 
-std::filesystem::path Coco::Path::fromSystem_(System type) const
+std::filesystem::path Coco::Path::fromSystem_(System value) const
 {
-    if (type == Root)
+    if (value == System::Root)
         return QDir::rootPath().toStdString();
 
-    auto it = SYSTEM_MAP_.find(type);
+    auto it = SYSTEM_MAP_.find(value);
 
     if (it != SYSTEM_MAP_.end())
         return standardLocation_(*it);

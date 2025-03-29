@@ -15,3 +15,5 @@
 #define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
 #define CACHED_STRING(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
 #define GEN_SYS_UTIL(EnumValue) Q_ALWAYS_INLINE static Path EnumValue() { return Path(System::EnumValue); }
+#define COCO_ALWAYS_INLINE __attribute__((always_inline)) inline
+#define COCO_ALWAYS_INLINE

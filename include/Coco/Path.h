@@ -42,7 +42,7 @@
 #define TO_QSTRING(StdFsPath) QString::fromStdString(StdFsPath.string())
 #define CACHED_STRING(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
 #define CACHED_QSTRING(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING(DPtr->path))
-#define GEN_SYS_UTIL(EnumValue) Q_ALWAYS_INLINE static Path EnumValue() { return Path(System::EnumValue); }
+#define GEN_SYS_UTIL(EnumValue) COCO_ALWAYS_INLINE static Path EnumValue() { return Path(System::EnumValue); }
 
 namespace Coco
 {
@@ -67,7 +67,7 @@ namespace Coco
         // Memoization flag
         bool cacheValid = true;
 
-        Q_ALWAYS_INLINE void invalidateCache()
+        COCO_ALWAYS_INLINE void invalidateCache()
         {
             cacheValid = false;
             cachedString = path.string();
@@ -119,26 +119,30 @@ namespace Coco
 
         // ----- Comparison operators -----
 
-        bool operator==(const Path& other) const noexcept = default;
-        bool operator!=(const Path& other) const noexcept = default;
+        COCO_ALWAYS_INLINE bool operator==(const Path& other) const noexcept
+        {
+            return d_->path == other.d_->path;
+        }
+
+        COCO_ALWAYS_INLINE bool operator!=(const Path& other) const noexcept = default;
 
         // ----- Concatenation operators -----
 
-        Q_ALWAYS_INLINE Path operator/(const Path& other) const
+        COCO_ALWAYS_INLINE Path operator/(const Path& other) const
         {
             Path path = *this;
             path /= other;
             return path;
         }
 
-        Q_ALWAYS_INLINE Path& operator/=(const Path& other)
+        COCO_ALWAYS_INLINE Path& operator/=(const Path& other)
         {
             d_->path /= other.d_->path;
             d_->invalidateCache();
             return *this;
         }
 
-        Q_ALWAYS_INLINE Path& operator+=(const Path& other)
+        COCO_ALWAYS_INLINE Path& operator+=(const Path& other)
         {
             d_->path += other.d_->path;
             d_->invalidateCache();
@@ -147,38 +151,38 @@ namespace Coco
 
         // ----- Conversion operators -----
 
-        Q_ALWAYS_INLINE explicit operator bool() const noexcept
+        COCO_ALWAYS_INLINE explicit operator bool() const noexcept
         {
             return !d_->path.empty();
         }
 
-        Q_ALWAYS_INLINE operator std::filesystem::path() const noexcept
+        COCO_ALWAYS_INLINE operator std::filesystem::path() const noexcept
         {
             return d_->path;
         }
 
         // ----- Queries -----
 
-        Q_ALWAYS_INLINE bool isEmpty() const noexcept
+        COCO_ALWAYS_INLINE bool isEmpty() const noexcept
         {
             return d_->path.empty();
         }
 
-        Q_ALWAYS_INLINE bool isFile() const
+        COCO_ALWAYS_INLINE bool isFile() const
         {
             //return std::filesystem::is_regular_file(m_path);
             // ^ Valid paths with non-standard characters won't return valid.
             return QFileInfo(CACHED_QSTRING(d_)).isFile();
         }
 
-        Q_ALWAYS_INLINE bool isFolder() const
+        COCO_ALWAYS_INLINE bool isFolder() const
         {
             //return std::filesystem::is_directory(m_path);
             // ^ Valid paths with non-standard characters won't return valid.
             return QFileInfo(CACHED_QSTRING(d_)).isDir();
         }
 
-        Q_ALWAYS_INLINE bool isValid() const
+        COCO_ALWAYS_INLINE bool isValid() const
         {
             //return std::filesystem::exists(m_path);
             // ^ Valid paths with non-standard characters won't return valid.
@@ -187,93 +191,93 @@ namespace Coco
 
         // ----- Decomposition -----
 
-        Q_ALWAYS_INLINE Path rootName() const
+        COCO_ALWAYS_INLINE Path rootName() const
         {
             return d_->path.root_name();
         }
 
-        Q_ALWAYS_INLINE Path rootDirectory() const
+        COCO_ALWAYS_INLINE Path rootDirectory() const
         {
             return d_->path.root_directory();
         }
 
-        Q_ALWAYS_INLINE Path root() const
+        COCO_ALWAYS_INLINE Path root() const
         {
             return d_->path.root_path();
         }
 
-        Q_ALWAYS_INLINE Path relative() const
+        COCO_ALWAYS_INLINE Path relative() const
         {
             return d_->path.relative_path();
         }
 
-        Q_ALWAYS_INLINE Path parent() const
+        COCO_ALWAYS_INLINE Path parent() const
         {
             return d_->path.parent_path();
         }
 
-        Q_ALWAYS_INLINE Path filename() const
+        COCO_ALWAYS_INLINE Path filename() const
         {
             return d_->path.filename();
         }
 
-        Q_ALWAYS_INLINE Path file() const
+        COCO_ALWAYS_INLINE Path file() const
         {
             return d_->path.filename();
         }
 
-        Q_ALWAYS_INLINE Path stem() const
+        COCO_ALWAYS_INLINE Path stem() const
         {
             return d_->path.stem();
         }
 
-        Q_ALWAYS_INLINE Path ext() const
+        COCO_ALWAYS_INLINE Path ext() const
         {
             return d_->path.extension();
         }
 
-        Q_ALWAYS_INLINE Path extension() const
+        COCO_ALWAYS_INLINE Path extension() const
         {
             return d_->path.extension();
         }
 
         // ----- Modification -----
 
-        Q_ALWAYS_INLINE void clear() //noexcept
+        COCO_ALWAYS_INLINE void clear() //noexcept
         {
             d_->path.clear();
             d_->invalidateCache();
         }
 
-        Q_ALWAYS_INLINE Path& makePreferred() //noexcept
+        COCO_ALWAYS_INLINE Path& makePreferred() //noexcept
         {
             d_->path.make_preferred();
             d_->invalidateCache();
             return *this;
         }
 
-        Q_ALWAYS_INLINE Path& replaceExt(const Path& replacement = {})
+        COCO_ALWAYS_INLINE Path& replaceExt(const Path& replacement = {})
         {
             d_->path.replace_extension(replacement);
             d_->invalidateCache();
             return *this;
         }
 
-        Q_ALWAYS_INLINE Path& replaceFilename(const Path& replacement)
+        COCO_ALWAYS_INLINE Path& replaceFilename(const Path& replacement)
         {
             d_->path.replace_filename(replacement);
             d_->invalidateCache();
             return *this;
         }
 
-        Q_ALWAYS_INLINE Path& removeFilename() //noexcept
+        COCO_ALWAYS_INLINE Path& removeFilename() //noexcept
         {
             d_->path.remove_filename();
             d_->invalidateCache();
             return *this;
         }
 
-        Q_ALWAYS_INLINE void swap(Path& other) //noexcept
+        COCO_ALWAYS_INLINE void swap(Path& other) //noexcept
         {
             d_->path.swap(other.d_->path);
             d_->invalidateCache();
@@ -282,22 +286,22 @@ namespace Coco
 
         // ----- Conversion -----
 
-        Q_ALWAYS_INLINE QString extQString() const
+        COCO_ALWAYS_INLINE QString extQString() const
         {
             return TO_QSTRING(d_->path.extension());
         }
 
-        Q_ALWAYS_INLINE std::string extString() const
+        COCO_ALWAYS_INLINE std::string extString() const
         {
             return d_->path.extension().string();
         }
 
-        Q_ALWAYS_INLINE QString fileQString() const
+        COCO_ALWAYS_INLINE QString fileQString() const
         {
             return TO_QSTRING(d_->path.filename());
         }
 
-        Q_ALWAYS_INLINE std::string fileString() const
+        COCO_ALWAYS_INLINE std::string fileString() const
         {
             return d_->path.filename().string();
         }
@@ -309,27 +313,27 @@ namespace Coco
 
         std::string prettyString() const;
 
-        Q_ALWAYS_INLINE QString stemQString() const
+        COCO_ALWAYS_INLINE QString stemQString() const
         {
             return TO_QSTRING(d_->path.stem());
         }
 
-        Q_ALWAYS_INLINE std::string stemString() const
+        COCO_ALWAYS_INLINE std::string stemString() const
         {
             return d_->path.stem().string();
         }
 
-        Q_ALWAYS_INLINE QString toQString() const
+        COCO_ALWAYS_INLINE QString toQString() const
         {
             return CACHED_QSTRING(d_);
         }
 
-        Q_ALWAYS_INLINE std::filesystem::path toStd() const noexcept
+        COCO_ALWAYS_INLINE std::filesystem::path toStd() const noexcept
         {
             return d_->path;
         }
 
-        Q_ALWAYS_INLINE std::string toString() const
+        COCO_ALWAYS_INLINE std::string toString() const
         {
             return CACHED_STRING(d_);
         }
@@ -360,83 +364,83 @@ namespace Coco
         GEN_SYS_UTIL(Templates);
 
         template <typename... Args>
-        Q_ALWAYS_INLINE Path arg(Args&&... args) const
+        COCO_ALWAYS_INLINE Path arg(Args&&... args) const
         {
             return CACHED_QSTRING(d_).arg(std::forward<Args>(args)...);
         }
 
-        Q_ALWAYS_INLINE Path arg(const QString& a, int fieldWidth = 0, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(const QString& a, int fieldWidth = 0, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(QChar a, int fieldWidth = 0, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(QChar a, int fieldWidth = 0, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(QLatin1StringView a, int fieldWidth = 0, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(QLatin1StringView a, int fieldWidth = 0, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(QStringView a, int fieldWidth = 0, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(QStringView a, int fieldWidth = 0, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(char a, int fieldWidth = 0, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(char a, int fieldWidth = 0, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(int a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(int a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(long a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(long a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(qlonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(qlonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(qulonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(qulonglong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(short a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(short a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(uint a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(uint a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(ulong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(ulong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(ushort a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(ushort a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, base, fillChar);
         }
 
-        Q_ALWAYS_INLINE Path arg(double a, int fieldWidth = 0, char format = 'g', int precision = -1, QChar fillChar = u' ') const
+        COCO_ALWAYS_INLINE Path arg(double a, int fieldWidth = 0, char format = 'g', int precision = -1, QChar fillChar = u' ') const
         {
             return CACHED_QSTRING(d_).arg(a, fieldWidth, format, precision, fillChar);
         }
 
         // Creates all directories in the specified path.
-        Q_ALWAYS_INLINE static bool mkdir(const Path& path)
+        COCO_ALWAYS_INLINE static bool mkdir(const Path& path)
         {
             return std::filesystem::create_directories(path.d_->path);
         }

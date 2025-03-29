@@ -14,6 +14,14 @@
 
 #include <QFlags>
 
+#ifdef __GNUC__
+  #define COCO_ALWAYS_INLINE __attribute__((always_inline)) inline
+#elif defined(_MSC_VER)
+  #define COCO_ALWAYS_INLINE __forceinline
+#else
+  #define COCO_ALWAYS_INLINE inline
+#endif
+
 namespace Coco
 {
     enum class CreateDirs

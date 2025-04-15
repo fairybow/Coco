@@ -49,9 +49,9 @@ namespace Coco
     class PathData : public QSharedData
     {
     public:
-        PathData() = default;
+        //PathData() = default;
 
-        explicit PathData(const std::filesystem::path& other)
+        explicit PathData(const std::filesystem::path& other = {})
             : path(other)
             , cachedString(path.string())
             , cachedQString(QString::fromStdString(cachedString))

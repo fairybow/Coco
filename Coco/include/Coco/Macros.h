@@ -6,11 +6,11 @@
 /// any function using this is not itself making function calls to stuff that is
 /// not inlined. This is for small functions returning members, basically.
 #ifdef __GNUC__
-#define COCO_ALWAYS_INLINE __attribute__((always_inline)) inline
+#   define COCO_ALWAYS_INLINE __attribute__((always_inline)) inline
 #elif defined(_MSC_VER)
-#define COCO_ALWAYS_INLINE __forceinline
+#   define COCO_ALWAYS_INLINE __forceinline
 #else
-#define COCO_ALWAYS_INLINE inline
+#   define COCO_ALWAYS_INLINE inline
 #endif
 
 /// @brief Shorthand for getting the sender of a signal inside a slot.

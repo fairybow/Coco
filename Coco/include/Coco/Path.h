@@ -179,6 +179,13 @@ namespace Coco
             return QFileInfo(CACHED_QSTRING_(d_)).exists();
         }
 
+        COCO_ALWAYS_INLINE static bool exists(const Path& path)
+        {
+            // For convenience. Coco::Path::exists(baseQssPath) instead of
+            // Coco::Path(baseQssPath).exists(). Shut up.
+            return path.exists();
+        }
+
         // ----- Decomposition -----
 
         COCO_ALWAYS_INLINE Path rootName() const

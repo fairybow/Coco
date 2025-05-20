@@ -67,6 +67,8 @@ namespace Coco::PathUtil
         return fileType(path, type) == type; // If no filter is passed, then this is always true, I think.
     }
 
+    QString resolveExt(const QString& extension);
+
     namespace Dialog
     {
         inline Path directory

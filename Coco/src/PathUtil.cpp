@@ -42,16 +42,6 @@ static const QList<FileTypeDatum_> FILE_TYPE_DATA_ =
     { Coco::FileSignature::TarGz,      QByteArray::fromHex("1F8B") }               // 2
 };
 
-static QString resolveExt_(const QString& extension)
-{
-    auto ext = extension.trimmed();
-    if (ext.isEmpty()) return {};
-
-    // Ensure extension starts with a dot
-    constexpr QChar dot('.');
-    return (ext.startsWith(dot) ? ext : dot + ext);
-}
-
 static QStringList fromArgsExtHelper_(const QString& extensions)
 {
     QStringList resolved{};
@@ -237,6 +227,16 @@ namespace Coco::PathUtil
         }
 
         return FileSignature::UnknownOrUtf8;
+    }
+
+    QString resolveExt(const QString& extension)
+    {
+        auto ext = extension.trimmed();
+        if (ext.isEmpty()) return {};
+
+        // Ensure extension starts with a dot
+        constexpr QChar dot('.');
+        return (ext.startsWith(dot) ? ext : dot + ext);
     }
 
 } // namespace Coco::PathUtil

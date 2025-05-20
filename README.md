@@ -4,6 +4,13 @@ Common, generic, or predicted-reusable code for my Qt projects.
 
 ```bat
 git submodule add https://github.com/fairybow/Coco Project\submodules\Coco
+git submodule update --init --recursive
+```
+
+```bat
+git submodule deinit -f "Project\submodules\Coco"
+git rm -f "Project\submodules\Coco"
+rmdir /s /q ".git\modules\Project\submodules\Coco"
 ```
 
 ## Configuration

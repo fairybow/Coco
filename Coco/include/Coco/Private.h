@@ -59,12 +59,18 @@ namespace Coco
         /// class
         /// @param publicClass Pointer to the public class that owns this
         /// implementation
-        explicit Private(PublicT* publicClass)
+        /// 
+        /// @note Without the explicit keyword, the base class constructor can
+        /// be implicitly used for constructing derived classes.
+        /*explicit*/ Private(PublicT* publicClass)
             : pub(publicClass)
         {
         }
 
-        virtual ~Private() = default;
+        /// @note When the base class doesn't have a virtual destructor, the
+        /// compiler generates a simple, non-virtual destructor for the derived
+        /// class automatically. This simplifies the inheritance relationship.
+        /*virtual*/ ~Private() = default;
 
     protected:
         /// @brief Pointer to the public class

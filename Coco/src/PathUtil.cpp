@@ -47,7 +47,7 @@ static QStringList fromArgsExtHelper_(const QString& extensions)
     QStringList resolved{};
 
     for (auto& ext : extensions.split(","))
-        resolved << resolveExt_(ext);
+        resolved << Coco::PathUtil::resolveExt(ext);
 
     return resolved;
 }
@@ -57,7 +57,7 @@ static QStringList fromDirExtHelper_(const QString& extensions)
     QStringList resolved{};
 
     for (auto& ext : extensions.split(","))
-        resolved << "*" + resolveExt_(ext);
+        resolved << "*" + Coco::PathUtil::resolveExt(ext);
 
     return resolved;
 }

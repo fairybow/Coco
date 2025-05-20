@@ -9,5 +9,5 @@ if %ERRORLEVEL% equ 0 (
     exit /b %ERRORLEVEL%
 )
 
-echo Done.
+echo Done!
 pause

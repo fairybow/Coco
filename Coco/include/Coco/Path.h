@@ -28,11 +28,41 @@
 /// @todo Would possibly prefer to cache strings when needed instead of right
 /// away (could be a problem for arg methods, for example, although they rely on
 /// QString's arg function to even work at all, so idk)
+/// 
+/// Handle QMimeData/QUrl?, like:
+/// void MainWindow::dropEvent(QDropEvent* event)
+///{
+///    // We know we have URLs because dragEnterEvent already verified this
+///    // We also know the first URL has .json extension
+///    QUrl url = event->mimeData()->urls().at(0);
+///    auto path = url.toLocalFile();
+///
+///    if (view_->load(path))
+///    {
+///        setWindowTitle(QFileInfo(path).fileName());
+///        event->acceptProposedAction();
+///        activateWindow();
+///
+///        return;
+///    }
+/// 
+///    // If we get here, loading failed
+///    event->ignore();
+///}
+/// 
+/// Or do this in PathUtil (rename File?) or similar!
 
 #define TO_QSTRING_(StdFsPath) QString::fromStdString(StdFsPath.string())
 #define CACHED_STRING_(DPtr) (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
 #define CACHED_QSTRING_(DPtr) (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING_(DPtr->path))
-#define GENERATE_SYS_METHOD_(EnumValue) COCO_ALWAYS_INLINE static Path EnumValue() { return Path(SystemLocation::EnumValue); }
+//#define GENERATE_SYS_METHOD_(EnumValue) COCO_ALWAYS_INLINE static Path EnumValue() { return Path(SystemLocation::EnumValue); }
+
+#define GENERATE_SYS_METHOD_(EnumValue) \
+    COCO_ALWAYS_INLINE static Path EnumValue(const char* path = {}) \
+    { \
+        return !path ? Path(SystemLocation::EnumValue) \
+            : Path(SystemLocation::EnumValue) / path; \
+    }
 
 namespace Coco
 {

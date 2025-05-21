@@ -15,7 +15,7 @@ for /f "delims=" %%i in ('git rev-parse --show-toplevel') do (
     echo Changed to parent Git root: %%i
 )
 
-:: Old:
+:: Old (WinGitRoot):
 
 ::@echo off
 

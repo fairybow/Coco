@@ -4,9 +4,9 @@
 
 /// @brief The general point is to have a convenient way to avoid ambiguous
 /// boolean function parameters. Creates a strongly-typed, named, boolean class
-/// with Yes/No static constants, with implicit conversion for natural use in
+/// with Yes/No static constants and implicit conversion for natural use in
 /// conditionals.
-/// 
+///
 /// @note Default Value: defaults can be specified in two equivalent ways:
 /// `FunctionName(ParamType = ParamType::No)` or `FunctionName(ParamType = {})`.
 ///
@@ -40,9 +40,9 @@ namespace Coco
         static const Bool Yes;
         static const Bool No;
 
-        // Doesn't work:
-        //static constexpr Bool<TagT> Yes{ true };
-        //static constexpr Bool<TagT> No{ false };
+        // Doesn't work (may be MSVC?):
+        // static constexpr Bool<TagT> Yes{ true };
+        // static constexpr Bool<TagT> No{ false };
 
     private:
         bool value_;
@@ -52,13 +52,15 @@ namespace Coco
     // Define the static members outside the class to ensure they're properly
     // instantiated
     template <typename TagT>
-    const Bool<TagT> Bool<TagT>::Yes{ true };
+    const Bool<TagT> Bool<TagT>::Yes{true};
 
     template <typename TagT>
-    const Bool<TagT> Bool<TagT>::No{ false };
+    const Bool<TagT> Bool<TagT>::No{false};
 
 } // namespace Coco
 
-#define COCO_BOOL(Name)                 \
-    struct Name##Tag {};                \
+#define COCO_BOOL(Name) \
+    struct Name##Tag    \
+    {                   \
+    };                  \
     using Name = Coco::Bool<Name##Tag>

@@ -12,18 +12,18 @@
 
 // ----- Internal -----
 
-constexpr auto WAIT = 100;
-constexpr auto TIMEOUT = 1000;
-constexpr auto DELIMITER = '\0';
+constexpr auto WAIT_ = 100;
+constexpr auto TIMEOUT_ = 1000;
+constexpr auto DELIMITER_ = '\0';
 
 static QByteArray serialize_(const QStringList& args)
 {
-    return args.join(DELIMITER).toUtf8();
+    return args.join(DELIMITER_).toUtf8();
 }
 
 static QStringList deserialize_(const QByteArray& data)
 {
-    return QString::fromUtf8(data).split(DELIMITER);
+    return QString::fromUtf8(data).split(DELIMITER_);
 }
 
 static QStringList toQStringList_(const int& argc, const char* const* argv)
@@ -66,7 +66,7 @@ namespace Coco
     {
         QLocalSocket socket{};
         socket.connectToServer(key_);
-        auto exists = socket.waitForConnected(WAIT);
+        auto exists = socket.waitForConnected(WAIT_);
 
         if (exists)
             sendArgs_(socket);
@@ -80,7 +80,7 @@ namespace Coco
         auto data = serialize_(args_);
         socket.write(data);
         socket.flush();
-        socket.waitForBytesWritten(WAIT);
+        socket.waitForBytesWritten(WAIT_);
     }
 
     void StartCop::startServer_()
@@ -114,7 +114,7 @@ namespace Coco
         auto next = server_->nextPendingConnection();
         if (!next) return;
 
-        if (next->waitForReadyRead(WAIT))
+        if (next->waitForReadyRead(WAIT_))
         {
             auto data = next->readAll();
             auto new_args = deserialize_(data);
@@ -125,7 +125,7 @@ namespace Coco
         next->disconnectFromServer();
         next->deleteLater();
 
-        debouncer_->start(TIMEOUT);
+        debouncer_->start(TIMEOUT_);
     }
 
 } // namespace Coco

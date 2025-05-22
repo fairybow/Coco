@@ -1,6 +1,10 @@
 #pragma once
 
-#if defined(QT_NETWORK_LIB) || defined(QT_QTNETWORK_MODULE_H)
+#if defined(QT_NO_NETWORK)
+
+#warning "Qt Network module not available. Coco::StartCop class will be disabled."
+
+#else // #if !defined(QT_NO_NETWORK)
 
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -38,12 +42,10 @@ namespace Coco
         Q_OBJECT
 
     public:
-        StartCop
-        (
-            const QString& key,
-            const int& argc = 0,
-            const char* const* argv = nullptr
-        );
+        StartCop(
+            const QString &key,
+            const int &argc = 0,
+            const char *const *argv = nullptr);
 
         virtual ~StartCop() override = default;
 
@@ -61,11 +63,11 @@ namespace Coco
         QStringList args_;
         QString key_;
 
-        QLocalServer* server_ = nullptr;
-        QTimer* debouncer_ = new QTimer(this);
+        QLocalServer *server_ = nullptr;
+        QTimer *debouncer_ = new QTimer(this);
 
         bool serverExists_() const;
-        void sendArgs_(QLocalSocket& socket) const;
+        void sendArgs_(QLocalSocket &socket) const;
         void startServer_();
 
     private slots:
@@ -75,8 +77,4 @@ namespace Coco
 
 } // namespace Coco
 
-#else // #if !defined(QT_NETWORK_LIB) && !defined(QT_QTNETWORK_MODULE_H)
-
-#warning "Qt Network module not available. Coco::StartCop class will be disabled."
-
-#endif // #if defined(QT_NETWORK_LIB) || defined(QT_QTNETWORK_MODULE_H)
+#endif // #if defined(QT_NO_NETWORK)

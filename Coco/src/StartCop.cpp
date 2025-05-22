@@ -1,4 +1,4 @@
-#if defined(QT_NETWORK_LIB) || defined(QT_QTNETWORK_MODULE_H)
+#if !defined(QT_NO_NETWORK)
 
 #include <QByteArray>
 #include <QLocalServer>
@@ -16,17 +16,17 @@ constexpr auto WAIT_ = 100;
 constexpr auto TIMEOUT_ = 1000;
 constexpr auto DELIMITER_ = '\0';
 
-static QByteArray serialize_(const QStringList& args)
+static QByteArray serialize_(const QStringList &args)
 {
     return args.join(DELIMITER_).toUtf8();
 }
 
-static QStringList deserialize_(const QByteArray& data)
+static QStringList deserialize_(const QByteArray &data)
 {
     return QString::fromUtf8(data).split(DELIMITER_);
 }
 
-static QStringList toQStringList_(const int& argc, const char* const* argv)
+static QStringList toQStringList_(const int &argc, const char *const *argv)
 {
     QStringList args{};
 
@@ -40,15 +40,11 @@ static QStringList toQStringList_(const int& argc, const char* const* argv)
 
 namespace Coco
 {
-    StartCop::StartCop
-    (
-        const QString& key,
-        const int& argc,
-        const char* const* argv
-    )
-        : QObject(nullptr)
-        , args_(toQStringList_(argc, argv))
-        , key_(key)
+    StartCop::StartCop(
+        const QString &key,
+        const int &argc,
+        const char *const *argv)
+        : QObject(nullptr), args_(toQStringList_(argc, argv)), key_(key)
     {
         debouncer_->setSingleShot(true);
     }
@@ -75,7 +71,7 @@ namespace Coco
         return exists;
     }
 
-    void StartCop::sendArgs_(QLocalSocket& socket) const
+    void StartCop::sendArgs_(QLocalSocket &socket) const
     {
         auto data = serialize_(args_);
         socket.write(data);
@@ -98,21 +94,21 @@ namespace Coco
             server_->listen(key_);
         }
 
-        connect
-        (
+        connect(
             server_,
             &QLocalServer::newConnection,
             this,
-            &StartCop::onServerNewConnection_
-        );
+            &StartCop::onServerNewConnection_);
     }
 
     void StartCop::onServerNewConnection_()
     {
-        if (debouncer_->isActive()) return;
+        if (debouncer_->isActive())
+            return;
 
         auto next = server_->nextPendingConnection();
-        if (!next) return;
+        if (!next)
+            return;
 
         if (next->waitForReadyRead(WAIT_))
         {
@@ -130,4 +126,4 @@ namespace Coco
 
 } // namespace Coco
 
-#endif // #if defined(QT_NETWORK_LIB) || defined(QT_QTNETWORK_MODULE_H)
+#endif // #if !defined(QT_NO_NETWORK)

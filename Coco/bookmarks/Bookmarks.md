@@ -8,6 +8,7 @@
 ## Graphics
 
 - [Flaticon](https://www.flaticon.com)
+- [SVGViewer](https://www.svgviewer.dev/)
 
 ## Guides
 

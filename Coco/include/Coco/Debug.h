@@ -8,6 +8,3 @@
 
 #define COCO_TEST_TIMER(Interval, Receiver, Slot) \
     QTimer::singleShot(Interval, Receiver, Slot);
-
-#define COCO_TEST_TIMER(Interval, Slot) \
-    QTimer::singleShot(Interval, this, Slot);

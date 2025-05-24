@@ -29,3 +29,22 @@ private:
     }
 };
 ```
+
+```cpp
+#pragma once
+
+#include <QObject>
+#include <QWidget>
+
+#include "Coco/Debug.h"
+
+class Class : public QWidget
+{
+    Q_OBJECT
+
+public:
+    using QWidget::QWidget;
+    virtual ~Class() override { COCO_TRACER; }
+
+};
+```

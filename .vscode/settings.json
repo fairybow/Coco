@@ -1,3 +1,4 @@
 {
-    "prettier.enable": false
+    "prettier.enable": false,
+    "C_Cpp.formatting": "disabled"
 }

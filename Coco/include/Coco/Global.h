@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "Bool.h"
+#include "Macros.h"
 
 namespace Coco
 {

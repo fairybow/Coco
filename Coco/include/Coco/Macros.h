@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include <QTimer>
 
 /// @note I think this is maybe pointless, but also it might matter more that
 /// any function using this is not itself making function calls to stuff that is
@@ -14,11 +15,16 @@
 #endif
 
 /// @brief Shorthand for getting the sender of a signal inside a slot.
-/// 
+///
 /// @note Via Qt: "Warning: This function violates the object-oriented principle
 /// of modularity. However, getting access to the sender might be useful when
 /// many signals are connected to a single slot."
-#define COCO_qSender(T) qobject_cast<T>(QObject::sender())
+#define COCO_QSENDER(T) qobject_cast<T>(QObject::sender())
+
+/// @brief More descriptive macro for the event loop timer-delay technique
+///
+/// @note I hate this
+#define COCO_ON_NEXT_TICK(Slot) QTimer::singleShot(0, this, Slot)
 
 /// @brief Creates a strongly typed boolean enumeration with Yes/No values,
 /// along with a convenience function, isYes(), to check if a value equals Yes
@@ -35,7 +41,7 @@
 /// maintaining type safety between different boolean concepts. As function
 /// parameters, both the following can be used to default to false:
 /// `Coco::NamedBool = Coco::NamedBool::No`, `Coco::NamedBool = {}`.
-/// 
+///
 /// @note Performance comparison with COCO_BOOL_ENUM: Despite the more complex
 /// implementation, this approach compiles to essentially identical machine code
 /// as COCO_BOOL_ENUM after optimization. The bool conversion operator and

@@ -19,7 +19,7 @@ namespace Coco::Fx
     // I'm sure there's a Qt function that does this, but I also know I chose to
     // make this for some reason (perhaps I tried the Qt version before and did
     // not like the output)
-    QPixmap greyscale(const QPixmap& pixmap)
+    QPixmap toGreyscale(const QPixmap& pixmap)
     {
         if (pixmap.isNull()) return {};
         auto image = pixmap.toImage();
@@ -93,12 +93,12 @@ namespace Coco::Fx
         return result;
     }
 
-    double rec601Luminance(const QColor& color)
-    {
-        return ((0.299 * color.red())
-            + (0.587 * color.green())
-            + (0.114 * color.blue()))
-            / 255.0;
-    }
+    // double rec601Luminance(const QColor& color)
+    // {
+    //     return ((0.299 * color.red())
+    //         + (0.587 * color.green())
+    //         + (0.114 * color.blue()))
+    //         / 255.0;
+    // }
 
 } // Coco::Fx

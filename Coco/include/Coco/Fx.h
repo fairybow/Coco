@@ -9,4 +9,5 @@ namespace Coco::Fx
 {
     QPixmap greyscale(const QPixmap& pixmap);
     QList<QColor> goldenRatioColors(int count, const QColor& startColor = Qt::red);
+    double rec601Luminance(const QColor& color);
 }

@@ -26,7 +26,7 @@
 /// @note I hate this.
 #define COCO_ON_NEXT_TICK(Slot) QTimer::singleShot(0, this, Slot)
 
-/// @brief Diables copy/move constructors and assignment operators.
+/// @brief Disables copy/move constructors and assignment operators.
 #define COCO_NO_COPY_MOVE(Class)                \
 	Class(const Class&) = delete;               \
 	Class(Class&&) = delete;                    \

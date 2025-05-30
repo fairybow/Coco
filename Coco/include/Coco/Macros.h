@@ -21,10 +21,17 @@
 /// many signals are connected to a single slot."
 #define COCO_QSENDER(T) qobject_cast<T>(QObject::sender())
 
-/// @brief More descriptive macro for the event loop timer-delay technique
+/// @brief More descriptive macro for the event loop timer-delay technique.
 ///
-/// @note I hate this
+/// @note I hate this.
 #define COCO_ON_NEXT_TICK(Slot) QTimer::singleShot(0, this, Slot)
+
+/// @brief Diables copy/move constructors and assignment operators.
+#define COCO_NO_COPY_MOVE(Class)                \
+	Class(const Class&) = delete;               \
+	Class(Class&&) = delete;                    \
+	Class& operator=(const Class&) = delete;    \
+	Class& operator=(Class&&) = delete
 
 /// @brief Creates a strongly typed boolean enumeration with Yes/No values,
 /// along with a convenience function, isYes(), to check if a value equals Yes

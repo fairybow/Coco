@@ -26,12 +26,20 @@
 /// @note I hate this.
 #define COCO_ON_NEXT_TICK(Slot) QTimer::singleShot(0, this, Slot)
 
+/// @brief Disables copy constructor and assignment operator.
+#define COCO_NO_COPY(Class)                     \
+    Class(const Class&) = delete;               \
+    Class& operator=(const Class&) = delete
+
+/// @brief Disables move constructor and assignment operator.
+#define COCO_NO_MOVE(Class)                     \
+    Class(Class&&) = delete;                    \
+    Class& operator=(Class&&) = delete
+
 /// @brief Disables copy/move constructors and assignment operators.
 #define COCO_NO_COPY_MOVE(Class)                \
-	Class(const Class&) = delete;               \
-	Class(Class&&) = delete;                    \
-	Class& operator=(const Class&) = delete;    \
-	Class& operator=(Class&&) = delete
+    COCO_NO_COPY(Class);                        \
+    COCO_NO_MOVE(Class)
 
 /// @brief Creates a strongly typed boolean enumeration with Yes/No values,
 /// along with a convenience function, isYes(), to check if a value equals Yes

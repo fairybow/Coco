@@ -19,7 +19,10 @@
         QObject::connect(timer, &QTimer::timeout, [timer] { \
             static auto counter = 0;                        \
             counter++;                                      \
-            if (counter >= repeats) timer->deleteLater();   \
+            if (counter >= repeats) {                       \
+                timer->stop();                              \
+                timer->deleteLater();                       \
+            }                                               \
         });                                                 \
         timer->start(interval);                             \
     } while(0)

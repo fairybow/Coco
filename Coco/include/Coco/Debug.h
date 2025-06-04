@@ -51,3 +51,13 @@
         using QtObject::QtObject;                   \
         virtual ~Class() override { COCO_TRACER; }  \
     }
+
+#define COCO_TRIVIAL_NESTED_QCLASS(OuterClass, InnerClass, QtObject)    \
+    class OuterClass::InnerClass : public QtObject                      \
+    {                                                                   \
+        Q_OBJECT                                                        \
+                                                                        \
+    public:                                                             \
+        using QtObject::QtObject;                                       \
+        virtual ~InnerClass() override { COCO_TRACER; }                 \
+    }

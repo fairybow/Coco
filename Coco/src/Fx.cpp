@@ -9,7 +9,7 @@
 #include <QMutexLocker>
 #include <QPixmap>
 #include <QRgb>
-#include <Qt>
+#include <QtGlobal>
 #include <QtTypes>
 
 #include "../include/Coco/Fx.h"
@@ -27,6 +27,9 @@ namespace Coco::Fx
         auto image = pixmap.toImage();
         QImage grayscaled_image = image;
 
+        // Preserve the device pixel ratio
+        auto dpr = pixmap.devicePixelRatio();
+
         for (auto x = 0; x < image.width(); ++x)
         {
             for (auto y = 0; y < image.height(); ++y)
@@ -38,7 +41,9 @@ namespace Coco::Fx
             }
         }
 
-        return QPixmap::fromImage(grayscaled_image);
+        auto result = QPixmap::fromImage(grayscaled_image);
+        result.setDevicePixelRatio(dpr);
+        return result;
     }
 
     // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/

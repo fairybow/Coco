@@ -20,15 +20,12 @@ namespace Coco::Fx
     // make this for some reason (perhaps I tried the Qt version before and did
     // not like the output)
     //
-    // Update: `QImage::convertToFormat(QImage::Format_Grayscale8)` is bad.
+    // Update: `QImage::convertToFormat(QImage::Format_Grayscale8)` is bad
     QPixmap toGreyscale(const QPixmap& pixmap)
     {
         if (pixmap.isNull()) return {};
         auto image = pixmap.toImage();
         QImage grayscaled_image = image;
-
-        // Preserve the device pixel ratio
-        auto dpr = pixmap.devicePixelRatio();
 
         for (auto x = 0; x < image.width(); ++x)
         {
@@ -41,9 +38,7 @@ namespace Coco::Fx
             }
         }
 
-        auto result = QPixmap::fromImage(grayscaled_image);
-        result.setDevicePixelRatio(dpr);
-        return result;
+        return QPixmap::fromImage(grayscaled_image);
     }
 
     // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/

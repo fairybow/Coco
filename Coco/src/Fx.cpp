@@ -16,9 +16,6 @@
 
 namespace Coco::Fx
 {
-    // I'm sure there's a Qt function that does this, but I also know I chose to
-    // make this for some reason (perhaps I tried the Qt version before and did
-    // not like the output)
     QPixmap toGreyscale(const QPixmap& pixmap)
     {
         if (pixmap.isNull()) return {};

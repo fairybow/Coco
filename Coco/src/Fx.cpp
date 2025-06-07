@@ -16,12 +16,29 @@
 
 namespace Coco::Fx
 {
+    // I'm sure there's a Qt function that does this, but I also know I chose to
+    // make this for some reason (perhaps I tried the Qt version before and did
+    // not like the output)
+    //
+    // Update: `QImage::convertToFormat(QImage::Format_Grayscale8)` is bad.
     QPixmap toGreyscale(const QPixmap& pixmap)
     {
         if (pixmap.isNull()) return {};
         auto image = pixmap.toImage();
-        auto greyscaled = image.convertToFormat(QImage::Format_Grayscale8);
-        return QPixmap::fromImage(greyscaled);
+        QImage grayscaled_image = image;
+
+        for (auto x = 0; x < image.width(); ++x)
+        {
+            for (auto y = 0; y < image.height(); ++y)
+            {
+                auto pixel = image.pixel(x, y);
+                auto grey = qGray(pixel);
+                auto rgba = qRgba(grey, grey, grey, qAlpha(pixel));
+                grayscaled_image.setPixel(x, y, rgba);
+            }
+        }
+
+        return QPixmap::fromImage(grayscaled_image);
     }
 
     // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/

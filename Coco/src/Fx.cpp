@@ -23,20 +23,8 @@ namespace Coco::Fx
     {
         if (pixmap.isNull()) return {};
         auto image = pixmap.toImage();
-        QImage grayscaled_image = image;
-
-        for (auto x = 0; x < image.width(); ++x)
-        {
-            for (auto y = 0; y < image.height(); ++y)
-            {
-                auto pixel = image.pixel(x, y);
-                auto grey = qGray(pixel);
-                auto rgba = qRgba(grey, grey, grey, qAlpha(pixel));
-                grayscaled_image.setPixel(x, y, rgba);
-            }
-        }
-
-        return QPixmap::fromImage(grayscaled_image);
+        auto greyscaled = image.convertToFormat(QImage::Format_Grayscale8);
+        return QPixmap::fromImage(greyscaled);
     }
 
     // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/

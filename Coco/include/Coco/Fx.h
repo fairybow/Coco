@@ -3,7 +3,7 @@
 #include <QColor>
 #include <QList>
 #include <QPixmap>
-#include <Qt>
+#include <QtGlobal>
 
 namespace Coco::Fx
 {

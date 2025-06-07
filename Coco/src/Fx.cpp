@@ -103,4 +103,4 @@ namespace Coco::Fx
     //         / 255.0;
     // }
 
-} // Coco::Fx
+} // namespace Coco::Fx

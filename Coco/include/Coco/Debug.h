@@ -37,24 +37,11 @@
 
 /// @brief I occasionally subclass in order to: 1) check memory via destructor
 /// debug output; and 2) have debug output  show up as a custom class and not,
-/// say, QWidget or something unhelpful. Obviously, this doesn't work directly
-/// as a nested class nor with `std::unique_ptr`.
-#define COCO_TRIVIAL_QCLASS(Class, QtObject)        \
-    class Class : public QtObject                   \
+/// say, QWidget or something unhelpful.
+#define COCO_TRIVIAL_CLASS(Class, Base)             \
+    class Class : public Base                       \
     {                                               \
-        Q_OBJECT                                    \
-                                                    \
     public:                                         \
-        using QtObject::QtObject;                   \
+        using Base::Base;                           \
         virtual ~Class() override { COCO_TRACER; }  \
-    }
-
-#define COCO_TRIVIAL_NESTED_QCLASS(OuterClass, InnerClass, QtObject)    \
-    class OuterClass::InnerClass : public QtObject                      \
-    {                                                                   \
-        Q_OBJECT                                                        \
-                                                                        \
-    public:                                                             \
-        using QtObject::QtObject;                                       \
-        virtual ~InnerClass() override { COCO_TRACER; }                 \
     }

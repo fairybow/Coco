@@ -37,6 +37,7 @@ namespace Coco::FxOp
             return qRgba(r, g, b, alpha);
         };
 
+    // https://stackoverflow.com/questions/65344928/sepia-filter-inverting
     inline auto sepia = [](QRgb pixel)
         {
             auto alpha = qAlpha(pixel);

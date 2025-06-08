@@ -3,7 +3,7 @@
 #include <QColor>
 #include <QList>
 #include <QPixmap>
-#include <QRbg>
+#include <QRgb>
 #include <QtGlobal>
 
 namespace Coco::FxOp

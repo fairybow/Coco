@@ -1,10 +1,14 @@
 #pragma once
 
 #include <QColor>
+#include <QImage>
 #include <QList>
 #include <QPixmap>
 #include <QRgb>
 #include <QtGlobal>
+
+// To-do:
+// - SIMD?
 
 namespace Coco::FxOp
 {
@@ -13,14 +17,14 @@ namespace Coco::FxOp
         return qBound(0, value, 255);
     }
 
-    // Greyscale conversion op
+    // Per-pixel operations, used with Fx::apply:
+
     inline auto greyscale = [](QRgb pixel)
         {
             auto grey = qGray(pixel);
             return qRgba(grey, grey, grey, qAlpha(pixel));
         };
 
-    // Color inversion op
     inline auto invert = [](QRgb pixel)
         {
             auto alpha = qAlpha(pixel);
@@ -32,6 +36,24 @@ namespace Coco::FxOp
 
             return qRgba(r, g, b, alpha);
         };
+
+    inline auto sepia = [](QRgb pixel)
+        {
+            auto alpha = qAlpha(pixel);
+            if (alpha < 1) return pixel; // Skip transparent pixels
+
+            auto r = qRed(pixel);
+            auto g = qGreen(pixel);
+            auto b = qBlue(pixel);
+
+            auto sr = clamp(static_cast<int>(0.393 * r + 0.769 * g + 0.189 * b));
+            auto sg = clamp(static_cast<int>(0.349 * r + 0.686 * g + 0.168 * b));
+            auto sb = clamp(static_cast<int>(0.272 * r + 0.534 * g + 0.131 * b));
+
+            return qRgba(sr, sg, sb, alpha);
+        };
+
+    // Factories:
 
     // Brightness adjustment op factory
     //
@@ -47,6 +69,8 @@ namespace Coco::FxOp
     // Practical range: -100 to +100
     inline auto brightness = [](int adjustment)
         {
+            adjustment = qBound(-255, adjustment, 255);
+
             return [adjustment](QRgb pixel)
                 {
                     auto alpha = qAlpha(pixel);
@@ -74,6 +98,8 @@ namespace Coco::FxOp
     // Practical range: 0.1 to 3.0
     inline auto contrast = [](double factor)
         {
+            factor = qMax(0.0, factor);
+
             return [factor](QRgb pixel)
                 {
                     auto alpha = qAlpha(pixel);
@@ -105,8 +131,10 @@ namespace Coco::FxOp
     // - tint(red, 1.5)     // Over-tinted (may look unnatural)
     //
     // Practical range: 0.0 to 1.0
-    inline auto tint = [](QColor tintColor, double strength = 0.5)
+    inline auto tint = [](QColor tintColor, double strength)
         {
+            strength = qMax(0.0, strength);
+
             return [tintColor, strength](QRgb pixel)
                 {
                     auto alpha = qAlpha(pixel);
@@ -130,8 +158,10 @@ namespace Coco::FxOp
     // - threshold(255)     // Everything becomes black
     //
     // Practical range: 32 to 224
-    inline auto threshold = [](int thresholdValue = 128)
+    inline auto threshold = [](int thresholdValue)
         {
+            thresholdValue = qBound(0, thresholdValue, 255);
+
             return [thresholdValue](QRgb pixel)
                 {
                     auto alpha = qAlpha(pixel);
@@ -144,29 +174,11 @@ namespace Coco::FxOp
                 };
         };
 
-    // Sepia tone op
-    inline auto sepia = [](QRgb pixel)
-        {
-            auto alpha = qAlpha(pixel);
-            if (alpha < 1) return pixel; // Skip transparent pixels
-
-            auto r = qRed(pixel);
-            auto g = qGreen(pixel);
-            auto b = qBlue(pixel);
-
-            auto sr = clamp(static_cast<int>(0.393 * r + 0.769 * g + 0.189 * b));
-            auto sg = clamp(static_cast<int>(0.349 * r + 0.686 * g + 0.168 * b));
-            auto sb = clamp(static_cast<int>(0.272 * r + 0.534 * g + 0.131 * b));
-
-            return qRgba(sr, sg, sb, alpha);
-        };
-
 } // namespace Coco::FxOp
 
 namespace Coco::Fx
 {
     QList<QColor> goldenRatioColors(int count, const QColor& startColor = Qt::red);
-    //double rec601Luminance(const QColor& color);
 
     // Qt's HSL lightness, 0-255 range
     inline bool isDark(const QColor& color) noexcept { return color.lightness() < 128; }
@@ -209,9 +221,19 @@ namespace Coco::Fx
         return QPixmap::fromImage(edited);
     }
 
-    QPixmap toGreyscale(const QPixmap& pixmap)
+    inline QPixmap toGreyscale(const QPixmap& pixmap)
     {
         return apply(pixmap, FxOp::greyscale);
+    }
+
+    inline QPixmap toInverted(const QPixmap& pixmap)
+    {
+        return apply(pixmap, FxOp::invert);
+    }
+
+    inline QPixmap toSepia(const QPixmap& pixmap)
+    {
+        return apply(pixmap, FxOp::sepia);
     }
 
 } // namespace Coco::Fx

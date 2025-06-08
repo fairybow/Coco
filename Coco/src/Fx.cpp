@@ -3,9 +3,7 @@
 
 #include <QColor>
 #include <QList>
-#include <QMutex>
-#include <QMutexLocker>
-#include <QtGlobal>
+#include <QtTypes>
 
 #include "../include/Coco/Fx.h"
 
@@ -14,22 +12,6 @@ namespace Coco::Fx
     // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
     QList<QColor> goldenRatioColors(int count, const QColor& startColor)
     {
-        // Try thread-safe cache
-        static QMutex mutex{};
-        static auto last_count = 0;
-        static QColor last_start_color = Qt::red;
-        static QList<QColor> cached{};
-
-        // Check cache under lock
-        {
-            QMutexLocker locker(&mutex);
-            if (count == last_count
-                && startColor == last_start_color
-                && !cached.isEmpty())
-                return cached;
-        }
-
-        // Otherwise, generate new colors
         QList<QColor> result{};
         if (count < 1) return result;
 
@@ -54,23 +36,7 @@ namespace Coco::Fx
             h = std::fmod(h, 1.0);
         }
 
-        // Update cache under lock
-        {
-            QMutexLocker locker(&mutex);
-            last_count = count;
-            last_start_color = startColor;
-            cached = result;
-        }
-
         return result;
     }
-
-    // double rec601Luminance(const QColor& color)
-    // {
-    //     return ((0.299 * color.red())
-    //         + (0.587 * color.green())
-    //         + (0.114 * color.blue()))
-    //         / 255.0;
-    // }
 
 } // namespace Coco::Fx

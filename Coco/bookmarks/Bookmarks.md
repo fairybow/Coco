@@ -20,3 +20,5 @@
 - [Adobe - Free online PNG to SVG converter](https://www.adobe.com/express/feature/image/convert/png-to-svg)
 - [ICO converter](https://www.icoconverter.com)
 - [ImageMagick](https://imagemagick.org)
+- [Inkscape](https://inkscape.org/)
+- [Krita](https://krita.org/en/)

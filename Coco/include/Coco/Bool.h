@@ -52,10 +52,10 @@ namespace Coco
     // Define the static members outside the class to ensure they're properly
     // instantiated
     template <typename TagT>
-    const Bool<TagT> Bool<TagT>::Yes{true};
+    const Bool<TagT> Bool<TagT>::Yes{ true };
 
     template <typename TagT>
-    const Bool<TagT> Bool<TagT>::No{false};
+    const Bool<TagT> Bool<TagT>::No{ false };
 
 } // namespace Coco
 

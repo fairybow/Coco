@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <QList>
+#include <QObject>
 #include <QSet>
 
 #include "Global.h"
@@ -21,6 +22,23 @@ namespace Coco::Utility
         QList<T> list{ set.begin(), set.end() };
         if (shouldSort) sort<T>(list);
         return list;
+    }
+
+    template <typename ParentT>
+    inline ParentT* findParent(QObject* object)
+    {
+        ParentT* parent = nullptr;
+
+        for (auto obj = object; obj; obj = obj->parent())
+        {
+            if (auto next = qobject_cast<ParentT*>(obj))
+            {
+                parent = next;
+                break;
+            }
+        }
+
+        return parent;
     }
 
 } // namespace Coco::Utility

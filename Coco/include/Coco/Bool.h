@@ -44,6 +44,10 @@ namespace Coco
         // static constexpr Bool<TagT> Yes{ true };
         // static constexpr Bool<TagT> No{ false };
 
+        // Would these work? Can't remember if I tried...
+        //static inline const Bool Yes{ true };
+        //static inline const Bool No{ false };
+
     private:
         bool value_;
 
@@ -59,8 +63,6 @@ namespace Coco
 
 } // namespace Coco
 
-#define COCO_BOOL(Name) \
-    struct Name##Tag    \
-    {                   \
-    };                  \
+#define COCO_BOOL(Name)                 \
+    struct Name##Tag {};                \
     using Name = Coco::Bool<Name##Tag>

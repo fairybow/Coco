@@ -59,23 +59,6 @@ namespace Coco
 
     typedef QFlags<FileSignature> FileSignatures;
 
-    template <typename ParentT>
-    inline ParentT* findParent(QObject* object)
-    {
-        ParentT* parent = nullptr;
-
-        for (auto obj = object; obj; obj = obj->parent())
-        {
-            if (auto next = qobject_cast<ParentT*>(obj))
-            {
-                parent = next;
-                break;
-            }
-        }
-
-        return parent;
-    }
-
 } // namespace Coco
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Coco::FileSignatures)

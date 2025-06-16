@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QMargins>
@@ -9,9 +11,8 @@
 
 namespace Coco::Layout
 {
-    // TODO: make pointer required in template param (see: findParent)
     template <typename QLayoutT>
-    inline QLayoutT* make
+    inline QLayoutT make
     (
         QMargins margins,
         int spacing,
@@ -19,7 +20,10 @@ namespace Coco::Layout
         Qt::Alignment alignment = {}
     )
     {
-        auto layout = new QLayoutT(parent);
+        static_assert(std::is_pointer_v<QLayoutT>, "Template parameter must be a pointer type!");
+        using Type = typename std::remove_pointer<QLayoutT>::type;
+
+        auto layout = new Type(parent);
         layout->setContentsMargins(margins);
         layout->setSpacing(spacing);
 
@@ -29,9 +33,8 @@ namespace Coco::Layout
         return layout;
     }
 
-    // TODO: make pointer required in template param (see: findParent)
     template <typename QLayoutT>
-    inline QLayoutT* zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
+    inline QLayoutT zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
     {
         return make<QLayoutT>({}, 0, parent, alignment);
     }

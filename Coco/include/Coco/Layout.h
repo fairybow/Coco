@@ -1,13 +1,13 @@
 #pragma once
 
-#include <type_traits>
-
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QMargins>
 #include <Qt>
 #include <QVBoxLayout>
 #include <QWidget>
+
+#include "Macros.h"
 
 namespace Coco::Layout
 {
@@ -20,7 +20,7 @@ namespace Coco::Layout
         Qt::Alignment alignment = {}
     )
     {
-        static_assert(std::is_pointer_v<QLayoutT>, "Template parameter must be a pointer type!");
+        COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
         using Type = typename std::remove_pointer<QLayoutT>::type;
 
         auto layout = new Type(parent);

@@ -1,13 +1,13 @@
 #pragma once
 
 #include <algorithm>
-#include <type_traits>
 
 #include <QList>
 #include <QObject>
 #include <QSet>
 
 #include "Global.h"
+#include "Macros.h"
 
 namespace Coco::Utility
 {
@@ -28,7 +28,7 @@ namespace Coco::Utility
     template <typename ParentT>
     inline ParentT findParent(QObject* object)
     {
-        static_assert(std::is_pointer_v<ParentT>, "Template parameter must be a pointer type!");
+        COCO_TEMPLATE_PTR_ASSERT(ParentT);
 
         for (auto obj = object; obj; obj = obj->parent())
             if (auto parent = qobject_cast<ParentT>(obj))

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include <QObject>
 #include <QTimer>
 
@@ -40,6 +42,9 @@
 #define COCO_NO_COPY_MOVE(Class)                \
     COCO_NO_COPY(Class);                        \
     COCO_NO_MOVE(Class)
+
+#define COCO_TEMPLATE_PTR_ASSERT(T)             \
+    static_assert(std::is_pointer_v<T>, "Template parameter must be a pointer type!");
 
 /// @brief Creates a strongly typed boolean enumeration with Yes/No values,
 /// along with a convenience function, isYes(), to check if a value equals Yes

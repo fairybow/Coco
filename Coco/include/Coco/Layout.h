@@ -23,9 +23,8 @@ namespace Coco::Layout
     )
     {
         COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
-        using Type = typename std::remove_pointer<QLayoutT>::type;
 
-        auto layout = new Type(parent);
+        auto layout = new std::remove_pointer<QLayoutT>::type(parent);
         layout->setContentsMargins(margins);
         layout->setSpacing(spacing);
 

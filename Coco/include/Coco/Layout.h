@@ -9,6 +9,7 @@
 
 namespace Coco::Layout
 {
+    // TODO: make pointer required in template param (see: findParent)
     template <typename QLayoutT>
     inline QLayoutT* make
     (
@@ -28,6 +29,7 @@ namespace Coco::Layout
         return layout;
     }
 
+    // TODO: make pointer required in template param (see: findParent)
     template <typename QLayoutT>
     inline QLayoutT* zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
     {

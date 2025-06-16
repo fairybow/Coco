@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <type_traits>
 
 #include <QList>
 #include <QObject>
@@ -25,20 +26,15 @@ namespace Coco::Utility
     }
 
     template <typename ParentT>
-    inline ParentT* findParent(QObject* object)
+    inline ParentT findParent(QObject* object)
     {
-        ParentT* parent = nullptr;
+        static_assert(std::is_pointer_v<ParentT>, "Template parameter must be a pointer type");
 
         for (auto obj = object; obj; obj = obj->parent())
-        {
-            if (auto next = qobject_cast<ParentT*>(obj))
-            {
-                parent = next;
-                break;
-            }
-        }
+            if (auto parent = qobject_cast<ParentT>(obj))
+                return parent;
 
-        return parent;
+        return nullptr;
     }
 
 } // namespace Coco::Utility

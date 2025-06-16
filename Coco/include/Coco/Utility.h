@@ -1,13 +1,16 @@
 #pragma once
 
 #include <algorithm>
+#include <type_traits>
 
 #include <QList>
 #include <QObject>
 #include <QSet>
 
 #include "Global.h"
-#include "Macros.h"
+
+#define COCO_TEMPLATE_PTR_ASSERT(T) \
+    static_assert(std::is_pointer_v<T>, "Template parameter must be a pointer type!");
 
 namespace Coco::Utility
 {

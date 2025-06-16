@@ -1,9 +1,10 @@
 #pragma once
 
-#include <type_traits>
-
 #include <QObject>
 #include <QTimer>
+
+/// Need to figure out which macros go where
+/// Most of these feel like they could go in Utility (although, it's a vague category anyway)
 
 /// @note I think this is maybe pointless, but also it might matter more that
 /// any function using this is not itself making function calls to stuff that is
@@ -42,9 +43,6 @@
 #define COCO_NO_COPY_MOVE(Class)                \
     COCO_NO_COPY(Class);                        \
     COCO_NO_MOVE(Class)
-
-#define COCO_TEMPLATE_PTR_ASSERT(T)             \
-    static_assert(std::is_pointer_v<T>, "Template parameter must be a pointer type!");
 
 /// @brief Creates a strongly typed boolean enumeration with Yes/No values,
 /// along with a convenience function, isYes(), to check if a value equals Yes

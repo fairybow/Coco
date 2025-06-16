@@ -5,6 +5,8 @@
 #include <QObject>
 #include <QTimer>
 
+/// Need to figure out which macros go where
+
 // Can be replaced later with more complex (and optional & toggleable) logging.
 #define COCO_TRACER qDebug() << __FUNCTION__
 

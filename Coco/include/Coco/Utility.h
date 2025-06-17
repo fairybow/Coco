@@ -12,7 +12,7 @@
 #define COCO_TEMPLATE_PTR_ASSERT(T)                                                             \
     static_assert(std::is_pointer_v<T>, "Template parameter must be a pointer type!");
 
-#define COCO_TEMPLATE_DERIVED_ASSERT(BaseT, T)                                                  \
+#define COCO_DERIVED_ASSERT(BaseT, T)                                                           \
     static_assert(std::is_base_of_v<BaseT, T>, #T " must be " #BaseT " or " #BaseT "-derived!")
 
 namespace Coco::Utility

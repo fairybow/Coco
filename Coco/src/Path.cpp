@@ -8,7 +8,6 @@
 #include <QDirIterator>
 #include <QFile>
 #include <QHash>
-#include <QIODevice>
 #include <QList>
 #include <QStandardPaths>
 #include <QString>

@@ -41,7 +41,7 @@ namespace Coco
     /// @note I would like a default "any" value, but technically, Utf8 is the
     /// "base" file type, and adding an extra non-file type would mean weirdness
     /// with flags, I think. Need to sort this out...
-    enum class FileSignature
+    /*enum class FileSignature
     {
         UnknownOrUtf8 = 0,
         Png = 1 << 0,
@@ -57,8 +57,8 @@ namespace Coco
         TarGz = 1 << 10
     };
 
-    typedef QFlags<FileSignature> FileSignatures;
+    typedef QFlags<FileSignature> FileSignatures;*/
 
 } // namespace Coco
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(Coco::FileSignatures)
+//Q_DECLARE_OPERATORS_FOR_FLAGS(Coco::FileSignatures)

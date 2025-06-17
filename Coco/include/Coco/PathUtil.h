@@ -59,13 +59,13 @@ namespace Coco::PathUtil
     /// @details Allows exclusion of specific file types by applying a bitwise
     /// negation. For instance, use `Coco::FileTypes() & ~Coco::Pdf` to check
     /// all types except PDF.
-    FileSignature fileType(const Path& path, FileSignatures filter = FileSignature::UnknownOrUtf8); // maybe "any" default
+    //FileSignature fileType(const Path& path, FileSignatures filter = FileSignature::UnknownOrUtf8); // maybe "any" default
 
     /// @brief Checks if the file matches the specified type.
-    inline bool is(FileSignature type, const Path& path)
-    {
-        return fileType(path, type) == type; // If no filter is passed, then this is always true, I think.
-    }
+    //inline bool is(FileSignature type, const Path& path)
+    //{
+    //    return fileType(path, type) == type; // If no filter is passed, then this is always true, I think.
+    //}
 
     QString resolveExt(const QString& extension);
 

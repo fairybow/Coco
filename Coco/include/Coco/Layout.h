@@ -24,7 +24,7 @@ namespace Coco::Layout
     {
         COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
 
-        auto layout = new std::remove_pointer<QLayoutT>::type(parent);
+        auto layout = new std::remove_pointer_t<QLayoutT>(parent);
         layout->setContentsMargins(margins);
         layout->setSpacing(spacing);
 
@@ -37,6 +37,7 @@ namespace Coco::Layout
     template <typename QLayoutT>
     inline QLayoutT zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
     {
+        COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
         return make<QLayoutT>({}, 0, parent, alignment);
     }
 

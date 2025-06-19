@@ -10,10 +10,13 @@
 #include "Global.h"
 
 #define COCO_TEMPLATE_PTR_ASSERT(T)                                                             \
-    static_assert(std::is_pointer_v<T>, "Template parameter must be a pointer type!");
+    static_assert(std::is_pointer_v<T>, "Template parameter " #T " must be a pointer type!");
 
 #define COCO_DERIVED_ASSERT(BaseT, T)                                                           \
     static_assert(std::is_base_of_v<BaseT, T>, #T " must be " #BaseT " or " #BaseT "-derived!")
+
+#define COCO_QOBJECT_ASSERT(T)                                                                  \
+    COCO_DERIVED_ASSERT(QObject, T)
 
 namespace Coco::Utility
 {
@@ -35,6 +38,20 @@ namespace Coco::Utility
     inline ParentT findParent(QObject* object)
     {
         COCO_TEMPLATE_PTR_ASSERT(ParentT);
+        COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
+
+        for (auto obj = object; obj; obj = obj->parent())
+            if (auto parent = qobject_cast<ParentT>(obj))
+                return parent;
+
+        return nullptr;
+    }
+
+    template <typename ParentT>
+    inline ParentT findParent(const QObject* object)
+    {
+        COCO_TEMPLATE_PTR_ASSERT(ParentT);
+        COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
 
         for (auto obj = object; obj; obj = obj->parent())
             if (auto parent = qobject_cast<ParentT>(obj))

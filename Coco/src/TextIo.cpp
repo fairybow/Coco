@@ -76,13 +76,9 @@ namespace Coco::TextIo
         out << text;
         auto success = out.status() == QTextStream::Ok;
 
-        if (!success)
-        {
-            qWarning() << FAIL_WRITE_TXT << path;
-            return false;
-        }
+        if (!success) qWarning() << FAIL_WRITE_TXT << path;
 
-        return true;
+        return success;
     }
 
 } // namespace Coco::TextIo

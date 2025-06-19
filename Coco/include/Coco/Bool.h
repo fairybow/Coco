@@ -48,6 +48,8 @@ namespace Coco
         //static inline const Bool Yes{ true };
         //static inline const Bool No{ false };
 
+        // equality op?
+
     private:
         bool value_;
 

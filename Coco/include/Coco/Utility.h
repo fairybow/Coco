@@ -18,6 +18,19 @@
 #define COCO_QOBJECT_ASSERT(T)                                                                  \
     COCO_DERIVED_ASSERT(QObject, T)
 
+/// @brief I occasionally subclass solely in order to: 1) check memory via
+/// destructor debug output; and 2) have debug output show up as a custom class
+/// and not, say, QWidget or something unhelpful. Additionally, this can be
+/// useful for quickly creating a nested class that doesn't need the Q_OBJECT
+/// macro
+#define COCO_TRIVIAL_CLASS(Class, Base)                         \
+    class Class : public Base                                   \
+    {                                                           \
+    public:                                                     \
+        using Base::Base;                                       \
+        virtual ~Class() override { COCO_TRACER; }              \
+    }
+
 namespace Coco::Utility
 {
     template <typename T>

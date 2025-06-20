@@ -45,17 +45,6 @@
 //#endif
 // Using ~Class() override COCO_DESTRUCTOR_TRACE in the below:
 
-/// @brief I occasionally subclass in order to: 1) check memory via destructor
-/// debug output; and 2) have debug output show up as a custom class and not,
-/// say, QWidget or something unhelpful.
-#define COCO_TRIVIAL_CLASS(Class, Base)                         \
-    class Class : public Base                                   \
-    {                                                           \
-    public:                                                     \
-        using Base::Base;                                       \
-        virtual ~Class() override { COCO_TRACER; }              \
-    }
-
 namespace Coco::Debug
 {
     // Could have a version for non-QObjects, perhaps? Would be more verbose if

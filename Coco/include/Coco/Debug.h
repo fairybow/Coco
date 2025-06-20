@@ -14,7 +14,9 @@
 // Can be replaced later with more complex (and optional & toggleable) logging.
 #define COCO_TRACER qDebug() << __FUNCTION__
 
-#define COCO_PTR_PRINT(Object) qUtf8Printable(Coco::Debug::qMemoryAddress(Object))
+#define COCO_PTR_QSTR(Object) Coco::Debug::qMemoryAddress(Object)
+
+#define COCO_PTR_PRINT(Object) qUtf8Printable(COCO_PTR_QSTR(Object))
 
 // Convenience macro for quick tests. Not for regular use.
 #define COCO_SST(Interval, Slot) QTimer::singleShot(Interval, this, Slot)

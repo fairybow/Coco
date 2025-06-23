@@ -2,43 +2,60 @@
 
 #include "Macros.h"
 
-/// @brief The general point is to have a convenient way to avoid ambiguous
-/// boolean function parameters. Creates a strongly-typed, named, boolean class
-/// with Yes/No static constants and implicit conversion for natural use in
-/// conditionals.
-///
-/// @note Default Value: defaults can be specified in two equivalent ways:
-/// `FunctionName(ParamType = ParamType::No)` or `FunctionName(ParamType = {})`.
-///
-/// @note Performance: The template-based implementation compiles to the same
-/// machine code as raw booleans after optimization. All operations are marked
-/// constexpr and COCO_ALWAYS_INLINE, ensuring the compiler optimizes away any
-/// overhead. Boolean checks reduce to simple comparisons at the assembly level,
-/// with zero runtime cost compared to using primitive bool types directly.
-///
-/// @example
-///     // Define a new boolean type
-///     COCO_BOOL(CreateDirs);
-///
-///     // Use in function declaration
-///     bool saveFile(const Path& path, CreateDirs createDirs = CreateDirs::No);
-///
-///     // Usage examples
-///     saveFile(path);                     // Uses default (No)
-///     saveFile(path, CreateDirs::Yes);    // Explicitly set to Yes
-///     saveFile(path, {});                 // Alternative way to use default
+// - NOTE: The general point is to have a convenient way to avoid ambiguous
+//   boolean function parameters. Creates a strongly-typed, named boolean class
+//   with Yes/No static constants that implicitly converts to bool for natural
+//   use.
+//
+// - NOTE: Default value is false, but using CocoBool{} or {} sorta defeats the
+//   purpose...
+//
+// - NOTE: Performance: The template-based implementation compiles to the same
+//   machine code as raw booleans after optimization. All operations are marked
+//   constexpr and COCO_ALWAYS_INLINE, ensuring (hopefully) zero runtime
+//   overhead.
+//
+// - EXAMPLE:
+// ```cpp
+// // Ambiguous boolean parameters:
+// void saveFile(const Path& path, bool createDirs, bool overwrite);
+// saveFile(path, true, false);  // What do these mean?
+//
+// // Instead:
+// COCO_BOOL(CreateDirs);
+// COCO_BOOL(Overwrite);
+// void saveFile(const Path& path, CreateDirs createDirs = CreateDirs::No, 
+//               Overwrite overwrite = Overwrite::No);
+//
+// // Self-documenting calls:
+// saveFile(path, CreateDirs::Yes, Overwrite::No);
+//
+// CreateDirs shouldCreate = CreateDirs::Yes;
+// if (shouldCreate) { /* create directories */ }
+//
+// // Implicitly converts to bool:
+// COCO_BOOL(EnableLogging);
+// auto logging = EnableLogging::Yes;
+// void libraryFunction(bool enable);
+// libraryFunction(logging);
+//
+// // Each type is distinct (the Tag template parameter):
+// CreateDirs dirs = CreateDirs::Yes;
+// Overwrite files = Overwrite::Yes;
+// // dirs == files;  // Compilation error - different types!
+// ```
 namespace Coco
 {
     template <typename TagT>
     class Bool
     {
     public:
+        static const Bool Yes;
+        static const Bool No;
+
         COCO_ALWAYS_INLINE constexpr Bool() : value_(false) {}
         COCO_ALWAYS_INLINE constexpr explicit Bool(bool v) : value_(v) {}
         COCO_ALWAYS_INLINE constexpr operator bool() const { return value_; }
-
-        static const Bool Yes;
-        static const Bool No;
 
         // Doesn't work (may be MSVC?):
         // static constexpr Bool<TagT> Yes{ true };
@@ -48,15 +65,14 @@ namespace Coco
         //static inline const Bool Yes{ true };
         //static inline const Bool No{ false };
 
-        // equality op?
+        // Equality operator? Anything else?
 
     private:
         bool value_;
 
     }; // class Coco::Bool
 
-    // Define the static members outside the class to ensure they're properly
-    // instantiated
+    // Define the static members outside the class (see above)
     template <typename TagT>
     const Bool<TagT> Bool<TagT>::Yes{ true };
 
@@ -65,6 +81,9 @@ namespace Coco
 
 } // namespace Coco
 
-#define COCO_BOOL(Name)                 \
-    struct Name##Tag {};                \
+#define COCO_BOOL(Name)                     \
+    struct Name##Tag {};                    \
     using Name = Coco::Bool<Name##Tag>
+
+// Macro to make an inheriting struct with custom type names
+// #define COCO_CUSTOM_BOOL(Name, YesVal, NoVal)

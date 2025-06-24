@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QDebug>
+#include <QString>
+
 #include "Macros.h"
 
 /*
@@ -23,7 +26,7 @@
 * // Instead:
 * COCO_BOOL(CreateDirs);
 * COCO_BOOL(Overwrite);
-* void saveFile(const Path& path, CreateDirs createDirs = CreateDirs::No, 
+* void saveFile(const Path& path, CreateDirs createDirs = CreateDirs::No,
 *               Overwrite overwrite = Overwrite::No);
 *
 * // Self-documenting calls:
@@ -40,10 +43,10 @@
 * void libraryFunction(bool enable);
 * libraryFunction(logging);
 *
-* // Each type is distinct (the Tag template parameter):
-* CreateDirs dirs = CreateDirs::Yes;
-* Overwrite files = Overwrite::Yes;
-* // dirs == files;  // Compilation error - different types!
+* // Each type is distinct:
+* TypeA a = TypeA::Yes;
+* TypeB b = TypeB::Yes;
+* // qDebug() << (a == b);  // Compile error
 * ```
 */
 namespace Coco
@@ -58,21 +61,21 @@ namespace Coco
         COCO_ALWAYS_INLINE constexpr Bool() : value_(false) {}
         COCO_ALWAYS_INLINE constexpr explicit Bool(bool value) : value_(value) {}
 
+        COCO_ALWAYS_INLINE friend QDebug operator<<(QDebug debug, const Bool& b) { return debug << qUtf8Printable(name_(b)); }
         COCO_ALWAYS_INLINE constexpr operator bool() const { return value_; }
-        COCO_ALWAYS_INLINE constexpr bool operator==(const Bool& other) const = default;
+        COCO_ALWAYS_INLINE constexpr Bool operator!() const { return Bool(!value_); }
 
-        // Doesn't work (may be MSVC?):
-        // static constexpr Bool<TagT> Yes{ true };
-        // static constexpr Bool<TagT> No{ false };
+        // Allow comparison only with same type only
+        template<typename OtherTagT>
+        constexpr bool operator==(const Bool<OtherTagT>& other) const = delete;
+        COCO_ALWAYS_INLINE constexpr bool operator==(const Bool<TagT>& other) const = default;
 
-        // Would these work? Can't remember if I tried...
-        //static inline const Bool Yes{ true };
-        //static inline const Bool No{ false };
-
-        // Equality operator? Anything else?
+        // Anything else?
 
     private:
         bool value_;
+
+        COCO_ALWAYS_INLINE static QString name_(const Bool& b) { return QString(TagT::name()) + "::" + (b.value_ ? "Yes" : "No"); }
 
     }; // class Coco::Bool
 
@@ -85,9 +88,25 @@ namespace Coco
 
 } // namespace Coco
 
-#define COCO_BOOL(Name)                     \
-    struct Name##Tag {};                    \
+#define COCO_BOOL(Name)                                         \
+    struct Name##Tag                                            \
+    {                                                           \
+        static constexpr const char* name() { return #Name; }   \
+    };                                                          \
+                                                                \
     using Name = Coco::Bool<Name##Tag>
+
+// Old, notes, etc:
 
 // Macro to make an inheriting struct with custom type names
 // #define COCO_CUSTOM_BOOL(Name, YesVal, NoVal)
+
+/*
+// Doesn't work (may be MSVC?):
+// static constexpr Bool<TagT> Yes{ true };
+// static constexpr Bool<TagT> No{ false };
+
+// Would these work? Can't remember if I tried...
+// static inline const Bool Yes{ true };
+// static inline const Bool No{ false };
+*/

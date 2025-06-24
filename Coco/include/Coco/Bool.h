@@ -58,14 +58,11 @@ namespace Coco
         static const Bool Yes;
         static const Bool No;
 
-        COCO_ALWAYS_INLINE constexpr Bool() : value_(false) {}
-        COCO_ALWAYS_INLINE constexpr explicit Bool(bool value) : value_(value) {}
-
         COCO_ALWAYS_INLINE friend QDebug operator<<(QDebug debug, const Bool& b) { return debug << qUtf8Printable(name_(b)); }
         COCO_ALWAYS_INLINE constexpr operator bool() const { return value_; }
-        COCO_ALWAYS_INLINE constexpr Bool operator!() const { return Bool(!value_); }
+        COCO_ALWAYS_INLINE constexpr Bool operator!() const { return value_ ? No : Yes; }
 
-        // Allow comparison only with same type only
+        // Allow comparison with same type only
         template<typename OtherTagT>
         constexpr bool operator==(const Bool<OtherTagT>& other) const = delete;
         COCO_ALWAYS_INLINE constexpr bool operator==(const Bool<TagT>& other) const = default;
@@ -75,6 +72,9 @@ namespace Coco
     private:
         bool value_;
 
+        Bool() = delete;
+        //COCO_ALWAYS_INLINE constexpr Bool() : value_(false) {}
+        COCO_ALWAYS_INLINE constexpr explicit Bool(bool value) : value_(value) {}
         COCO_ALWAYS_INLINE static QString name_(const Bool& b) { return QString(TagT::name()) + "::" + (b.value_ ? "Yes" : "No"); }
 
     }; // class Coco::Bool
@@ -88,13 +88,15 @@ namespace Coco
 
 } // namespace Coco
 
-#define COCO_BOOL(Name)                                         \
-    struct Name##Tag                                            \
-    {                                                           \
-        static constexpr const char* name() { return #Name; }   \
-    };                                                          \
-                                                                \
-    using Name = Coco::Bool<Name##Tag>
+#define COCO_BOOL(Name)                                     \
+    namespace Coco::detail {                                \
+        struct Name##Tag {                                  \
+            static constexpr const char* name() {           \
+                return #Name;                               \
+            }                                               \
+        };                                                  \
+    }                                                       \
+    using Name = Coco::Bool<Coco::detail::Name##Tag>;       \
 
 // Old, notes, etc:
 

@@ -88,15 +88,13 @@ namespace Coco
 
 } // namespace Coco
 
-#define COCO_BOOL(Name)                                     \
-    namespace Coco::detail {                                \
-        struct Name##Tag {                                  \
-            static constexpr const char* name() {           \
-                return #Name;                               \
-            }                                               \
-        };                                                  \
-    }                                                       \
-    using Name = Coco::Bool<Coco::detail::Name##Tag>;       \
+#define COCO_BOOL(Name)                             \
+    struct Name##Tag {                              \
+        static constexpr const char* name() {       \
+            return #Name;                           \
+        }                                           \
+    };                                              \
+    using Name = Coco::Bool<Name##Tag>              \
 
 // Old, notes, etc:
 

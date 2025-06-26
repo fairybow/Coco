@@ -56,18 +56,20 @@ namespace Coco::FxOp
 
     // Factories:
 
-    // Brightness adjustment op factory
-    //
-    // Valid range: -255 to +255
-    // - brightness(-255)   // Makes everything black
-    // - brightness(-50)    // Darken significantly  
-    // - brightness(-10)    // Slight darkening
-    // - brightness(0)      // No change
-    // - brightness(10)     // Slight brightening
-    // - brightness(50)     // Brighten significantly
-    // - brightness(255)    // Makes everything whit
-    //
-    // Practical range: -100 to +100
+    /*
+    * Brightness adjustment op factory
+    *
+    * Valid range: -255 to +255
+    * - brightness(-255)   * Makes everything black
+    * - brightness(-50)    * Darken significantly  
+    * - brightness(-10)    * Slight darkening
+    * - brightness(0)      * No change
+    * - brightness(10)     * Slight brightening
+    * - brightness(50)     * Brighten significantly
+    * - brightness(255)    * Makes everything whit
+    *
+    * Practical range: -100 to +100
+    */
     inline auto brightness = [](int adjustment)
         {
             adjustment = qBound(-255, adjustment, 255);
@@ -85,18 +87,20 @@ namespace Coco::FxOp
                 };
         };
 
-    // Contrast adjustment op factory
-    //
-    // Valid range: 0.0 to infinity (but practical limit around 4.0)
-    //
-    // - contrast(0.0)      // Everything becomes middle gray (128,128,128)
-    // - contrast(0.5)      // Low contrast (washed out)
-    // - contrast(1.0)      // No change
-    // - contrast(1.5)      // Increased contrast
-    // - contrast(2.0)      // High contrast
-    // - contrast(3.0)      // Very high contrast (dramatic)
-    //
-    // Practical range: 0.1 to 3.0
+    /*
+    * Contrast adjustment op factory
+    *
+    * Valid range: 0.0 to infinity (but practical limit around 4.0)
+    *
+    * - contrast(0.0)      * Everything becomes middle gray (128,128,128)
+    * - contrast(0.5)      * Low contrast (washed out)
+    * - contrast(1.0)      * No change
+    * - contrast(1.5)      * Increased contrast
+    * - contrast(2.0)      * High contrast
+    * - contrast(3.0)      * Very high contrast (dramatic)
+    *
+    * Practical range: 0.1 to 3.0
+    */
     inline auto contrast = [](double factor)
         {
             factor = qMax(0.0, factor);
@@ -121,17 +125,19 @@ namespace Coco::FxOp
                 };
         };
 
-    // Color tint op factory
-    //
-    // Valid range: 0.0 to 1.0 (can go higher but gets weird)
-    // - tint(red, 0.0)     // No tint (original image)
-    // - tint(red, 0.2)     // Subtle red tint
-    // - tint(red, 0.5)     // Moderate red tint (default)
-    // - tint(red, 0.8)     // Strong red tint
-    // - tint(red, 1.0)     // Full red replacement
-    // - tint(red, 1.5)     // Over-tinted (may look unnatural)
-    //
-    // Practical range: 0.0 to 1.0
+    /*
+    * Color tint op factory
+    *
+    * Valid range: 0.0 to 1.0 (can go higher but gets weird)
+    * - tint(red, 0.0)     * No tint (original image)
+    * - tint(red, 0.2)     * Subtle red tint
+    * - tint(red, 0.5)     * Moderate red tint (default)
+    * - tint(red, 0.8)     * Strong red tint
+    * - tint(red, 1.0)     * Full red replacement
+    * - tint(red, 1.5)     * Over-tinted (may look unnatural)
+    *
+    * Practical range: 0.0 to 1.0
+    */
     inline auto tint = [](QColor tintColor, double strength)
         {
             strength = qMax(0.0, strength);
@@ -149,16 +155,18 @@ namespace Coco::FxOp
                 };
         };
 
-    // Threshold (binary) op factory
-    //
-    // Valid range: 0 to 255
-    // - threshold(0)       // Everything becomes white
-    // - threshold(64)      // Only very dark pixels become black
-    // - threshold(128)     // Middle threshold (default)
-    // - threshold(192)     // Only light pixels become white
-    // - threshold(255)     // Everything becomes black
-    //
-    // Practical range: 32 to 224
+    /*
+    * Threshold (binary) op factory
+    *
+    * Valid range: 0 to 255
+    * - threshold(0)       * Everything becomes white
+    * - threshold(64)      * Only very dark pixels become black
+    * - threshold(128)     * Middle threshold (default)
+    * - threshold(192)     * Only light pixels become white
+    * - threshold(255)     * Everything becomes black
+    *
+    * Practical range: 32 to 224
+    */
     inline auto threshold = [](int thresholdValue)
         {
             thresholdValue = qBound(0, thresholdValue, 255);
@@ -185,15 +193,17 @@ namespace Coco::Fx
     inline bool isDark(const QColor& color) noexcept { return color.lightness() < 128; }
     inline bool isLight(const QColor& color) noexcept { return color.lightness() >= 128; }
 
-    // Usage examples:
-    // - Subtle adjustments (good for photos):
-    // - apply(pixmap, brightness(15), contrast(1.2), tint(QColor(255, 240,
-    //   200), 0.1));
-    // - Dramatic effects:
-    // - apply(pixmap, contrast(2.5), brightness(-20), tint(QColor(100, 50,
-    //   200), 0.3));
-    // - Black and white high contrast:
-    // - apply(pixmap, greyscale, contrast(1.8), threshold(120));
+    /*
+    * Usage examples:
+    * - Subtle adjustments (good for photos):
+    * - apply(pixmap, brightness(15), contrast(1.2), tint(QColor(255, 240, 200),
+    *   0.1));
+    * - Dramatic effects:
+    * - apply(pixmap, contrast(2.5), brightness(-20), tint(QColor(100, 50, 200),
+    *   0.3));
+    * - Black and white high contrast:
+    * - apply(pixmap, greyscale, contrast(1.8), threshold(120));
+    */
     template<typename... FxOps>
     inline QPixmap apply(const QPixmap& pixmap, FxOps... ops)
     {

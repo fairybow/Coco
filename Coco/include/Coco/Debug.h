@@ -7,7 +7,7 @@
 #include <QString>
 #include <QTimer>
 
-#include "Utility.h"
+#include "Concepts.h"
 
 /// Need to figure out which macros go where
 
@@ -49,11 +49,9 @@ namespace Coco::Debug
 {
     // Could have a version for non-QObjects, perhaps? Would be more verbose if
     // using std to get type name
-    template<typename PtrT>
-    inline QString qMemoryAddress(PtrT* ptr)
+    template<Concepts::QObjectPointer T>
+    inline QString qMemoryAddress(T* ptr)
     {
-        COCO_QOBJECT_ASSERT(PtrT);
-
         return QString("%1(%2)")
             .arg(ptr->metaObject()->className())
             .arg(QString::asprintf("%p", ptr));

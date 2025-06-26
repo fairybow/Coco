@@ -4,17 +4,21 @@
 
 #include <QGridLayout>
 #include <QHBoxLayout>
+#include <QLayout>
 #include <QMargins>
 #include <Qt>
 #include <QVBoxLayout>
 #include <QWidget>
 
-#include "Utility.h"
+#include "Concepts.h"
 
 namespace Coco::Layout
 {
-    template <typename QLayoutT>
-    inline QLayoutT make
+    template<typename T>
+    concept QLayoutPointer = Concepts::Pointer<T> && Concepts::Derived<QLayout, std::remove_pointer_t<T>>;
+
+    template <QLayoutPointer T>
+    inline T make
     (
         QMargins margins,
         int spacing,
@@ -22,9 +26,9 @@ namespace Coco::Layout
         Qt::Alignment alignment = {}
     )
     {
-        COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
+        //COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
 
-        auto layout = new std::remove_pointer_t<QLayoutT>(parent);
+        auto layout = new std::remove_pointer_t<T>(parent);
         layout->setContentsMargins(margins);
         layout->setSpacing(spacing);
 
@@ -34,11 +38,11 @@ namespace Coco::Layout
         return layout;
     }
 
-    template <typename QLayoutT>
-    inline QLayoutT zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
+    template <QLayoutPointer T>
+    inline T zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
     {
-        COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
-        return make<QLayoutT>({}, 0, parent, alignment);
+        //COCO_TEMPLATE_PTR_ASSERT(QLayoutT);
+        return make<T>({}, 0, parent, alignment);
     }
 
 } // Coco::Layout

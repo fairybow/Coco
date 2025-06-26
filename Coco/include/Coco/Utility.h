@@ -10,20 +10,21 @@
 #include "Concepts.h"
 #include "Global.h"
 
-#define COCO_TEMPLATE_PTR_ASSERT(T)                                                             \
-    static_assert(std::is_pointer_v<T>, "Template parameter " #T " must be a pointer type!");
+//#define COCO_TEMPLATE_PTR_ASSERT(T)                                                             \
+    //static_assert(std::is_pointer_v<T>, "Template parameter " #T " must be a pointer type!");
 
-#define COCO_DERIVED_ASSERT(BaseT, T)                                                           \
-    static_assert(std::is_base_of_v<BaseT, T>, #T " must be " #BaseT " or " #BaseT "-derived!")
+//#define COCO_DERIVED_ASSERT(BaseT, T)                                                           \
+    //static_assert(std::is_base_of_v<BaseT, T>, #T " must be " #BaseT " or " #BaseT "-derived!")
 
-#define COCO_QOBJECT_ASSERT(T)                                                                  \
-    COCO_DERIVED_ASSERT(QObject, T)
+//#define COCO_QOBJECT_ASSERT(T)                                                                  \
+    //COCO_DERIVED_ASSERT(QObject, T)
 
-/// @brief I occasionally subclass solely in order to: 1) check memory via
-/// destructor debug output; and 2) have debug output show up as a custom class
-/// and not, say, QWidget or something unhelpful. Additionally, this can be
-/// useful for quickly creating a nested class that doesn't need the Q_OBJECT
-/// macro
+/*
+* @brief I occasionally subclass solely in order to: 1) check memory via
+* destructor debug output; and 2) have debug output show up as a custom class
+* and not, say, QWidget or something unhelpful. Additionally, this can be useful
+* for quickly creating a nested class that doesn't need the Q_OBJECT macro
+*/
 #define COCO_TRIVIAL_CLASS(Class, Base)                         \
     class Class : public Base                                   \
     {                                                           \
@@ -51,9 +52,6 @@ namespace Coco::Utility
     template <Concepts::QObjectPointer ParentT>
     inline ParentT findParent(QObject* object)
     {
-        //COCO_TEMPLATE_PTR_ASSERT(ParentT);
-        //COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
-
         for (auto obj = object; obj; obj = obj->parent())
             if (auto parent = qobject_cast<ParentT>(obj))
                 return parent;
@@ -64,9 +62,6 @@ namespace Coco::Utility
     template <Concepts::QObjectPointer ParentT>
     inline ParentT findParent(const QObject* object)
     {
-        //COCO_TEMPLATE_PTR_ASSERT(ParentT);
-        //COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
-
         for (auto obj = object; obj; obj = obj->parent())
             if (auto parent = qobject_cast<ParentT>(obj))
                 return parent;

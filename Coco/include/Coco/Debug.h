@@ -49,7 +49,7 @@ namespace Coco::Debug
 {
     // Could have a version for non-QObjects, perhaps? Would be more verbose if
     // using std to get type name
-    template<Concepts::QObjectPointer T>
+    template<Concepts::QObjectDerived T>
     inline QString qMemoryAddress(T* ptr)
     {
         return QString("%1(%2)")

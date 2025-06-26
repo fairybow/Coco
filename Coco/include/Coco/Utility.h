@@ -7,6 +7,7 @@
 #include <QObject>
 #include <QSet>
 
+#include "Concepts.h"
 #include "Global.h"
 
 #define COCO_TEMPLATE_PTR_ASSERT(T)                                                             \
@@ -47,11 +48,11 @@ namespace Coco::Utility
         return list;
     }
 
-    template <typename ParentT>
+    template <Utility::QObjectPointer ParentT>
     inline ParentT findParent(QObject* object)
     {
-        COCO_TEMPLATE_PTR_ASSERT(ParentT);
-        COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
+        //COCO_TEMPLATE_PTR_ASSERT(ParentT);
+        //COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
 
         for (auto obj = object; obj; obj = obj->parent())
             if (auto parent = qobject_cast<ParentT>(obj))

@@ -48,7 +48,7 @@ namespace Coco::Utility
         return list;
     }
 
-    template <Utility::QObjectPointer ParentT>
+    template <Concepts::QObjectPointer ParentT>
     inline ParentT findParent(QObject* object)
     {
         //COCO_TEMPLATE_PTR_ASSERT(ParentT);
@@ -61,11 +61,11 @@ namespace Coco::Utility
         return nullptr;
     }
 
-    template <typename ParentT>
+    template <Concepts::QObjectPointer ParentT>
     inline ParentT findParent(const QObject* object)
     {
-        COCO_TEMPLATE_PTR_ASSERT(ParentT);
-        COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
+        //COCO_TEMPLATE_PTR_ASSERT(ParentT);
+        //COCO_QOBJECT_ASSERT(std::remove_pointer_t<ParentT>);
 
         for (auto obj = object; obj; obj = obj->parent())
             if (auto parent = qobject_cast<ParentT>(obj))

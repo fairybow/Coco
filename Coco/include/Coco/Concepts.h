@@ -10,4 +10,5 @@ namespace Coco::Concepts
 
     template<typename T>
     concept QObjectPointer = Pointer<T> && QObjectDerived<std::remove_pointer_t<T>>;
-}
+
+} // namespace Coco::Concepts

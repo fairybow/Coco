@@ -11,19 +11,28 @@
 #include "../include/Coco/PathUtil.h"
 #include "../include/Coco/TextIo.h"
 
-constexpr auto PATH_NOT_FOUND = "Path not found:";
-constexpr auto FAIL_OPEN_READ = "Failed to open file for reading:";
-constexpr auto FAIL_OPEN_WRITE = "Failed to open file for writing:";
-constexpr auto FAIL_WRITE_TXT = "Failed to write text to file:";
-constexpr auto JSON_PARSE_ERROR = "JSON parse error:";
+constexpr auto PATH_EMPTY_ = "Path empty!";
+constexpr auto PATH_NOT_FOUND_ = "Path not found:";
+constexpr auto MKDIR_FAIL_ = "Failed to create directory:";
+constexpr auto FAIL_OPEN_READ_ = "Failed to open file for reading:";
+constexpr auto FAIL_OPEN_WRITE_ = "Failed to open file for writing:";
+constexpr auto FAIL_WRITE_TXT_ = "Failed to write text to file:";
+constexpr auto JSON_PARSE_ERROR_ = "JSON parse error:";
 
+// - TODO: Permissions errors
 namespace Coco::TextIo
 {
     QString read(const Path& path, QStringConverter::Encoding encoding)
     {
+        if (path.isEmpty())
+        {
+            qWarning() << PATH_EMPTY_;
+            return {};
+        }
+
         if (!path.exists())
         {
-            qWarning() << PATH_NOT_FOUND << path;
+            qWarning() << PATH_NOT_FOUND_ << path;
             return {};
         }
 
@@ -34,7 +43,7 @@ namespace Coco::TextIo
         // flag and handle conversion manually
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qWarning() << FAIL_OPEN_READ << path;
+            qWarning() << FAIL_OPEN_READ_ << path;
             return {};
         }
 
@@ -53,21 +62,31 @@ namespace Coco::TextIo
         QStringConverter::Encoding encoding
     )
     {
-        if (path.isEmpty()) return false;
+        if (path.isEmpty())
+        {
+            qWarning() << PATH_EMPTY_;
+            return false;
+        }
 
         if (createDirs)
         {
             auto parent_path = path.parent();
 
             if (!parent_path.exists())
-                Coco::PathUtil::mkdir(parent_path);
+            {
+                if (!Coco::PathUtil::mkdir(parent_path))
+                {
+                    qWarning() << MKDIR_FAIL_ << parent_path;
+                    return false;
+                }
+            }
         }
 
         QFile file(path.toQString());
 
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
-            qWarning() << FAIL_OPEN_WRITE << path;
+            qWarning() << FAIL_OPEN_WRITE_ << path;
             return false;
         }
 
@@ -76,7 +95,7 @@ namespace Coco::TextIo
         out << text;
         auto success = out.status() == QTextStream::Ok;
 
-        if (!success) qWarning() << FAIL_WRITE_TXT << path;
+        if (!success) qWarning() << FAIL_WRITE_TXT_ << path;
 
         return success;
     }
@@ -95,7 +114,7 @@ namespace Coco::TextIo::Json
 
         if (err.error != QJsonParseError::NoError)
         {
-            qWarning() << JSON_PARSE_ERROR << err.errorString();
+            qWarning() << JSON_PARSE_ERROR_ << err.errorString() << "[" << path << "]";
             return {};
         }
 

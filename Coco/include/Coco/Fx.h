@@ -258,7 +258,7 @@ namespace Coco::Fx
     concept QColorConstructible = requires(T&& t) { QColor(std::forward<T>(t)); };
 
     template <QColorConstructible... T>
-    inline QLinearGradient bandedGradient_(qreal x1, qreal y1, qreal x2, qreal y2, T&&... colors) const
+    inline QLinearGradient bandedGradient(qreal x1, qreal y1, qreal x2, qreal y2, T&&... colors)
     {
         QLinearGradient gradient(x1, y1, x2, y2);
         constexpr std::size_t n = sizeof...(colors);
@@ -291,7 +291,7 @@ namespace Coco::Fx
     }
 
     template <QColorConstructible... T>
-    inline QLinearGradient bandedGradient_(const QPointF& start, const QPointF& finalStop, T&&... colors) const
+    inline QLinearGradient bandedGradient(const QPointF& start, const QPointF& finalStop, T&&... colors)
     {
         return bandedGradient_
         (

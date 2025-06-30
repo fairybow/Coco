@@ -1,11 +1,18 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
+#include <utility>
+
 #include <QColor>
 #include <QImage>
+#include <QLinearGradient>
 #include <QList>
 #include <QPixmap>
+#include <QPointF>
 #include <QRgb>
 #include <QtGlobal>
+#include <QtTypes>
 
 // To-do:
 // - SIMD?
@@ -245,6 +252,53 @@ namespace Coco::Fx
     inline QPixmap toSepia(const QPixmap& pixmap)
     {
         return apply(pixmap, FxOp::sepia);
+    }
+
+    template<typename T>
+    concept QColorConstructible = requires(T&& t) { QColor(std::forward<T>(t)); };
+
+    template <QColorConstructible... T>
+    inline QLinearGradient bandedGradient_(qreal x1, qreal y1, qreal x2, qreal y2, T&&... colors) const
+    {
+        QLinearGradient gradient(x1, y1, x2, y2);
+        constexpr std::size_t n = sizeof...(colors);
+
+        if (n == 0)
+        {
+        defaultReturn:
+            // Default semi-transparent black to white gradient
+            gradient.setColorAt(0.0, QColor(0, 0, 0, 128));
+            gradient.setColorAt(1.0, QColor(255, 255, 255, 128));
+            return gradient;
+        }
+
+        auto color_array = std::array{ QColor(std::forward<T>(colors))... };
+
+        // Check if any color construction failed
+        for (auto& color : color_array)
+            if (!color.isValid())
+                goto defaultReturn; // idc
+
+        // For 4 colors, we should have gradient positions of 0.0, 0.25, 0.5,
+        // and 0.75
+        for (std::size_t i = 0; i < n; ++i)
+        {
+            auto position = static_cast<qreal>(i) / n;
+            gradient.setColorAt(position, color_array[i]);
+        }
+
+        return gradient;
+    }
+
+    template <QColorConstructible... T>
+    inline QLinearGradient bandedGradient_(const QPointF& start, const QPointF& finalStop, T&&... colors) const
+    {
+        return bandedGradient_
+        (
+            start.x(), start.y(),
+            finalStop.x(), finalStop.y(),
+            std::forward<T>(colors)...
+        );
     }
 
 } // namespace Coco::Fx

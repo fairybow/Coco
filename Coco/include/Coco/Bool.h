@@ -5,50 +5,49 @@
 
 #include "Macros.h"
 
-/*
-* @brief The general point is to have a convenient way to avoid ambiguous
-* boolean function parameters. Creates a strongly-typed, named boolean class
-* with Yes/No static constants that implicitly converts to bool for natural use.
-*
-* @note Default value is false, but using CocoBool{} or {} sorta defeats the
-* purpose...
-*
-* @note Performance: The template-based implementation compiles to the same
-* machine code as raw booleans after optimization. All operations are marked
-* constexpr and COCO_ALWAYS_INLINE, ensuring (hopefully) zero runtime overhead.
-*
-* EXAMPLE:
-* ```cpp
-* // Ambiguous boolean parameters:
-* void saveFile(const Path& path, bool createDirs, bool overwrite);
-* saveFile(path, true, false);  // What do these mean?
-*
-* // Instead:
-* COCO_BOOL(CreateDirs);
-* COCO_BOOL(Overwrite);
-* void saveFile(const Path& path, CreateDirs createDirs = CreateDirs::No,
-*               Overwrite overwrite = Overwrite::No);
-*
-* // Self-documenting calls:
-* saveFile(path, CreateDirs::Yes, Overwrite::No);
-*
-* CreateDirs shouldCreate = CreateDirs::Yes;
-* if (shouldCreate) {
-*   // create directories
-* }
-*
-* // Implicitly converts to bool:
-* COCO_BOOL(EnableLogging);
-* auto logging = EnableLogging::Yes;
-* void libraryFunction(bool enable);
-* libraryFunction(logging);
-*
-* // Each type is distinct:
-* TypeA a = TypeA::Yes;
-* TypeB b = TypeB::Yes;
-* // qDebug() << (a == b);  // Compile error
-* ```
-*/
+// @brief The general point is to have a convenient way to avoid ambiguous
+// boolean function parameters. Creates a strongly-typed, named boolean class
+// with Yes/No static constants that implicitly converts to bool for natural
+// use.
+//
+// @note Default value is false, but using CocoBool{} or {} sorta defeats the
+// purpose...
+//
+// @note Performance: The template-based implementation compiles to the same
+// machine code as raw booleans after optimization. All operations are marked
+// constexpr and COCO_ALWAYS_INLINE, ensuring (hopefully) zero runtime overhead.
+//
+// EXAMPLE:
+// ```cpp
+// // Ambiguous boolean parameters:
+// void saveFile(const Path& path, bool createDirs, bool overwrite);
+// saveFile(path, true, false);  // What do these mean?
+//
+// // Instead:
+// COCO_BOOL(CreateDirs);
+// COCO_BOOL(Overwrite);
+// void saveFile(const Path& path, CreateDirs createDirs = CreateDirs::No,
+//               Overwrite overwrite = Overwrite::No);
+//
+// // Self-documenting calls:
+// saveFile(path, CreateDirs::Yes, Overwrite::No);
+//
+// CreateDirs shouldCreate = CreateDirs::Yes;
+// if (shouldCreate) {
+//   // create directories
+// }
+//
+// // Implicitly converts to bool:
+// COCO_BOOL(EnableLogging);
+// auto logging = EnableLogging::Yes;
+// void libraryFunction(bool enable);
+// libraryFunction(logging);
+//
+// // Each type is distinct:
+// TypeA a = TypeA::Yes;
+// TypeB b = TypeB::Yes;
+// qDebug() << (a == b);  // Compile error
+// ```
 namespace Coco
 {
     template <typename TagT>
@@ -101,7 +100,6 @@ namespace Coco
 // Macro to make an inheriting struct with custom type names
 // #define COCO_CUSTOM_BOOL(Name, YesVal, NoVal)
 
-/*
 // Doesn't work (may be MSVC?):
 // static constexpr Bool<TagT> Yes{ true };
 // static constexpr Bool<TagT> No{ false };
@@ -109,4 +107,3 @@ namespace Coco
 // Would these work? Can't remember if I tried...
 // static inline const Bool Yes{ true };
 // static inline const Bool No{ false };
-*/

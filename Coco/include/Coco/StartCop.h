@@ -31,7 +31,7 @@ namespace Coco
     ///         QApplication app(argc, argv);
     ///
     ///         MainWindow w;
-    ///         app.connect(&s, &StartCop::appRelaunched,
+    ///         w.connect(&s, &StartCop::appRelaunched,
     ///             &w, &MainWindow::slot);
     ///         w.show();
     ///

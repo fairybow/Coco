@@ -8,7 +8,9 @@
 // @brief The general point is to have a convenient way to avoid ambiguous
 // boolean function parameters. Creates a strongly-typed, named boolean class
 // with Yes/No static constants that implicitly converts to bool for natural
-// use.
+// use. If the function has only one parameter (bool), then the function name
+// itself should make it clear what that parameter is for (meaning this class is
+// unnecessary there).
 //
 // @note Default value is false, but using CocoBool{} or {} sorta defeats the
 // purpose...

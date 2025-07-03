@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include <QObject>
+#include <QWidget>
 
 namespace Coco::Concepts
 {
@@ -21,5 +22,11 @@ namespace Coco::Concepts
 
     template<typename T>
     concept QObjectPointer = DerivedPointer<QObject, T>;
+
+    template<typename T>
+    concept QWidgetDerived = Derived<QWidget, T>;
+
+    template<typename T>
+    concept QWidgetPointer = DerivedPointer<QWidget, T>;
 
 } // namespace Coco::Concepts

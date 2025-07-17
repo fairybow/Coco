@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #if defined(QT_NO_SVG)
 
@@ -42,3 +42,4 @@ namespace Coco::Svg
 } // namespace Coco::Svg
 
 #endif // #if defined(QT_NO_SVG)
+*/

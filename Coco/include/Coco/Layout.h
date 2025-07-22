@@ -65,13 +65,13 @@ namespace Coco::Layout
     }
 
     template <QLayoutPointer T>
-    inline T zeroPadded(QWidget* target, Qt::Alignment alignment = Qt::AlignCenter)
+    inline T makeDense(QWidget* target, Qt::Alignment alignment = Qt::AlignCenter)
     {
         return make<T>(QMargins{}, 0, target, alignment);
     }
 
     template <QLayoutPointer T>
-    inline T zeroPadded(Qt::Alignment alignment = Qt::AlignCenter)
+    inline T makeDense(Qt::Alignment alignment = Qt::AlignCenter)
     {
         return make<T>(QMargins{}, 0, nullptr, alignment);
     }

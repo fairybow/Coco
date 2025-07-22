@@ -37,9 +37,15 @@ namespace Coco::Layout
     }
 
     template <QLayoutPointer T>
-    inline T zeroPadded(QWidget* parent = nullptr, Qt::Alignment alignment = {})
+    inline T zeroPadded(QWidget* parent, Qt::Alignment alignment = {})
     {
         return make<T>({}, 0, parent, alignment);
+    }
+
+    template <QLayoutPointer T>
+    inline T zeroPadded(Qt::Alignment alignment = {})
+    {
+        return zeroPadded<T>(nullptr, alignment);
     }
 
 } // Coco::Layout

@@ -23,7 +23,7 @@ namespace Coco::Layout
         QMargins margins,
         int spacing,
         QWidget* parent = nullptr,
-        Qt::Alignment alignment = {}
+        Qt::Alignment alignment = Qt::AlignCenter
     )
     {
         auto layout = new std::remove_pointer_t<T>(parent);
@@ -37,13 +37,13 @@ namespace Coco::Layout
     }
 
     template <QLayoutPointer T>
-    inline T zeroPadded(QWidget* parent, Qt::Alignment alignment = {})
+    inline T zeroPadded(QWidget* parent, Qt::Alignment alignment = Qt::AlignCenter)
     {
         return make<T>({}, 0, parent, alignment);
     }
 
     template <QLayoutPointer T>
-    inline T zeroPadded(Qt::Alignment alignment = {})
+    inline T zeroPadded(Qt::Alignment alignment = Qt::AlignCenter)
     {
         return zeroPadded<T>(nullptr, alignment);
     }

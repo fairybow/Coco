@@ -18,6 +18,20 @@ namespace Coco::Layout
     concept QLayoutPointer = Concepts::DerivedPointer<QLayout, T>;
 
     template <QLayoutPointer T>
+    inline T make(QWidget* target, Qt::Alignment alignment = Qt::AlignCenter)
+    {
+        auto layout = new std::remove_pointer_t<T>(target);
+        layout->setAlignment(alignment);
+        return layout;
+    }
+
+    template <QLayoutPointer T>
+    inline T make(Qt::Alignment alignment = Qt::AlignCenter)
+    {
+        return make<T>(nullptr, alignment);
+    }
+
+    template <QLayoutPointer T>
     inline T make
     (
         QMargins margins,
@@ -26,13 +40,9 @@ namespace Coco::Layout
         Qt::Alignment alignment = Qt::AlignCenter
     )
     {
-        auto layout = new std::remove_pointer_t<T>(target);
+        auto layout = make<T>(target, alignment);
         layout->setContentsMargins(margins);
         layout->setSpacing(spacing);
-
-        if (alignment != Qt::AlignmentFlag(0))
-            layout->setAlignment(alignment);
-
         return layout;
     }
 
@@ -63,7 +73,7 @@ namespace Coco::Layout
     template <QLayoutPointer T>
     inline T zeroPadded(Qt::Alignment alignment = Qt::AlignCenter)
     {
-        return zeroPadded<T>(nullptr, alignment);
+        return make<T>(QMargins{}, 0, nullptr, alignment);
     }
 
 } // Coco::Layout

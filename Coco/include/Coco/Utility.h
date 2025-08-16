@@ -3,21 +3,15 @@
 #include <algorithm>
 #include <type_traits>
 
+#include <QCoreApplication>
+#include <QEventLoop>
 #include <QList>
 #include <QObject>
 #include <QSet>
+#include <QTimer>
 
 #include "Concepts.h"
 #include "Global.h"
-
-//#define COCO_TEMPLATE_PTR_ASSERT(T)                                                             \
-    //static_assert(std::is_pointer_v<T>, "Template parameter " #T " must be a pointer type!");
-
-//#define COCO_DERIVED_ASSERT(BaseT, T)                                                           \
-    //static_assert(std::is_base_of_v<BaseT, T>, #T " must be " #BaseT " or " #BaseT "-derived!")
-
-//#define COCO_QOBJECT_ASSERT(T)                                                                  \
-    //COCO_DERIVED_ASSERT(QObject, T)
 
 /*
 * @brief I occasionally subclass solely in order to: 1) check memory via
@@ -67,6 +61,16 @@ namespace Coco::Utility
                 return parent;
 
         return nullptr;
+    }
+
+    // https://stackoverflow.com/a/11487434
+    // Questionable
+    inline void delay(unsigned int msecs)
+    {
+        auto die_time = QTime::currentTime().addMSecs(msecs);
+
+        while (QTime::currentTime() < die_time)
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     }
 
 } // namespace Coco::Utility

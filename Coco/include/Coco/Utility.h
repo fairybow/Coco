@@ -3,12 +3,9 @@
 #include <algorithm>
 #include <type_traits>
 
-#include <QCoreApplication>
-#include <QEventLoop>
 #include <QList>
 #include <QObject>
 #include <QSet>
-#include <QTime>
 
 #include "Concepts.h"
 #include "Global.h"
@@ -61,16 +58,6 @@ namespace Coco::Utility
                 return parent;
 
         return nullptr;
-    }
-
-    // https://stackoverflow.com/a/11487434
-    // Questionable
-    inline void delay(unsigned int msecs)
-    {
-        auto die_time = QTime::currentTime().addMSecs(msecs);
-
-        while (QTime::currentTime() < die_time)
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
     }
 
 } // namespace Coco::Utility

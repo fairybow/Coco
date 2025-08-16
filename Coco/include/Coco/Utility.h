@@ -8,7 +8,7 @@
 #include <QList>
 #include <QObject>
 #include <QSet>
-#include <QTimer>
+#include <QTime>
 
 #include "Concepts.h"
 #include "Global.h"

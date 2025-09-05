@@ -24,6 +24,19 @@
         virtual ~Class() override { COCO_TRACER; }              \
     }
 
+/*
+* @brief Since this adds the Q_OBJECT macro, it cannot be nested
+*/
+#define COCO_TRIVIAL_QCLASS(Class, Base)                        \
+    class Class : public Base                                   \
+    {                                                           \
+        Q_OBJECT                                                \
+                                                                \
+    public:                                                     \
+        using Base::Base;                                       \
+        virtual ~Class() override { COCO_TRACER; }              \
+    }
+
 namespace Coco::Utility
 {
     template <typename T>

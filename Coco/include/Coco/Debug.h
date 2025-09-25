@@ -57,4 +57,12 @@ namespace Coco::Debug
             .arg(QString::asprintf("%p", ptr));
     }
 
+    template<Concepts::QObjectDerived T>
+    inline QString qMemoryAddress(const T* ptr)
+    {
+        return QString("%1(%2)")
+            .arg(ptr->metaObject()->className())
+            .arg(QString::asprintf("%p", ptr));
+    }
+
 } // namespace Coco::Debug

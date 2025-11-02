@@ -8,6 +8,7 @@
 #include <QSet>
 
 #include "Concepts.h"
+#include "Debug.h"
 #include "Global.h"
 
 /*

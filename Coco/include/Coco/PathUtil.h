@@ -95,7 +95,8 @@ namespace Coco::PathUtil
             const QString& caption = {},
             const Path& startPath = {},
             const QString& filter = {},
-            QString* selectedFilter = nullptr
+            QString* selectedFilter = nullptr,
+            QFileDialog::Options options = {}
         )
         {
             return Path
@@ -106,9 +107,37 @@ namespace Coco::PathUtil
                     caption,
                     startPath.toQString(),
                     filter,
-                    selectedFilter
+                    selectedFilter,
+                    options
                 )
             );
+        }
+
+        inline QList<Path> files
+        (
+            QWidget* parent = nullptr,
+            const QString& caption = {},
+            const Path& startPath = {},
+            const QString& filter = {},
+            QString* selectedFilter = nullptr,
+            QFileDialog::Options options = {}
+        )
+        {
+            auto string_paths = QFileDialog::getOpenFileNames
+            (
+                parent,
+                caption,
+                startPath.toQString(),
+                filter,
+                selectedFilter,
+                options
+            );
+    
+            QList<Path> paths{};
+            for (const auto& str : string_paths)
+                paths << Path(str);
+    
+            return paths;
         }
 
         inline Path save

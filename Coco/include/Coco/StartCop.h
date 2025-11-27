@@ -57,7 +57,7 @@ namespace Coco
         /// @brief Emitted in the primary instance when a secondary instance
         /// connects. The provided args are those received from the new
         /// instance.
-        void appRelaunched(QStringList args);
+        void appRelaunched(const QStringList& args);
 
     private:
         QStringList args_;

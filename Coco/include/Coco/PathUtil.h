@@ -2,19 +2,25 @@
 
 #include <filesystem>
 
+#include <QDir>
+#include <QFile>
 #include <QFileDialog>
 #include <QList>
 #include <QString>
 #include <QStringList>
 #include <QWidget>
 
+#include "Bool.h"
 #include "Global.h"
 #include "Path.h"
+
+// TODO: Maybe just reintegrate with Path, for convenience
+// TODO: Own Path iterator
 
 namespace Coco::PathUtil
 {
     // Creates all directories in the specified path.
-    inline static bool mkdir(const Path& path)
+    inline bool mkdir(const Path& path)
     {
         return std::filesystem::create_directories(path.toStd());
     }
@@ -49,6 +55,37 @@ namespace Coco::PathUtil
         const char* const* argv,
         const QString& extensions
     );
+
+    inline bool copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
+    {
+        if (overwrite && newPath.exists()) QFile::remove(newPath.toQString());
+        return QFile::copy(path.toQString(), newPath.toQString());
+    }
+
+    inline bool copyContents(const Path& srcDir, const Path& dstDir)
+    {
+        if (!srcDir.exists() || !srcDir.isFolder()) return false;
+        if (!dstDir.exists() && !mkdir(dstDir)) return false;
+
+        QDir src_dir(srcDir.toQString());
+        auto entries = src_dir.entryList(QDir::AllEntries | QDir::NoDotAndDotDot);
+
+        for (const auto& entry : entries) {
+            auto src_path = srcDir / entry;
+            auto dst_path = dstDir / entry;
+
+            if (src_path.isFolder()) {
+                // Recurse
+                if (!mkdir(dst_path)) return false;
+                if (!copyContents(src_path, dst_path)) return false;
+            }
+            else {
+                if (!copy(src_path, dst_path)) return false;
+            }
+        }
+
+        return true;
+    }
 
     /// @brief Identifies the file type based on its signature.
     /// 
@@ -132,11 +169,11 @@ namespace Coco::PathUtil
                 selectedFilter,
                 options
             );
-    
+
             QList<Path> paths{};
             for (const auto& str : string_paths)
                 paths << Path(str);
-    
+
             return paths;
         }
 

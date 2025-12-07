@@ -11,6 +11,7 @@ namespace Coco
     COCO_BOOL(CreateDirs);
     COCO_BOOL(Recursive);
     COCO_BOOL(Sort);
+    COCO_BOOL(Overwrite);
 
     enum class SystemLocation
     {

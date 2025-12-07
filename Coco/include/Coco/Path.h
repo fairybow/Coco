@@ -389,6 +389,12 @@ namespace Coco
 
         // ----- Conversion -----
 
+        COCO_ALWAYS_INLINE Path rebase(const Path& oldBase, const Path& newBase) const
+        {
+            auto relative = d_->path.lexically_relative(oldBase.d_->path);
+            return newBase.d_->path / relative;
+        }
+
         COCO_ALWAYS_INLINE QString extQString() const
         {
             return TO_QSTRING_(d_->path.extension());

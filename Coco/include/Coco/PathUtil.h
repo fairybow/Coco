@@ -62,6 +62,11 @@ namespace Coco::PathUtil
         return QFile::copy(path.toQString(), newPath.toQString());
     }
 
+    inline bool remove(const Path& path)
+    {
+        return QFile::remove(path.toQString());
+    }
+
     inline bool copyContents(const Path& srcDir, const Path& dstDir)
     {
         if (!srcDir.exists() || !srcDir.isFolder()) return false;

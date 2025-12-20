@@ -146,6 +146,13 @@ namespace Coco
 
         COCO_ALWAYS_INLINE bool operator!=(const Path& other) const noexcept = default;
 
+        COCO_ALWAYS_INLINE bool operator<(const Path& other) const noexcept
+        {
+            return d_->path < other.d_->path;
+        }
+
+        COCO_ALWAYS_INLINE bool operator>(const Path& other) const noexcept = default;
+
         // ----- Concatenation operators -----
 
         COCO_ALWAYS_INLINE Path operator/(const Path& other) const

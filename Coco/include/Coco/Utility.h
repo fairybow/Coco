@@ -40,6 +40,7 @@
 
 namespace Coco::Utility
 {
+    // This is dumb. Why did you do this?
     template <typename T>
     inline void sort(QList<T>& list)
     {

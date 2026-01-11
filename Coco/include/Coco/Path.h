@@ -498,6 +498,8 @@ namespace Coco
 
     }; // class Coco::Path
 
+    using PathList = QList<Path>;
+
 } // namespace Coco
 
 inline Coco::Path operator"" _ccpath(const char* cString, std::size_t)
@@ -513,8 +515,6 @@ namespace std
         std::size_t operator()(const Coco::Path& path) const;
     };
 }
-
-using Coco::PathList = QList<Coco::Path>;
 
 #undef TO_QSTRING_
 #undef CACHED_QSTRING_

@@ -514,6 +514,8 @@ namespace std
     };
 }
 
+using Coco::PathList = QList<Coco::Path>;
+
 #undef TO_QSTRING_
 #undef CACHED_QSTRING_
 #undef CACHED_STRING_

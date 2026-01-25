@@ -291,4 +291,14 @@ namespace Coco::Fx
         );
     }
 
+    inline QColor blend(const QColor& base, const QColor& overlay, qreal strength)
+    {
+        strength = qBound(0.0, strength, 1.0);
+        return QColor(
+            FxOp::clamp(int(base.red() * (1 - strength) + overlay.red() * strength)),
+            FxOp::clamp(int(base.green() * (1 - strength) + overlay.green() * strength)),
+            FxOp::clamp(int(base.blue() * (1 - strength) + overlay.blue() * strength))
+        );
+    }
+
 } // namespace Coco::Fx

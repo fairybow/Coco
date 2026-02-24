@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <filesystem>
+#include <format>
 #include <ostream>
 #include <string>
 #include <utility>
@@ -546,7 +547,15 @@ namespace std {
 
 template <> struct hash<Coco::Path>
 {
-    std::size_t operator()(const Coco::Path& path) const;
+    size_t operator()(const Coco::Path& path) const;
+};
+
+template <> struct formatter<Coco::Path> : formatter<string>
+{
+    auto format(const Coco::Path& path, format_context& ctx) const
+    {
+        return formatter<string>::format(path.toString(), ctx);
+    }
 };
 
 } // namespace std

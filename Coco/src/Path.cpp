@@ -1,3 +1,12 @@
+/*
+ * Coco  Copyright (C) 2025-2026  fairybow
+ *
+ * Licensed under GPL 3 with additional terms under Section 7. See LICENSE and
+ * ADDITIONAL_TERMS files, or visit: <https://www.gnu.org/licenses/>
+ *
+ * Uses Qt 6 - <https://www.qt.io/>
+ */
+
 #include "../include/Coco/Path.h"
 
 #include <algorithm>
@@ -15,8 +24,6 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QStringList>
-#include <QtGlobal>
-#include <QtTypes>
 
 static const int cocoPathMetaInit_ = [] {
     qRegisterMetaType<Coco::Path>("Coco::Path");
@@ -29,6 +36,33 @@ static const int cocoPathMetaInit_ = [] {
 
     return 0;
 }();
+
+static QStringList dirPathsExtHelper_(const QString& extensions)
+{
+    QStringList resolved{};
+
+    for (auto& ext : extensions.split(QStringLiteral(",")))
+        resolved << QStringLiteral("*") + Coco::resolveExt(ext);
+
+    return resolved;
+}
+
+static constexpr QDirIterator::IteratorFlags
+dirPathsFlagsHelper_(Coco::Recursive recursive) noexcept
+{
+    return recursive ? QDirIterator::Subdirectories
+                     : QDirIterator::NoIteratorFlags;
+}
+
+static QStringList argPathsExtHelper_(const QString& extensions)
+{
+    QStringList resolved{};
+
+    for (auto& ext : extensions.split(QStringLiteral(",")))
+        resolved << Coco::resolveExt(ext);
+
+    return resolved;
+}
 
 #define TO_QSTRING_(StdFsPath) QString::fromStdString(StdFsPath.string())
 #define CACHED_STRING_(DPtr)                                                   \
@@ -103,6 +137,71 @@ QString Path::fromSystem_(SystemLocation value) const
     if (it != SYSTEM_MAP_.end()) return standardLocation_(*it);
 
     return {};
+}
+
+PathList
+dirPaths(const Path& directory, const QString& extensions, Recursive recursive)
+{
+    PathList paths{};
+
+    QDirIterator it(
+        directory.toQString(),
+        dirPathsExtHelper_(extensions),
+        QDir::Files,
+        dirPathsFlagsHelper_(recursive));
+
+    while (it.hasNext()) {
+        it.next();
+        paths << it.filePath();
+    }
+
+    return paths;
+}
+
+PathList dirPaths(
+    const PathList& directories,
+    const QString& extensions,
+    Recursive recursive)
+{
+    PathList paths{};
+    auto exts = dirPathsExtHelper_(extensions);
+    auto flags = dirPathsFlagsHelper_(recursive);
+
+    for (auto& dir : directories) {
+        QDirIterator it(dir.toQString(), exts, QDir::Files, flags);
+
+        while (it.hasNext()) {
+            it.next();
+            paths << it.filePath();
+        }
+    }
+
+    return paths;
+}
+
+PathList argPaths(const QStringList& args, const QString& extensions)
+{
+    PathList paths{};
+    auto exts = argPathsExtHelper_(extensions);
+
+    for (const auto& arg : args) {
+        Path path(arg);
+        if (exts.contains(path.extQString())) paths.append(path);
+    }
+
+    return paths;
+}
+
+PathList argPaths(int argc, const char* const* argv, const QString& extensions)
+{
+    QStringList args{};
+
+    for (auto i = 0; i < argc; ++i) {
+        auto arg = argv[i];
+        if (arg) args << QString::fromUtf8(arg);
+    }
+
+    return argPaths(args, extensions);
 }
 
 } // namespace Coco

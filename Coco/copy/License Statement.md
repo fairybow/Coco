@@ -2,14 +2,11 @@
 
 ```
 /*
-* Project: File.ext  Copyright (C) yyyy  fairybow
-*
-* You should have received a copy of the GNU General Public License along with
-* this program. If not, see <https://www.gnu.org/licenses/>.
-*
-* This file uses Qt 6. Qt is a free and open-source widget toolkit for creating
-* graphical user interfaces. For more information, visit <https://www.qt.io/>.
-*
-* Updated: yyyy-mm-dd
-*/
+ * Coco  Copyright (C) 2025-2026  fairybow
+ *
+ * Licensed under GPL 3 with additional terms under Section 7. See LICENSE and
+ * ADDITIONAL_TERMS files, or visit: <https://www.gnu.org/licenses/>
+ *
+ * Uses Qt 6 - <https://www.qt.io/>
+ */
 ```

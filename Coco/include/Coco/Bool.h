@@ -1,24 +1,29 @@
+/*
+ * Coco  Copyright (C) 2025-2026  fairybow
+ *
+ * Licensed under GPL 3 with additional terms under Section 7. See LICENSE and
+ * ADDITIONAL_TERMS files, or visit: <https://www.gnu.org/licenses/>
+ *
+ * Uses Qt 6 - <https://www.qt.io/>
+ */
+
 #pragma once
 
 #include <QDebug>
 #include <QString>
 
-#include "Macros.h"
-
-// @brief The general point is to have a convenient way to avoid ambiguous
-// boolean function parameters. Creates a strongly-typed, named boolean class
-// with Yes/No static constants that implicitly converts to bool for natural
-// use. If the function has only one parameter (bool), then the function name
-// itself should make it clear what that parameter is for (meaning this class is
-// unnecessary there).
+// The general point is to have a convenient way to avoid ambiguous boolean
+// function parameters. Creates a strongly-typed, named boolean class with
+// Yes/No static constants that implicitly converts to bool for natural use. If
+// the function has only one parameter (bool), then the function name itself
+// should make it clear what that parameter is for (meaning this class is
+// unnecessary there)
 //
-// @note Default value is false, but using CocoBool{} or {} sorta defeats the
-// purpose...
+// Performance: The template-based implementation compiles to the same machine
+// code as raw booleans after optimization
 //
-// @note Performance: The template-based implementation compiles to the same
-// machine code as raw booleans after optimization. All operations are marked
-// constexpr and COCO_ALWAYS_INLINE, ensuring (hopefully) zero runtime overhead.
-//
+// clang-format off
+// 
 // EXAMPLE:
 // ```cpp
 // // Ambiguous boolean parameters:
@@ -50,52 +55,61 @@
 // TypeB b = TypeB::Yes;
 // qDebug() << (a == b);  // Compile error
 // ```
-namespace Coco
+//
+// clang-format on
+namespace Coco {
+template <typename TagT> class Bool
 {
-    template <typename TagT>
-    class Bool
+public:
+    static const Bool Yes;
+    static const Bool No;
+
+    friend QDebug operator<<(QDebug debug, const Bool& b)
     {
-    public:
-        static const Bool Yes;
-        static const Bool No;
+        return debug << qUtf8Printable(name_(b));
+    }
 
-        COCO_ALWAYS_INLINE friend QDebug operator<<(QDebug debug, const Bool& b) { return debug << qUtf8Printable(name_(b)); }
-        COCO_ALWAYS_INLINE constexpr operator bool() const { return value_; }
-        COCO_ALWAYS_INLINE constexpr Bool operator!() const { return value_ ? No : Yes; }
+    constexpr operator bool() const { return value_; }
+    constexpr Bool operator!() const { return value_ ? No : Yes; }
+    constexpr bool operator==(const Bool<TagT>& other) const = default;
 
-        // Allow comparison with same type only
-        template<typename OtherTagT>
-        constexpr bool operator==(const Bool<OtherTagT>& other) const = delete;
-        COCO_ALWAYS_INLINE constexpr bool operator==(const Bool<TagT>& other) const = default;
+    // Allow comparison with same type only
+    template <typename OtherTagT>
+    constexpr bool operator==(const Bool<OtherTagT>& other) const = delete;
 
-        // Anything else?
+    // TODO: Anything else?
 
-    private:
-        bool value_;
+private:
+    bool value_;
 
-        Bool() = delete;
-        //COCO_ALWAYS_INLINE constexpr Bool() : value_(false) {}
-        COCO_ALWAYS_INLINE constexpr explicit Bool(bool value) : value_(value) {}
-        COCO_ALWAYS_INLINE static QString name_(const Bool& b) { return QString(TagT::name()) + "::" + (b.value_ ? "Yes" : "No"); }
+    // Default value could be false but then that defeats the purpose (back to
+    // ambiguous bools)
+    Bool() = delete;
 
-    }; // class Coco::Bool
+    constexpr explicit Bool(bool value)
+        : value_(value)
+    {
+    }
 
-    // Define the static members outside the class (see above)
-    template <typename TagT>
-    const Bool<TagT> Bool<TagT>::Yes{ true };
+    static QString name_(const Bool& b)
+    {
+        return QString(TagT::name()) + QStringLiteral("::")
+               + (b.value_ ? QStringLiteral("Yes") : QStringLiteral("No"));
+    }
+};
 
-    template <typename TagT>
-    const Bool<TagT> Bool<TagT>::No{ false };
+// Define the static members outside the class (see above)
+template <typename TagT> const Bool<TagT> Bool<TagT>::Yes{ true };
+template <typename TagT> const Bool<TagT> Bool<TagT>::No{ false };
 
 } // namespace Coco
 
-#define COCO_BOOL(Name)                             \
-    struct Name##Tag {                              \
-        static constexpr const char* name() {       \
-            return #Name;                           \
-        }                                           \
-    };                                              \
-    using Name = Coco::Bool<Name##Tag>              \
+#define COCO_BOOL(Name)                                                        \
+    struct Name##Tag                                                           \
+    {                                                                          \
+        static constexpr const char* name() { return #Name; }                  \
+    };                                                                         \
+    using Name = Coco::Bool<Name##Tag>
 
 // Old, notes, etc:
 

@@ -36,15 +36,15 @@ static const int cocoPathMetaInit_ = [] {
     return 0;
 }();
 
-static QStringList argPathsExtHelper_(const QString& extensions)
-{
-    QStringList resolved{};
-
-    for (auto& ext : extensions.split(QStringLiteral(",")))
-        resolved << Coco::resolveExt(ext);
-
-    return resolved;
-}
+// static QStringList argPathsExtHelper_(const QString& extensions)
+//{
+//     QStringList resolved{};
+//
+//     for (auto& ext : extensions.split(QStringLiteral(",")))
+//         resolved << Coco::resolveExt(ext);
+//
+//     return resolved;
+// }
 
 #define TO_QSTRING_(StdFsPath) QString::fromStdString(StdFsPath.string())
 #define CACHED_STRING_(DPtr)                                                   \
@@ -120,30 +120,31 @@ QString Path::fromSystem_(SystemLocation value) const
     return {};
 }
 
-PathList argPaths(const QStringList& args, const QString& extensions)
-{
-    PathList paths{};
-    auto exts = argPathsExtHelper_(extensions);
-
-    for (const auto& arg : args) {
-        Path path(arg);
-        if (exts.contains(path.extQString())) paths.append(path);
-    }
-
-    return paths;
-}
-
-PathList argPaths(int argc, const char* const* argv, const QString& extensions)
-{
-    QStringList args{};
-
-    for (auto i = 0; i < argc; ++i) {
-        auto arg = argv[i];
-        if (arg) args << QString::fromUtf8(arg);
-    }
-
-    return argPaths(args, extensions);
-}
+// PathList argPaths(const QStringList& args, const QString& extensions)
+//{
+//     PathList paths{};
+//     auto exts = argPathsExtHelper_(extensions);
+//
+//     for (const auto& arg : args) {
+//         Path path(arg);
+//         if (exts.contains(path.extQString())) paths.append(path);
+//     }
+//
+//     return paths;
+// }
+//
+// PathList argPaths(int argc, const char* const* argv, const QString&
+// extensions)
+//{
+//     QStringList args{};
+//
+//     for (auto i = 0; i < argc; ++i) {
+//         auto arg = argv[i];
+//         if (arg) args << QString::fromUtf8(arg);
+//     }
+//
+//     return argPaths(args, extensions);
+// }
 
 } // namespace Coco
 

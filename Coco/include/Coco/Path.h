@@ -547,13 +547,13 @@ inline bool copyContents(const Path& srcDir, const Path& dstDir)
     return true;
 }
 
-inline QString resolveExt(const QString& ext)
-{
-    auto e = ext.trimmed();
-    if (e.isEmpty()) return {};
-    constexpr QChar dot('.');
-    return (e.startsWith(dot) ? e : dot + e);
-}
+// inline QString resolveExt(const QString& ext)
+//{
+//     auto e = ext.trimmed();
+//     if (e.isEmpty()) return {};
+//     constexpr QChar dot('.');
+//     return (e.startsWith(dot) ? e : dot + e);
+// }
 
 // Iterator wrappers
 
@@ -677,11 +677,12 @@ inline PathList allFilePaths(const PathList& dirs, const QStringList& exts)
 
 // For isolating paths from QApplication arguments
 // TODO: Redo like the above (argPaths vs argFiles)
-PathList argPaths(const QStringList& args, const QString& extensions);
+// PathList argPaths(const QStringList& args, const QString& extensions);
 
 // For isolating paths from main function arguments
 // TODO: Redo like the above (argPaths vs argFiles)
-PathList argPaths(int argc, const char* const* argv, const QString& extensions);
+// PathList argPaths(int argc, const char* const* argv, const QString&
+// extensions);
 
 inline Path getDir(
     QWidget* parent = nullptr,

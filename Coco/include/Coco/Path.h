@@ -264,7 +264,7 @@ public:
         return QFileInfo(CACHED_QSTRING_(d_)).isFile();
     }
 
-    bool isFolder() const
+    bool isDir() const
     {
         // return std::filesystem::is_directory(m_path);
         //  ^ Valid paths with non-standard characters won't return valid.
@@ -525,7 +525,7 @@ inline bool remove(const Path& path) { return QFile::remove(path.toQString()); }
 // Copies the contents of one directory to another
 inline bool copyContents(const Path& srcDir, const Path& dstDir)
 {
-    if (!srcDir.exists() || !srcDir.isFolder()) return false;
+    if (!srcDir.exists() || !srcDir.isDir()) return false;
     if (!dstDir.exists() && !mkdir(dstDir)) return false;
 
     QDir src_dir(srcDir.toQString());
@@ -535,7 +535,7 @@ inline bool copyContents(const Path& srcDir, const Path& dstDir)
         auto src_path = srcDir / entry;
         auto dst_path = dstDir / entry;
 
-        if (src_path.isFolder()) {
+        if (src_path.isDir()) {
             // Recurse
             if (!mkdir(dst_path)) return false;
             if (!copyContents(src_path, dst_path)) return false;

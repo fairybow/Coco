@@ -559,8 +559,9 @@ inline QString resolveExt(const QString& ext)
 
 // Base:
 
-PathList
-paths(const Path& dir, QDirIterator::IteratorFlags flags = NoIteratorFlags)
+PathList paths(
+    const Path& dir,
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dir, {}, QDir::AllEntries | QDir::NoDotAndDotDot, flags);
 }
@@ -573,7 +574,7 @@ PathList allPaths(const Path& dir)
 PathList paths(
     const Path& dir,
     QDir::Filters filters,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dir, {}, filters, flags);
 }
@@ -588,7 +589,7 @@ PathList paths(
     const Path& dir,
     const QStringList& exts,
     QDir::Filters filters = QDir::AllEntries | QDir::NoDotAndDotDot,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     PathList result{};
     QDirIterator it(dir.toQString(), exts, filters, flags);
@@ -612,8 +613,9 @@ PathList allPaths(
 
 // Multi-dir:
 
-PathList
-paths(const PathList& dirs, QDirIterator::IteratorFlags flags = NoIteratorFlags)
+PathList paths(
+    const PathList& dirs,
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dirs, {}, QDir::AllEntries | QDir::NoDotAndDotDot, flags);
 }
@@ -626,7 +628,7 @@ PathList allPaths(const PathList& dirs)
 PathList paths(
     const PathList& dirs,
     QDir::Filters filters,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dirs, {}, filters, flags);
 }
@@ -641,7 +643,7 @@ PathList paths(
     const PathList& dirs,
     const QStringList& exts,
     QDir::Filters filters = QDir::AllEntries | QDir::NoDotAndDotDot,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     PathList result{};
 
@@ -663,8 +665,9 @@ PathList allPaths(
 
 // Base convenience:
 
-PathList
-filePaths(const Path& dir, QDirIterator::IteratorFlags flags = NoIteratorFlags)
+PathList filePaths(
+    const Path& dir,
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dir, {}, QDir::Files, flags);
 }
@@ -678,7 +681,7 @@ PathList allFilePaths(const Path& dir)
 PathList filePaths(
     const Path& dir,
     const QStringList& exts,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dir, exts, QDir::Files, flags);
 }
@@ -693,7 +696,7 @@ PathList allFilePaths(const Path& dir, const QStringList& exts)
 
 PathList filePaths(
     const PathList& dirs,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dirs, {}, QDir::Files, flags);
 }
@@ -707,7 +710,7 @@ PathList allFilePaths(const PathList& dirs)
 PathList filePaths(
     const PathList& dirs,
     const QStringList& exts,
-    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+    QDirIterator::IteratorFlags flags = QDirIterator::NoIteratorFlags)
 {
     return paths(dirs, exts, QDir::Files, flags);
 }

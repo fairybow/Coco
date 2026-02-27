@@ -11,15 +11,20 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QVariant>
 
 #include "Concepts.h"
 
-// Shorthand for getting the sender of a signal inside a slot.
-//
-// Via Qt: "Warning: This function violates the object-oriented principle of
-// modularity. However, getting access to the sender might be useful when many
-// signals are connected to a single slot."
+// Shorthand for getting the sender of a signal inside a slot. Via Qt: "Warning:
+// This function violates the object-oriented principle of modularity. However,
+// getting access to the sender might be useful when many signals are connected
+// to a single slot."
+// TODO: Prefix with cc_?
 #define qSender(T) qobject_cast<T>(QObject::sender())
+
+// idc I'm the only one using this lol
+// TODO: Prefix with cc_?
+#define qVar(T) QVariant::fromValue(T)
 
 #define COCO_TRACER qDebug() << __FUNCTION__
 
@@ -60,10 +65,7 @@ inline ParentT findParent(QObject* object)
 template <Concepts::QObjectPointer ParentT>
 inline ParentT findParent(const QObject* object)
 {
-    for (auto obj = object; obj; obj = obj->parent())
-        if (auto parent = qobject_cast<ParentT>(obj)) return parent;
-
-    return nullptr;
+    return findParent<ParentT>(const_cast<QObject*>(object));
 }
 
 } // namespace Coco

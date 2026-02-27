@@ -9,6 +9,9 @@
 
 #pragma once
 
+#include <format>
+#include <string>
+
 #include <QDebug>
 #include <QString>
 
@@ -93,8 +96,8 @@ private:
 
     static QString name_(const Bool& b)
     {
-        return QString(TagT::name()) + QStringLiteral("::")
-               + (b.value_ ? QStringLiteral("Yes") : QStringLiteral("No"));
+        return QString::fromUtf8(
+            std::format("{}::{}", TagT::name(), b.value_ ? "Yes" : "No"));
     }
 };
 
@@ -102,14 +105,27 @@ private:
 template <typename TagT> const Bool<TagT> Bool<TagT>::Yes{ true };
 template <typename TagT> const Bool<TagT> Bool<TagT>::No{ false };
 
-} // namespace Coco
-
 #define COCO_BOOL(Name)                                                        \
     struct Name##Tag                                                           \
     {                                                                          \
         static constexpr const char* name() { return #Name; }                  \
     };                                                                         \
     using Name = Coco::Bool<Name##Tag>
+
+} // namespace Coco
+
+template <typename TagT>
+struct std::formatter<Coco::Bool<TagT>> : std::formatter<std::string>
+{
+    auto format(const Coco::Bool<TagT>& b, std::format_context& ctx) const
+    {
+        return std::format_to(
+            ctx.out(),
+            "{}::{}",
+            TagT::name(),
+            b ? "Yes" : "No");
+    }
+};
 
 // Old, notes, etc:
 

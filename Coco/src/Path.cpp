@@ -16,7 +16,6 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QDir>
-#include <QDirIterator>
 #include <QFile>
 #include <QHash>
 #include <QList>
@@ -36,23 +35,6 @@ static const int cocoPathMetaInit_ = [] {
 
     return 0;
 }();
-
-static QStringList dirPathsExtHelper_(const QString& extensions)
-{
-    QStringList resolved{};
-
-    for (auto& ext : extensions.split(QStringLiteral(",")))
-        resolved << QStringLiteral("*") + Coco::resolveExt(ext);
-
-    return resolved;
-}
-
-static constexpr QDirIterator::IteratorFlags
-dirPathsFlagsHelper_(Coco::Recursive recursive) noexcept
-{
-    return recursive ? QDirIterator::Subdirectories
-                     : QDirIterator::NoIteratorFlags;
-}
 
 static QStringList argPathsExtHelper_(const QString& extensions)
 {
@@ -133,50 +115,9 @@ QString Path::fromSystem_(SystemLocation value) const
     if (value == SystemLocation::Root) return QDir::rootPath();
 
     auto it = SYSTEM_MAP_.find(value);
-
     if (it != SYSTEM_MAP_.end()) return standardLocation_(*it);
 
     return {};
-}
-
-PathList
-dirPaths(const Path& directory, const QString& extensions, Recursive recursive)
-{
-    PathList paths{};
-
-    QDirIterator it(
-        directory.toQString(),
-        dirPathsExtHelper_(extensions),
-        QDir::Files,
-        dirPathsFlagsHelper_(recursive));
-
-    while (it.hasNext()) {
-        it.next();
-        paths << it.filePath();
-    }
-
-    return paths;
-}
-
-PathList dirPaths(
-    const PathList& directories,
-    const QString& extensions,
-    Recursive recursive)
-{
-    PathList paths{};
-    auto exts = dirPathsExtHelper_(extensions);
-    auto flags = dirPathsFlagsHelper_(recursive);
-
-    for (auto& dir : directories) {
-        QDirIterator it(dir.toQString(), exts, QDir::Files, flags);
-
-        while (it.hasNext()) {
-            it.next();
-            paths << it.filePath();
-        }
-    }
-
-    return paths;
 }
 
 PathList argPaths(const QStringList& args, const QString& extensions)

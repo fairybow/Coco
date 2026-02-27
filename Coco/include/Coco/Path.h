@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include <cstddef>
 #include <filesystem>
 #include <format>
 #include <ostream>
@@ -20,10 +19,10 @@
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
+#include <QDirIterator>
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QFlags>
 #include <QLatin1StringView>
 #include <QList>
 #include <QSharedData>
@@ -83,7 +82,6 @@
 namespace Coco {
 
 COCO_BOOL(Overwrite);
-COCO_BOOL(Recursive);
 
 // TODO: Could maybe be private or removed altogether somehow?
 enum class SystemLocation
@@ -557,24 +555,175 @@ inline QString resolveExt(const QString& ext)
     return (e.startsWith(dot) ? e : dot + e);
 }
 
-// TODO: Add sorting option
-// Provide extensions as ".h, .cpp" (one QString)
-PathList dirPaths(
-    const Path& directory,
-    const QString& extensions,
-    Recursive recursive = Recursive::Yes);
+// Iterator wrappers
 
-// TODO: Add sorting option
-// Provide extensions as ".h, .cpp" (one QString)
-PathList dirPaths(
-    const PathList& directories,
-    const QString& extensions,
-    Recursive recursive = Recursive::Yes);
+// Base:
+
+PathList
+paths(const Path& dir, QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dir, {}, QDir::AllEntries | QDir::NoDotAndDotDot, flags);
+}
+
+PathList allPaths(const Path& dir)
+{
+    return paths(dir, QDirIterator::Subdirectories);
+}
+
+PathList paths(
+    const Path& dir,
+    QDir::Filters filters,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dir, {}, filters, flags);
+}
+
+PathList allPaths(const Path& dir, QDir::Filters filters)
+{
+    return paths(dir, filters, QDirIterator::Subdirectories);
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList paths(
+    const Path& dir,
+    const QStringList& exts,
+    QDir::Filters filters = QDir::AllEntries | QDir::NoDotAndDotDot,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    PathList result{};
+    QDirIterator it(dir.toQString(), exts, filters, flags);
+
+    while (it.hasNext()) {
+        it.next();
+        result << it.filePath();
+    }
+
+    return result;
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList allPaths(
+    const Path& dir,
+    const QStringList& exts,
+    QDir::Filters filters = QDir::AllEntries | QDir::NoDotAndDotDot)
+{
+    return paths(dir, exts, filters, QDirIterator::Subdirectories);
+}
+
+// Multi-dir:
+
+PathList
+paths(const PathList& dirs, QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dirs, {}, QDir::AllEntries | QDir::NoDotAndDotDot, flags);
+}
+
+PathList allPaths(const PathList& dirs)
+{
+    return paths(dirs, QDirIterator::Subdirectories);
+}
+
+PathList paths(
+    const PathList& dirs,
+    QDir::Filters filters,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dirs, {}, filters, flags);
+}
+
+PathList allPaths(const PathList& dirs, QDir::Filters filters)
+{
+    return paths(dirs, filters, QDirIterator::Subdirectories);
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList paths(
+    const PathList& dirs,
+    const QStringList& exts,
+    QDir::Filters filters = QDir::AllEntries | QDir::NoDotAndDotDot,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    PathList result{};
+
+    for (auto& dir : dirs) {
+        result << paths(dir, exts, filters, flags);
+    }
+
+    return result;
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList allPaths(
+    const PathList& dirs,
+    const QStringList& exts,
+    QDir::Filters filters = QDir::AllEntries | QDir::NoDotAndDotDot)
+{
+    return paths(dirs, exts, filters, QDirIterator::Subdirectories);
+}
+
+// Base convenience:
+
+PathList
+filePaths(const Path& dir, QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dir, {}, QDir::Files, flags);
+}
+
+PathList allFilePaths(const Path& dir)
+{
+    return filePaths(dir, QDirIterator::Subdirectories);
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList filePaths(
+    const Path& dir,
+    const QStringList& exts,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dir, exts, QDir::Files, flags);
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList allFilePaths(const Path& dir, const QStringList& exts)
+{
+    return filePaths(dir, exts, QDirIterator::Subdirectories);
+}
+
+// Multi-path convenience:
+
+PathList filePaths(
+    const PathList& dirs,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dirs, {}, QDir::Files, flags);
+}
+
+PathList allFilePaths(const PathList& dirs)
+{
+    return filePaths(dirs, QDirIterator::Subdirectories);
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList filePaths(
+    const PathList& dirs,
+    const QStringList& exts,
+    QDirIterator::IteratorFlags flags = NoIteratorFlags)
+{
+    return paths(dirs, exts, QDir::Files, flags);
+}
+
+// Provide extensions as: `{ "*.mp3", "*.wav" }`
+PathList allFilePaths(const PathList& dirs, const QStringList& exts)
+{
+    return filePaths(dirs, exts, QDirIterator::Subdirectories);
+}
 
 // For isolating paths from QApplication arguments
+// TODO: Redo like the above (argPaths vs argFiles)
 PathList argPaths(const QStringList& args, const QString& extensions);
 
 // For isolating paths from main function arguments
+// TODO: Redo like the above (argPaths vs argFiles)
 PathList argPaths(int argc, const char* const* argv, const QString& extensions);
 
 inline Path getDir(

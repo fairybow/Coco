@@ -1,8 +1,8 @@
 /*
  * Coco  Copyright (C) 2025-2026  fairybow
  *
- * Licensed under GPL 3 with additional terms under Section 7. See LICENSE and
- * ADDITIONAL_TERMS files, or visit: <https://www.gnu.org/licenses/>
+ * Licensed under GPL 3 with additional terms under Section 7. See LICENSE, or
+ * visit: <https://www.gnu.org/licenses/>
  *
  * Uses Qt 6 - <https://www.qt.io/>
  */
@@ -80,8 +80,6 @@
     }
 
 namespace Coco {
-
-COCO_BOOL(Overwrite);
 
 // TODO: Could maybe be private or removed altogether somehow?
 enum class SystemLocation
@@ -510,6 +508,8 @@ inline bool mkdir(const Path& path)
 {
     return std::filesystem::create_directories(path.toStd());
 }
+
+COCO_BOOL(Overwrite);
 
 // Copies a file at the specified path to a new path
 inline bool

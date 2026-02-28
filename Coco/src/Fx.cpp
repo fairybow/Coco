@@ -1,11 +1,20 @@
+/*
+ * Coco  Copyright (C) 2025-2026  fairybow
+ *
+ * Licensed under GPL 3 with additional terms under Section 7. See LICENSE, or
+ * visit: <https://www.gnu.org/licenses/>
+ *
+ * Uses Qt 6 - <https://www.qt.io/>
+ */
+
+#include "../include/Coco/Fx.h"
+
 #include <cmath>
 #include <numbers>
 
 #include <QColor>
 #include <QList>
 #include <QtTypes>
-
-#include "../include/Coco/Fx.h"
 
 namespace Coco::Fx
 {

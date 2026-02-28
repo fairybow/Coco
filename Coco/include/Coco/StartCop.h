@@ -1,3 +1,12 @@
+/*
+ * Coco  Copyright (C) 2025-2026  fairybow
+ *
+ * Licensed under GPL 3 with additional terms under Section 7. See LICENSE, or
+ * visit: <https://www.gnu.org/licenses/>
+ *
+ * Uses Qt 6 - <https://www.qt.io/>
+ */
+
 #pragma once
 
 #if defined(QT_NO_NETWORK)
@@ -21,6 +30,8 @@ namespace Coco {
 // stopping it after sending the second instance's command line arguments to the
 // primary instance.
 //
+// clang-format off
+//
 // Example:
 //
 // ```
@@ -40,6 +51,7 @@ namespace Coco {
 //     return app.exec();
 // }
 // ```
+// clang-format on
 class StartCop : public QObject
 {
     Q_OBJECT

@@ -304,18 +304,37 @@ public:
 
     QString extQString() const { return TO_QSTRING_(d_->path.extension()); }
     std::string extString() const { return d_->path.extension().string(); }
-    QString fileQString() const { return TO_QSTRING_(d_->path.filename()); }
-    std::string fileString() const { return d_->path.filename().string(); }
+    QString nameQString() const { return TO_QSTRING_(d_->path.filename()); }
+    std::string nameString() const { return d_->path.filename().string(); }
 
     QString prettyQString() const
     {
         return QString::fromStdString(prettyString());
     }
 
-    // TODO: I have no idea why this isn't inline...
-    std::string prettyString() const;
+    std::string prettyString() const
+    {
+        std::string pretty{};
+        auto last_ch_was_sep = false;
+
+        for (auto& ch : CACHED_STRING_(d_)) {
+            if (ch == '/' || ch == '\\') {
+                if (!last_ch_was_sep) {
+                    pretty += '/';
+                    last_ch_was_sep = true;
+                }
+            } else {
+                pretty += ch;
+                last_ch_was_sep = false;
+            }
+        }
+
+        return pretty;
+    }
+
     QString stemQString() const { return TO_QSTRING_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
+
     QString toQString() const { return CACHED_QSTRING_(d_); }
     std::filesystem::path toStd() const noexcept { return d_->path; }
     std::string toString() const { return CACHED_STRING_(d_); }
@@ -596,7 +615,10 @@ namespace std {
 
 template <> struct hash<Coco::Path>
 {
-    size_t operator()(const Coco::Path& path) const;
+    size_t operator()(const Coco::Path& path) const
+    {
+        return hash<filesystem::path>()(path.toStd());
+    }
 };
 
 template <> struct formatter<Coco::Path> : formatter<string>

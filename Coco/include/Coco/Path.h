@@ -32,42 +32,7 @@
 
 #include "Bool.h"
 
-// clang-format off
-// 
-// TODO:
-// Handle QMimeData/QUrl?, like:
-// void MainWindow::dropEvent(QDropEvent* event)
-// {
-//      // We know we have URLs because dragEnterEvent already verified this
-//      // We also know the first URL has .json extension
-//      QUrl url = event->mimeData()->urls().at(0);
-//      auto path = url.toLocalFile();
-//
-//      if (view_->load(path))
-//      {
-//          setWindowTitle(QFileInfo(path).fileName());
-//          event->acceptProposedAction();
-//          activateWindow();
-//
-//          return;
-//      }
-// 
-//      // If we get here, loading failed
-//      event->ignore();
-// }
-//
-// clang-format on
-
 #define TO_QSTRING_(StdPath) QString::fromStdString(StdPath.string())
-
-#define GEN_STD_DIR_METHOD_1_(Name, Fn)                                        \
-    static Path Name(const char* cStrPath = {})                                \
-    {                                                                          \
-        Path base(Fn);                                                         \
-        return (!cStrPath || !*cStrPath) ? base : base / cStrPath;             \
-    }
-#define GEN_STD_DIR_METHOD_2_(Name, QtLocation)                                \
-    GEN_STD_DIR_METHOD_1_(Name, QStandardPaths::writableLocation(QtLocation))
 
 namespace Coco {
 
@@ -79,7 +44,7 @@ class Path
 {
 public:
     Path()
-        : d_(new Data_)
+        : d_(new SharedData_)
     {
     }
 
@@ -91,22 +56,22 @@ public:
     Path(Path&& other) noexcept = default;
 
     Path(const std::filesystem::path& path)
-        : d_(new Data_(path))
+        : d_(new SharedData_(path))
     {
     }
 
     Path(const char* path)
-        : d_(new Data_(path))
+        : d_(new SharedData_(path))
     {
     }
 
     Path(const std::string& path)
-        : d_(new Data_(path))
+        : d_(new SharedData_(path))
     {
     }
 
     Path(const QString& path)
-        : d_(new Data_(path.toStdString()))
+        : d_(new SharedData_(path.toStdString()))
     {
     }
 
@@ -202,7 +167,7 @@ public:
     // ----- Decomposition -----
 
     Path rootName() const { return d_->path.root_name(); }
-    Path rootDirectory() const { return d_->path.root_directory(); }
+    Path rootDir() const { return d_->path.root_directory(); }
     Path root() const { return d_->path.root_path(); }
     Path relative() const { return d_->path.relative_path(); }
     Path parent() const { return d_->path.parent_path(); }
@@ -232,14 +197,14 @@ public:
         return *this;
     }
 
-    Path& replaceFilename(const Path& replacement)
+    Path& replaceName(const Path& replacement)
     {
         d_->path.replace_filename(replacement.d_->path);
         d_->invalidateCache();
         return *this;
     }
 
-    Path& removeFilename() noexcept
+    Path& removeName() noexcept
     {
         d_->path.remove_filename();
         d_->invalidateCache();
@@ -300,6 +265,15 @@ public:
 
     // ----- Utility -----
 
+#define GEN_STD_DIR_METHOD_1_(Name, Fn)                                        \
+    static Path Name(const char* cStrPath = {})                                \
+    {                                                                          \
+        Path base(Fn);                                                         \
+        return (!cStrPath || !*cStrPath) ? base : base / cStrPath;             \
+    }
+#define GEN_STD_DIR_METHOD_2_(Name, QtLocation)                                \
+    GEN_STD_DIR_METHOD_1_(Name, QStandardPaths::writableLocation(QtLocation))
+
     GEN_STD_DIR_METHOD_1_(Root, QDir::rootPath())
     GEN_STD_DIR_METHOD_2_(AppConfig, QStandardPaths::AppConfigLocation)
     GEN_STD_DIR_METHOD_2_(AppData, QStandardPaths::AppDataLocation)
@@ -323,11 +297,14 @@ public:
     GEN_STD_DIR_METHOD_2_(Temp, QStandardPaths::TempLocation)
     GEN_STD_DIR_METHOD_2_(Templates, QStandardPaths::TemplatesLocation)
 
+#undef GEN_STD_DIR_METHOD_1_
+#undef GEN_STD_DIR_METHOD_2_
+
 private:
-    class Data_ : public QSharedData
+    class SharedData_ : public QSharedData
     {
     public:
-        explicit Data_(const std::filesystem::path& other = {})
+        explicit SharedData_(const std::filesystem::path& other = {})
             : path(other)
         {
         }
@@ -368,7 +345,7 @@ private:
         mutable std::string cachedString_{};
     };
 
-    QSharedDataPointer<Data_> d_;
+    QSharedDataPointer<SharedData_> d_;
 };
 
 using PathList = QList<Path>;
@@ -654,7 +631,5 @@ inline QDataStream& operator>>(QDataStream& in, Coco::Path& path)
 }
 
 #undef TO_QSTRING_
-#undef GEN_STD_DIR_METHOD_1_
-#undef GEN_STD_DIR_METHOD_2_
 
 Q_DECLARE_METATYPE(Coco::Path)

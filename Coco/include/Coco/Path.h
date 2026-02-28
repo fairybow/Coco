@@ -76,7 +76,7 @@
 #define GENERATE_SYS_METHOD_(Name, QtLocation)                                 \
     static Path Name(const char* cStrPath = {})                                \
     {                                                                          \
-        Path base(standardLocation_(QtLocation));                              \
+        Path base(QStandardPaths::writableLocation(QtLocation));               \
         return !cStrPath ? base : base / cStrPath;                             \
     }
 
@@ -465,14 +465,6 @@ public:
 
 private:
     QSharedDataPointer<PathData> d_;
-
-    static QString standardLocation_(QStandardPaths::StandardLocation value)
-    {
-        return QStandardPaths::locate(
-            value,
-            {},
-            QStandardPaths::LocateDirectory);
-    }
 };
 
 using PathList = QList<Path>;

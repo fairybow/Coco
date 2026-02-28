@@ -38,8 +38,9 @@ namespace Coco {
 
 // Path is a Swiss Army class designed to be a `std::filesystem::path` surrogate
 // for Qt (instead of relying on `QString`). It includes `std::filesystem::path`
-// functionality as well as various utility functions to make it easier (and to
-// allow a user to avoid `QDir` and `QFile` unless they really need them)
+// functionality as well as various utility functions to make it easier to work
+// with (and to allow avoidance of `QDir`, `QFile`, and related classes unless
+// really needed)
 class Path
 {
 public:

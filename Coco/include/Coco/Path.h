@@ -279,14 +279,14 @@ public:
 
     Path& replaceExt(const Path& replacement = {})
     {
-        d_->path.replace_extension(replacement);
+        d_->path.replace_extension(replacement.d_->path);
         d_->invalidateCache();
         return *this;
     }
 
     Path& replaceFilename(const Path& replacement)
     {
-        d_->path.replace_filename(replacement);
+        d_->path.replace_filename(replacement.d_->path);
         d_->invalidateCache();
         return *this;
     }
@@ -506,14 +506,6 @@ inline bool copyContents(const Path& srcDir, const Path& dstDir)
 
     return true;
 }
-
-// inline QString resolveExt(const QString& ext)
-//{
-//     auto e = ext.trimmed();
-//     if (e.isEmpty()) return {};
-//     constexpr QChar dot('.');
-//     return (e.startsWith(dot) ? e : dot + e);
-// }
 
 // Iterator wrappers
 

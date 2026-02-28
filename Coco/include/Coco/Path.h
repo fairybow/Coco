@@ -13,9 +13,7 @@
 #include <format>
 #include <ostream>
 #include <string>
-#include <utility>
 
-#include <QChar>
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
@@ -23,14 +21,12 @@
 #include <QFile>
 #include <QFileDialog>
 #include <QFileInfo>
-#include <QLatin1StringView>
 #include <QList>
 #include <QSharedData>
 #include <QSharedDataPointer>
 #include <QStandardPaths>
 #include <QString>
 #include <QStringList>
-#include <QStringView>
 #include <QTextStream>
 #include <QWidget>
 
@@ -303,102 +299,6 @@ public:
         d_->path.swap(other.d_->path);
         d_->invalidateCache();
         other.d_->invalidateCache();
-    }
-
-    template <typename... Args> Path arg(Args&&... args) const
-    {
-        return CACHED_QSTRING_(d_).arg(std::forward<Args>(args)...);
-    }
-
-    Path arg(const QString& a, int fieldWidth = 0, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, fillChar);
-    }
-
-    Path arg(QChar a, int fieldWidth = 0, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, fillChar);
-    }
-
-    Path
-    arg(QLatin1StringView a, int fieldWidth = 0, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, fillChar);
-    }
-
-    Path arg(QStringView a, int fieldWidth = 0, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, fillChar);
-    }
-
-    Path arg(char a, int fieldWidth = 0, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, fillChar);
-    }
-
-    Path
-    arg(int a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(long a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(qlonglong a,
-        int fieldWidth = 0,
-        int base = 10,
-        QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(qulonglong a,
-        int fieldWidth = 0,
-        int base = 10,
-        QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(short a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(uint a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(ulong a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path arg(ushort a, int fieldWidth = 0, int base = 10, QChar fillChar = u' ')
-        const
-    {
-        return CACHED_QSTRING_(d_).arg(a, fieldWidth, base, fillChar);
-    }
-
-    Path
-    arg(double a,
-        int fieldWidth = 0,
-        char format = 'g',
-        int precision = -1,
-        QChar fillChar = u' ') const
-    {
-        return CACHED_QSTRING_(d_)
-            .arg(a, fieldWidth, format, precision, fillChar);
     }
 
     // ----- Conversion -----

@@ -252,11 +252,9 @@ public:
     Path root() const { return d_->path.root_path(); }
     Path relative() const { return d_->path.relative_path(); }
     Path parent() const { return d_->path.parent_path(); }
-    Path filename() const { return d_->path.filename(); }
-    Path file() const { return d_->path.filename(); }
+    Path name() const { return d_->path.filename(); }
     Path stem() const { return d_->path.stem(); }
     Path ext() const { return d_->path.extension(); }
-    Path extension() const { return d_->path.extension(); }
 
     // ----- Modification -----
 

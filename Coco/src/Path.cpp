@@ -17,14 +17,13 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
-#include <QHash>
 #include <QList>
 #include <QMetaType>
 #include <QStandardPaths>
 #include <QString>
 #include <QStringList>
 
-static const int cocoPathMetaInit_ = [] {
+static const int cocoPathQMetaTypeInitializer_ = [] {
     qRegisterMetaType<Coco::Path>("Coco::Path");
 
     // Lets QSettings write Coco::Path as a plain string in INI files
@@ -36,60 +35,22 @@ static const int cocoPathMetaInit_ = [] {
     return 0;
 }();
 
-// static QStringList argPathsExtHelper_(const QString& extensions)
-//{
-//     QStringList resolved{};
-//
-//     for (auto& ext : extensions.split(QStringLiteral(",")))
-//         resolved << Coco::resolveExt(ext);
-//
-//     return resolved;
-// }
-
+// TODO: These are duplicated from header!
 #define TO_QSTRING_(StdFsPath) QString::fromStdString(StdFsPath.string())
 #define CACHED_STRING_(DPtr)                                                   \
     (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
 #define CACHED_QSTRING_(DPtr)                                                  \
     (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING_(DPtr->path))
 
+// TODO: Why not inline?
 std::size_t std::hash<Coco::Path>::operator()(const Coco::Path& path) const
 {
     return std::hash<std::filesystem::path>()(path.toStd());
 }
 
-static const QHash<Coco::SystemLocation, QStandardPaths::StandardLocation>
-    SYSTEM_MAP_ = {
-        { Coco::SystemLocation::AppConfig, QStandardPaths::AppConfigLocation },
-        { Coco::SystemLocation::AppData, QStandardPaths::AppDataLocation },
-        { Coco::SystemLocation::AppLocalData,
-          QStandardPaths::AppLocalDataLocation },
-        { Coco::SystemLocation::Applications,
-          QStandardPaths::ApplicationsLocation },
-        { Coco::SystemLocation::Cache, QStandardPaths::CacheLocation },
-        { Coco::SystemLocation::Config, QStandardPaths::ConfigLocation },
-        { Coco::SystemLocation::Desktop, QStandardPaths::DesktopLocation },
-        { Coco::SystemLocation::Downloads, QStandardPaths::DownloadLocation },
-        { Coco::SystemLocation::Documents, QStandardPaths::DocumentsLocation },
-        { Coco::SystemLocation::Fonts, QStandardPaths::FontsLocation },
-        { Coco::SystemLocation::GenericCache,
-          QStandardPaths::GenericCacheLocation },
-        { Coco::SystemLocation::GenericConfig,
-          QStandardPaths::GenericConfigLocation },
-        { Coco::SystemLocation::GenericData,
-          QStandardPaths::GenericDataLocation },
-        { Coco::SystemLocation::Home, QStandardPaths::HomeLocation },
-        { Coco::SystemLocation::Movies, QStandardPaths::MoviesLocation },
-        { Coco::SystemLocation::Music, QStandardPaths::MusicLocation },
-        { Coco::SystemLocation::Pictures, QStandardPaths::PicturesLocation },
-        { Coco::SystemLocation::PublicShare,
-          QStandardPaths::PublicShareLocation },
-        { Coco::SystemLocation::Runtime, QStandardPaths::RuntimeLocation },
-        { Coco::SystemLocation::Temp, QStandardPaths::TempLocation },
-        { Coco::SystemLocation::Templates, QStandardPaths::TemplatesLocation }
-    };
-
 namespace Coco {
 
+// TODO: Why not inline?
 std::string Path::prettyString() const
 {
     std::string pretty{};
@@ -110,44 +71,9 @@ std::string Path::prettyString() const
     return pretty;
 }
 
-QString Path::fromSystem_(SystemLocation value) const
-{
-    if (value == SystemLocation::Root) return QDir::rootPath();
-
-    auto it = SYSTEM_MAP_.find(value);
-    if (it != SYSTEM_MAP_.end()) return standardLocation_(*it);
-
-    return {};
-}
-
-// PathList argPaths(const QStringList& args, const QString& extensions)
-//{
-//     PathList paths{};
-//     auto exts = argPathsExtHelper_(extensions);
-//
-//     for (const auto& arg : args) {
-//         Path path(arg);
-//         if (exts.contains(path.extQString())) paths.append(path);
-//     }
-//
-//     return paths;
-// }
-//
-// PathList argPaths(int argc, const char* const* argv, const QString&
-// extensions)
-//{
-//     QStringList args{};
-//
-//     for (auto i = 0; i < argc; ++i) {
-//         auto arg = argv[i];
-//         if (arg) args << QString::fromUtf8(arg);
-//     }
-//
-//     return argPaths(args, extensions);
-// }
-
 } // namespace Coco
 
+// TODO: These are duplicated from header!
 #undef TO_QSTRING_
 #undef CACHED_QSTRING_
 #undef CACHED_STRING_

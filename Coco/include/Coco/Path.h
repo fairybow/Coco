@@ -72,41 +72,15 @@
     (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
 #define CACHED_QSTRING_(DPtr)                                                  \
     (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING_(DPtr->path))
-#define GENERATE_SYS_METHOD_(EnumValue)                                        \
-    static Path EnumValue(const char* path = {})                               \
+
+#define GENERATE_SYS_METHOD_(Name, QtLocation)                                 \
+    static Path Name(const char* cStrPath = {})                                \
     {                                                                          \
-        return !path ? Path(SystemLocation::EnumValue)                         \
-                     : Path(SystemLocation::EnumValue) / path;                 \
+        Path base(standardLocation_(QtLocation));                              \
+        return !cStrPath ? base : base / cStrPath;                             \
     }
 
 namespace Coco {
-
-// TODO: Could maybe be private or removed altogether somehow?
-enum class SystemLocation
-{
-    Root,
-    AppConfig,
-    AppData,
-    AppLocalData,
-    Applications,
-    Cache,
-    Config,
-    Desktop,
-    Downloads,
-    Documents,
-    Fonts,
-    GenericCache,
-    GenericConfig,
-    GenericData,
-    Home,
-    Movies,
-    Music,
-    Pictures,
-    PublicShare,
-    Runtime,
-    Temp,
-    Templates
-};
 
 // TODO: Nest in path later
 class PathData : public QSharedData
@@ -140,7 +114,10 @@ public:
     }
 };
 
-// Swiss Army class for Qt/std::filesystem::path interop
+// Path is a Swiss Army class designed to be a `std::filesystem::path` surrogate
+// for Qt (instead of relying on `QString`). It includes `std::filesystem::path`
+// functionality as well as various utility functions to make it easier (and to
+// allow a user to avoid `QDir` and `QFile` unless they really need them)
 class Path
 {
 public:
@@ -173,11 +150,6 @@ public:
 
     Path(const QString& path)
         : d_(new PathData(path.toStdString()))
-    {
-    }
-
-    Path(SystemLocation location)
-        : d_(new PathData(fromSystem_(location).toStdString()))
     {
     }
 
@@ -453,6 +425,7 @@ public:
         return QString::fromStdString(prettyString());
     }
 
+    // TODO: I have no idea why this isn't inline...
     std::string prettyString() const;
     QString stemQString() const { return TO_QSTRING_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
@@ -462,37 +435,38 @@ public:
 
     // ----- Utility -----
 
-    GENERATE_SYS_METHOD_(Root);
-    GENERATE_SYS_METHOD_(AppConfig);
-    GENERATE_SYS_METHOD_(AppData);
-    GENERATE_SYS_METHOD_(AppLocalData);
-    GENERATE_SYS_METHOD_(Applications);
-    GENERATE_SYS_METHOD_(Cache);
-    GENERATE_SYS_METHOD_(Config);
-    GENERATE_SYS_METHOD_(Desktop);
-    GENERATE_SYS_METHOD_(Downloads);
-    GENERATE_SYS_METHOD_(Documents);
-    GENERATE_SYS_METHOD_(Fonts);
-    GENERATE_SYS_METHOD_(GenericCache);
-    GENERATE_SYS_METHOD_(GenericConfig);
-    GENERATE_SYS_METHOD_(GenericData);
-    GENERATE_SYS_METHOD_(Home);
-    GENERATE_SYS_METHOD_(Movies);
-    GENERATE_SYS_METHOD_(Music);
-    GENERATE_SYS_METHOD_(Pictures);
-    GENERATE_SYS_METHOD_(PublicShare);
-    GENERATE_SYS_METHOD_(Runtime);
-    GENERATE_SYS_METHOD_(Temp);
-    GENERATE_SYS_METHOD_(Templates);
+    static Path Root(const char* path = {})
+    {
+        Path base(QDir::rootPath());
+        return !path ? base : base / path;
+    }
+
+    GENERATE_SYS_METHOD_(AppConfig, QStandardPaths::AppConfigLocation)
+    GENERATE_SYS_METHOD_(AppData, QStandardPaths::AppDataLocation)
+    GENERATE_SYS_METHOD_(AppLocalData, QStandardPaths::AppLocalDataLocation)
+    GENERATE_SYS_METHOD_(Applications, QStandardPaths::ApplicationsLocation)
+    GENERATE_SYS_METHOD_(Cache, QStandardPaths::CacheLocation)
+    GENERATE_SYS_METHOD_(Config, QStandardPaths::ConfigLocation)
+    GENERATE_SYS_METHOD_(Desktop, QStandardPaths::DesktopLocation)
+    GENERATE_SYS_METHOD_(Downloads, QStandardPaths::DownloadLocation)
+    GENERATE_SYS_METHOD_(Documents, QStandardPaths::DocumentsLocation)
+    GENERATE_SYS_METHOD_(Fonts, QStandardPaths::FontsLocation)
+    GENERATE_SYS_METHOD_(GenericCache, QStandardPaths::GenericCacheLocation)
+    GENERATE_SYS_METHOD_(GenericConfig, QStandardPaths::GenericConfigLocation)
+    GENERATE_SYS_METHOD_(GenericData, QStandardPaths::GenericDataLocation)
+    GENERATE_SYS_METHOD_(Home, QStandardPaths::HomeLocation)
+    GENERATE_SYS_METHOD_(Movies, QStandardPaths::MoviesLocation)
+    GENERATE_SYS_METHOD_(Music, QStandardPaths::MusicLocation)
+    GENERATE_SYS_METHOD_(Pictures, QStandardPaths::PicturesLocation)
+    GENERATE_SYS_METHOD_(PublicShare, QStandardPaths::PublicShareLocation)
+    GENERATE_SYS_METHOD_(Runtime, QStandardPaths::RuntimeLocation)
+    GENERATE_SYS_METHOD_(Temp, QStandardPaths::TempLocation)
+    GENERATE_SYS_METHOD_(Templates, QStandardPaths::TemplatesLocation)
 
 private:
     QSharedDataPointer<PathData> d_;
 
-    // Returning QString just because the Qt functions within this and
-    // standardLocation_ also return QString
-    QString fromSystem_(SystemLocation value) const;
-
-    QString standardLocation_(QStandardPaths::StandardLocation value) const
+    static QString standardLocation_(QStandardPaths::StandardLocation value)
     {
         return QStandardPaths::locate(
             value,
@@ -674,15 +648,6 @@ inline PathList allFilePaths(const PathList& dirs, const QStringList& exts)
 {
     return paths(dirs, exts, QDir::Files, QDirIterator::Subdirectories);
 }
-
-// For isolating paths from QApplication arguments
-// TODO: Redo like the above (argPaths vs argFiles)
-// PathList argPaths(const QStringList& args, const QString& extensions);
-
-// For isolating paths from main function arguments
-// TODO: Redo like the above (argPaths vs argFiles)
-// PathList argPaths(int argc, const char* const* argv, const QString&
-// extensions);
 
 inline Path getDir(
     QWidget* parent = nullptr,

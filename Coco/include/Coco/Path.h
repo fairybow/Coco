@@ -32,11 +32,6 @@
 
 #include "Bool.h"
 
-// TODO: Fix caching / cache clearing
-// TODO: Would possibly prefer to cache strings when needed instead of right
-// away (could be a problem for arg methods, for example, although they rely on
-// QString's arg function to even work at all, so idk)
-//
 // clang-format off
 // 
 // TODO:
@@ -63,11 +58,7 @@
 //
 // clang-format on
 
-#define TO_QSTRING_(StdFsPath) QString::fromStdString(StdFsPath.string())
-#define CACHED_STRING_(DPtr)                                                   \
-    (DPtr->cacheValid ? DPtr->cachedString : DPtr->path.string())
-#define CACHED_QSTRING_(DPtr)                                                  \
-    (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING_(DPtr->path))
+#define TO_QSTRING_(StdPath) QString::fromStdString(StdPath.string())
 
 #define GEN_STD_DIR_METHOD_1_(Name, Fn)                                        \
     static Path Name(const char* cStrPath = {})                                \
@@ -80,38 +71,6 @@
 
 namespace Coco {
 
-// TODO: Nest in path later
-class PathData : public QSharedData
-{
-public:
-    explicit PathData(const std::filesystem::path& other = {})
-        : path(other)
-        , cachedString(path.string())
-        , cachedQString(QString::fromStdString(cachedString))
-    {
-    }
-
-    std::filesystem::path path;
-
-    // Cached conversions
-    std::string cachedString;
-    QString cachedQString;
-
-    // Memoization flag (Do we need this?)
-    bool cacheValid = true;
-
-    // Just set cache false and then recompile strings as needed. Start with
-    // doing both whenever one is requested, then maybe do one at a time as
-    // needed
-    void invalidateCache()
-    {
-        cacheValid = false;
-        cachedString = path.string();
-        cachedQString = QString::fromStdString(cachedString);
-        cacheValid = true;
-    }
-};
-
 // Path is a Swiss Army class designed to be a `std::filesystem::path` surrogate
 // for Qt (instead of relying on `QString`). It includes `std::filesystem::path`
 // functionality as well as various utility functions to make it easier (and to
@@ -120,7 +79,7 @@ class Path
 {
 public:
     Path()
-        : d_(new PathData)
+        : d_(new Data_)
     {
     }
 
@@ -132,22 +91,22 @@ public:
     Path(Path&& other) noexcept = default;
 
     Path(const std::filesystem::path& path)
-        : d_(new PathData(path))
+        : d_(new Data_(path))
     {
     }
 
     Path(const char* path)
-        : d_(new PathData(path))
+        : d_(new Data_(path))
     {
     }
 
     Path(const std::string& path)
-        : d_(new PathData(path))
+        : d_(new Data_(path))
     {
     }
 
     Path(const QString& path)
-        : d_(new PathData(path.toStdString()))
+        : d_(new Data_(path.toStdString()))
     {
     }
 
@@ -155,12 +114,12 @@ public:
 
     friend QTextStream& operator<<(QTextStream& outStream, const Path& path)
     {
-        return outStream << CACHED_QSTRING_(path.d_);
+        return outStream << path.d_->qstr();
     }
 
     friend std::ostream& operator<<(std::ostream& outStream, const Path& path)
     {
-        return outStream << CACHED_STRING_(path.d_);
+        return outStream << path.d_->str();
     }
 
     // By returning a QDebug object (not a reference), we allow the chaining of
@@ -168,7 +127,7 @@ public:
     // with the added benefit of managing QDebug's internal state
     friend QDebug operator<<(QDebug debug, const Path& path)
     {
-        return debug << CACHED_QSTRING_(path.d_);
+        return debug << path.d_->qstr();
     }
 
     // ----- Assignment operators -----
@@ -221,23 +180,23 @@ public:
 
     bool isFile() const
     {
-        // return std::filesystem::is_regular_file(m_path);
+        // return std::filesystem::is_regular_file(d_->path);
         //  ^ Valid paths with non-standard characters won't return valid.
-        return QFileInfo(CACHED_QSTRING_(d_)).isFile();
+        return QFileInfo(d_->qstr()).isFile();
     }
 
     bool isDir() const
     {
-        // return std::filesystem::is_directory(m_path);
+        // return std::filesystem::is_directory(d_->path);
         //  ^ Valid paths with non-standard characters won't return valid.
-        return QFileInfo(CACHED_QSTRING_(d_)).isDir();
+        return QFileInfo(d_->qstr()).isDir();
     }
 
     bool exists() const
     {
-        // return std::filesystem::exists(m_path);
+        // return std::filesystem::exists(d_->path);
         //  ^ Valid paths with non-standard characters won't return valid.
-        return QFileInfo(CACHED_QSTRING_(d_)).exists();
+        return QFileInfo(d_->qstr()).exists();
     }
 
     // ----- Decomposition -----
@@ -253,13 +212,13 @@ public:
 
     // ----- Modification -----
 
-    void clear() // noexcept
+    void clear() noexcept
     {
         d_->path.clear();
         d_->invalidateCache();
     }
 
-    Path& makePreferred() // noexcept
+    Path& makePreferred() noexcept
     {
         d_->path.make_preferred();
         d_->invalidateCache();
@@ -280,14 +239,14 @@ public:
         return *this;
     }
 
-    Path& removeFilename() // noexcept
+    Path& removeFilename() noexcept
     {
         d_->path.remove_filename();
         d_->invalidateCache();
         return *this;
     }
 
-    void swap(Path& other) // noexcept
+    void swap(Path& other) noexcept
     {
         d_->path.swap(other.d_->path);
         d_->invalidateCache();
@@ -317,7 +276,7 @@ public:
         std::string pretty{};
         auto last_ch_was_sep = false;
 
-        for (auto& ch : CACHED_STRING_(d_)) {
+        for (auto& ch : d_->str()) {
             if (ch == '/' || ch == '\\') {
                 if (!last_ch_was_sep) {
                     pretty += '/';
@@ -335,9 +294,9 @@ public:
     QString stemQString() const { return TO_QSTRING_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
 
-    QString toQString() const { return CACHED_QSTRING_(d_); }
     std::filesystem::path toStd() const noexcept { return d_->path; }
-    std::string toString() const { return CACHED_STRING_(d_); }
+    QString toQString() const { return d_->qstr(); }
+    std::string toString() const { return d_->str(); }
 
     // ----- Utility -----
 
@@ -365,7 +324,51 @@ public:
     GEN_STD_DIR_METHOD_2_(Templates, QStandardPaths::TemplatesLocation)
 
 private:
-    QSharedDataPointer<PathData> d_;
+    class Data_ : public QSharedData
+    {
+    public:
+        explicit Data_(const std::filesystem::path& other = {})
+            : path(other)
+        {
+        }
+
+        std::filesystem::path path;
+
+        void invalidateCache() noexcept
+        {
+            stringValid_ = false;
+            qStringValid_ = false;
+        }
+
+        const QString& qstr() const
+        {
+            if (!qStringValid_) {
+                cachedQString_ = QString::fromStdString(str());
+                qStringValid_ = true;
+            }
+
+            return cachedQString_;
+        }
+
+        const std::string& str() const
+        {
+            if (!stringValid_) {
+                cachedString_ = path.string();
+                stringValid_ = true;
+            }
+
+            return cachedString_;
+        }
+
+    private:
+        mutable bool qStringValid_ = false;
+        mutable QString cachedQString_{};
+
+        mutable bool stringValid_ = false;
+        mutable std::string cachedString_{};
+    };
+
+    QSharedDataPointer<Data_> d_;
 };
 
 using PathList = QList<Path>;
@@ -651,8 +654,6 @@ inline QDataStream& operator>>(QDataStream& in, Coco::Path& path)
 }
 
 #undef TO_QSTRING_
-#undef CACHED_QSTRING_
-#undef CACHED_STRING_
 #undef GEN_STD_DIR_METHOD_1_
 #undef GEN_STD_DIR_METHOD_2_
 

@@ -69,12 +69,14 @@
 #define CACHED_QSTRING_(DPtr)                                                  \
     (DPtr->cacheValid ? DPtr->cachedQString : TO_QSTRING_(DPtr->path))
 
-#define GEN_STD_DIR_METHOD_(Name, QtLocation)                                  \
+#define GEN_STD_DIR_METHOD_1_(Name, Fn)                                        \
     static Path Name(const char* cStrPath = {})                                \
     {                                                                          \
-        Path base(QStandardPaths::writableLocation(QtLocation));               \
+        Path base(Fn);                                                         \
         return (!cStrPath || !*cStrPath) ? base : base / cStrPath;             \
     }
+#define GEN_STD_DIR_METHOD_2_(Name, QtLocation)                                \
+    GEN_STD_DIR_METHOD_1_(Name, QStandardPaths::writableLocation(QtLocation))
 
 namespace Coco {
 
@@ -320,33 +322,28 @@ public:
 
     // ----- Utility -----
 
-    static Path Root(const char* path = {})
-    {
-        Path base(QDir::rootPath());
-        return !path ? base : base / path;
-    }
-
-    GEN_STD_DIR_METHOD_(AppConfig, QStandardPaths::AppConfigLocation)
-    GEN_STD_DIR_METHOD_(AppData, QStandardPaths::AppDataLocation)
-    GEN_STD_DIR_METHOD_(AppLocalData, QStandardPaths::AppLocalDataLocation)
-    GEN_STD_DIR_METHOD_(Applications, QStandardPaths::ApplicationsLocation)
-    GEN_STD_DIR_METHOD_(Cache, QStandardPaths::CacheLocation)
-    GEN_STD_DIR_METHOD_(Config, QStandardPaths::ConfigLocation)
-    GEN_STD_DIR_METHOD_(Desktop, QStandardPaths::DesktopLocation)
-    GEN_STD_DIR_METHOD_(Downloads, QStandardPaths::DownloadLocation)
-    GEN_STD_DIR_METHOD_(Documents, QStandardPaths::DocumentsLocation)
-    GEN_STD_DIR_METHOD_(Fonts, QStandardPaths::FontsLocation)
-    GEN_STD_DIR_METHOD_(GenericCache, QStandardPaths::GenericCacheLocation)
-    GEN_STD_DIR_METHOD_(GenericConfig, QStandardPaths::GenericConfigLocation)
-    GEN_STD_DIR_METHOD_(GenericData, QStandardPaths::GenericDataLocation)
-    GEN_STD_DIR_METHOD_(Home, QStandardPaths::HomeLocation)
-    GEN_STD_DIR_METHOD_(Movies, QStandardPaths::MoviesLocation)
-    GEN_STD_DIR_METHOD_(Music, QStandardPaths::MusicLocation)
-    GEN_STD_DIR_METHOD_(Pictures, QStandardPaths::PicturesLocation)
-    GEN_STD_DIR_METHOD_(PublicShare, QStandardPaths::PublicShareLocation)
-    GEN_STD_DIR_METHOD_(Runtime, QStandardPaths::RuntimeLocation)
-    GEN_STD_DIR_METHOD_(Temp, QStandardPaths::TempLocation)
-    GEN_STD_DIR_METHOD_(Templates, QStandardPaths::TemplatesLocation)
+    GEN_STD_DIR_METHOD_1_(Root, QDir::rootPath())
+    GEN_STD_DIR_METHOD_2_(AppConfig, QStandardPaths::AppConfigLocation)
+    GEN_STD_DIR_METHOD_2_(AppData, QStandardPaths::AppDataLocation)
+    GEN_STD_DIR_METHOD_2_(AppLocalData, QStandardPaths::AppLocalDataLocation)
+    GEN_STD_DIR_METHOD_2_(Applications, QStandardPaths::ApplicationsLocation)
+    GEN_STD_DIR_METHOD_2_(Cache, QStandardPaths::CacheLocation)
+    GEN_STD_DIR_METHOD_2_(Config, QStandardPaths::ConfigLocation)
+    GEN_STD_DIR_METHOD_2_(Desktop, QStandardPaths::DesktopLocation)
+    GEN_STD_DIR_METHOD_2_(Downloads, QStandardPaths::DownloadLocation)
+    GEN_STD_DIR_METHOD_2_(Documents, QStandardPaths::DocumentsLocation)
+    GEN_STD_DIR_METHOD_2_(Fonts, QStandardPaths::FontsLocation)
+    GEN_STD_DIR_METHOD_2_(GenericCache, QStandardPaths::GenericCacheLocation)
+    GEN_STD_DIR_METHOD_2_(GenericConfig, QStandardPaths::GenericConfigLocation)
+    GEN_STD_DIR_METHOD_2_(GenericData, QStandardPaths::GenericDataLocation)
+    GEN_STD_DIR_METHOD_2_(Home, QStandardPaths::HomeLocation)
+    GEN_STD_DIR_METHOD_2_(Movies, QStandardPaths::MoviesLocation)
+    GEN_STD_DIR_METHOD_2_(Music, QStandardPaths::MusicLocation)
+    GEN_STD_DIR_METHOD_2_(Pictures, QStandardPaths::PicturesLocation)
+    GEN_STD_DIR_METHOD_2_(PublicShare, QStandardPaths::PublicShareLocation)
+    GEN_STD_DIR_METHOD_2_(Runtime, QStandardPaths::RuntimeLocation)
+    GEN_STD_DIR_METHOD_2_(Temp, QStandardPaths::TempLocation)
+    GEN_STD_DIR_METHOD_2_(Templates, QStandardPaths::TemplatesLocation)
 
 private:
     QSharedDataPointer<PathData> d_;
@@ -634,6 +631,7 @@ inline QDataStream& operator>>(QDataStream& in, Coco::Path& path)
 #undef TO_QSTRING_
 #undef CACHED_QSTRING_
 #undef CACHED_STRING_
-#undef GEN_STD_DIR_METHOD_
+#undef GEN_STD_DIR_METHOD_1_
+#undef GEN_STD_DIR_METHOD_2_
 
 Q_DECLARE_METATYPE(Coco::Path)

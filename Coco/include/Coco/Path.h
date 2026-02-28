@@ -217,12 +217,6 @@ public:
         return *this;
     }
 
-    // ----- Conversion operators -----
-
-    explicit operator bool() const noexcept { return !d_->path.empty(); }
-
-    operator std::filesystem::path() const noexcept { return d_->path; }
-
     // ----- Queries -----
 
     bool isEmpty() const noexcept { return d_->path.empty(); }

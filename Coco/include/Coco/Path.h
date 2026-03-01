@@ -258,31 +258,32 @@ public:
     QString nameQString() const { return STD_TO_QSTR_(d_->path.filename()); }
     std::string nameString() const { return d_->path.filename().string(); }
 
-    // TODO: For a display path (normalized forward slashes but no other changes
-    // QString prettyQString() const
-    //{
-    //    return QString::fromStdString(prettyString());
-    //}
+    // For a uniform display path (single forward slashes and no other changes)
+    QString prettyQString() const
+    {
+        return QString::fromStdString(prettyString());
+    }
 
-    // std::string prettyString() const
-    //{
-    //     std::string pretty{};
-    //     auto last_ch_was_sep = false;
+    // For a uniform display path (single forward slashes and no other changes)
+    std::string prettyString() const
+    {
+        std::string pretty{};
+        auto last_was_sep = false;
 
-    //    for (auto& ch : d_->str()) {
-    //        if (ch == '/' || ch == '\\') {
-    //            if (!last_ch_was_sep) {
-    //                pretty += '/';
-    //                last_ch_was_sep = true;
-    //            }
-    //        } else {
-    //            pretty += ch;
-    //            last_ch_was_sep = false;
-    //        }
-    //    }
+        for (auto& ch : d_->str()) {
+            if (ch == '/' || ch == '\\') {
+                if (!last_was_sep) {
+                    pretty += '/';
+                    last_was_sep = true;
+                }
+            } else {
+                pretty += ch;
+                last_was_sep = false;
+            }
+        }
 
-    //    return pretty;
-    //}
+        return pretty;
+    }
 
     QString stemQString() const { return STD_TO_QSTR_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
@@ -653,6 +654,7 @@ Q_DECLARE_METATYPE(Coco::Path)
 
 /*
 // Stream Operator Tests:
+
 #include "Coco/Path.h"
 
 #include <sstream>
@@ -760,11 +762,383 @@ int main()
         qDebug() << "multi std b match:" << (b == rb);
     }
 
+    return 0;
+}
+*/
+
+/*
+// Construction & Comparison Tests:
+
+#include "Coco/Path.h"
+
+#include <QDebug>
+
+int main()
+{
+    // Construction from various types
+    {
+        auto from_cstr = Coco::Path("C:/test/file.txt");
+        auto from_std = Coco::Path(std::string("C:/test/file.txt"));
+        auto from_qstr = Coco::Path(QString("C:/test/file.txt"));
+        auto from_fspath =
+            Coco::Path(std::filesystem::path("C:/test/file.txt"));
+        auto from_literal = "C:/test/file.txt"_ccpath;
+
+        qDebug() << "all equal:"
+                 << (from_cstr == from_std && from_std == from_qstr
+                     && from_qstr == from_fspath
+                     && from_fspath == from_literal);
+    }
+
+    // Copy and move semantics (COW)
+    {
+        auto original = Coco::Path("C:/test/file.txt");
+        auto copied = original;
+
+        qDebug() << "copy equal:" << (original == copied);
+
+        copied /= "subdir";
+
+        qDebug() << "diverged:     " << (original != copied);
+        qDebug() << "original safe:"
+                 << (original == Coco::Path("C:/test/file.txt"));
+        qDebug() << "copy changed: "
+                 << (copied == Coco::Path("C:/test/file.txt/subdir"));
+    }
+
+    // Comparison operators
+    {
+        auto a = Coco::Path("aaa");
+        auto b = Coco::Path("bbb");
+        auto a2 = Coco::Path("aaa");
+
+        qDebug() << "a == a2:" << (a == a2);
+        qDebug() << "a != b: " << (a != b);
+        qDebug() << "a < b:  " << (a < b);
+        qDebug() << "b > a:  " << (b > a);
+        qDebug() << "a <= a2:" << (a <= a2);
+    }
+
+    // Empty path
+    {
+        auto empty = Coco::Path();
+        auto also_empty = Coco::Path("");
+
+        qDebug() << "default empty:" << empty.isEmpty();
+        qDebug() << "string empty: " << also_empty.isEmpty();
+        qDebug() << "empties equal:" << (empty == also_empty);
+    }
+
+    return 0;
+}
+*/
+
+/*
+// Decomposition Tests:
+
+#include "Coco/Path.h"
+
+#include <QDebug>
+
+int main()
+{
+    auto p = Coco::Path("C:/Users/fairybow/Documents/report.tar.gz");
+
+    qDebug() << "rootName:" << p.rootName();
+    qDebug() << "rootDir: " << p.rootDir();
+    qDebug() << "root:    " << p.root();
+    qDebug() << "relative:" << p.relative();
+    qDebug() << "parent:  " << p.parent();
+    qDebug() << "name:    " << p.name();
+    qDebug() << "stem:    " << p.stem();
+    qDebug() << "ext:     " << p.ext();
+
+    // Edge cases
+    auto root_only = Coco::Path("C:/");
+
+    qDebug() << "root name empty: " << root_only.name().isEmpty();
+    qDebug() << "root stem empty: " << root_only.stem().isEmpty();
+    qDebug() << "root ext empty:  " << root_only.ext().isEmpty();
+
+    auto no_ext = Coco::Path("C:/Users/Makefile");
+
+    qDebug() << "no ext name:" << no_ext.name();
+    qDebug() << "no ext stem:" << no_ext.stem();
+    qDebug() << "no ext ext:  " << no_ext.ext().isEmpty();
+
+    auto dotfile = Coco::Path("C:/Users/.gitignore");
+
+    qDebug() << "dotfile name:" << dotfile.name();
+    qDebug() << "dotfile stem:" << dotfile.stem();
+    qDebug() << "dotfile ext: " << dotfile.ext();
+
+    return 0;
+}
+*/
+
+/*
+// Modification Tests:
+
+#include <format>
+
+#include "Coco/Path.h"
+
+#include <QDebug>
+
+int main()
+{
+    // replaceExt
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.replaceExt(".md");
+
+        qDebug() << "replaceExt:" << p;
+        qDebug() << "match:     " << (p == Coco::Path("C:/docs/file.md"));
+    }
+
+    // replaceExt (remove)
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.replaceExt();
+
+        qDebug() << "removeExt:" << p;
+        qDebug() << "match:    " << (p == Coco::Path("C:/docs/file"));
+    }
+
+    // replaceName
+    {
+        auto p = Coco::Path("C:/docs/old.txt");
+        p.replaceName("new.txt");
+
+        qDebug() << "replaceName:" << p;
+        qDebug() << "match:      " << (p == Coco::Path("C:/docs/new.txt"));
+    }
+
+    // removeName
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.removeName();
+
+        qDebug() << "removeName:" << p;
+    }
+
+    // clear
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.clear();
+
+        qDebug() << "clear empty:" << p.isEmpty();
+    }
+
+    // swap
+    {
+        auto a = Coco::Path("C:/first");
+        auto b = Coco::Path("D:/second");
+        a.swap(b);
+
+        qDebug() << "swap a:" << (a == Coco::Path("D:/second"));
+        qDebug() << "swap b:" << (b == Coco::Path("C:/first"));
+    }
+
+    // Concatenation
+    {
+        auto base = Coco::Path("C:/Users");
+        auto joined = base / "fairybow" / "Documents";
+
+        qDebug() << "operator/:" << joined;
+
+        auto appended = Coco::Path("C:/file");
+        appended += ".txt";
+
+        qDebug() << "operator+=:" << appended;
+        qDebug() << "match:     " << (appended == Coco::Path("C:/file.txt"));
+    }
+
+    // makePreferred
+    {
+        auto p = Coco::Path("C:/Users/fairybow/Documents");
+        p.makePreferred();
+
+        qDebug() << "makePreferred:" << p;
+    }
+
     // std::format
     {
         auto p = Coco::Path("C:/My Documents/test.txt");
         auto formatted = std::format("Path is: {}", p);
         qDebug() << "std::format:" << QString::fromStdString(formatted);
+    }
+
+    return 0;
+}
+*/
+
+/*
+// Conversion Tests:
+#include "Coco/Path.h"
+
+#include <QDebug>
+
+int main()
+{
+    auto p = Coco::Path("C:/Users/fairybow/Documents/file.txt");
+
+    // String conversions
+    {
+        auto std_str = p.toString();
+        auto qstr = p.toQString();
+        auto fspath = p.toStd();
+
+        qDebug() << "toString:  " << QString::fromStdString(std_str);
+        qDebug() << "toQString: " << qstr;
+        qDebug() << "toStd:     " << QString::fromStdString(fspath.string());
+    }
+
+    // Component string shortcuts
+    {
+        qDebug() << "extQString: " << p.extQString();
+        qDebug() << "extString:  " << QString::fromStdString(p.extString());
+        qDebug() << "nameQString:" << p.nameQString();
+        qDebug() << "nameString: " << QString::fromStdString(p.nameString());
+        qDebug() << "stemQString:" << p.stemQString();
+        qDebug() << "stemString: " << QString::fromStdString(p.stemString());
+    }
+
+    // rebase (normal case)
+    {
+        auto file = Coco::Path("C:/old/project/src/main.cpp");
+        auto rebased = file.rebase("C:/old/project", "D:/new/project");
+
+        qDebug() << "rebase:" << rebased;
+        qDebug() << "match: "
+                 << (rebased == Coco::Path("D:/new/project/src/main.cpp"));
+    }
+
+    // rebase (unrelated base, should return empty)
+    {
+        auto file = Coco::Path("C:/completely/different/path.txt");
+        auto rebased = file.rebase("D:/unrelated", "E:/target");
+
+        qDebug() << "rebase unrelated empty:" << rebased.isEmpty();
+    }
+
+    // rebase (same base)
+    {
+        auto file = Coco::Path("C:/project/file.txt");
+        auto rebased = file.rebase("C:/project", "C:/project");
+
+        qDebug() << "rebase same:" << rebased;
+        qDebug() << "match:      " << (rebased == file);
+    }
+
+    // std::hash
+    {
+        auto a = Coco::Path("C:/test/file.txt");
+        auto b = Coco::Path("C:/test/file.txt");
+        auto c = Coco::Path("C:/test/other.txt");
+
+        auto ha = std::hash<Coco::Path>{}(a);
+        auto hb = std::hash<Coco::Path>{}(b);
+        auto hc = std::hash<Coco::Path>{}(c);
+
+        qDebug() << "hash equal match:  " << (ha == hb);
+        qDebug() << "hash differ differ:" << (ha != hc);
+    }
+
+    // QVariant roundtrip
+    {
+        auto original = Coco::Path("C:/test/file.txt");
+        auto variant = QVariant::fromValue(original);
+        auto back = variant.value<Coco::Path>();
+
+        qDebug() << "QVariant roundtrip:" << (original == back);
+
+        // Through QString conversion
+        auto as_string = variant.value<QString>();
+        qDebug() << "QVariant->QString: " << as_string;
+    }
+
+    // "Pretty" strings
+    {
+        // Mixed separators
+        {
+            auto p = Coco::Path("C:/Users") / "fairybow" / "Documents";
+
+            qDebug() << "raw:    " << p;
+            qDebug() << "pretty: " << p.prettyQString();
+            qDebug() << "match:  "
+                     << (p.prettyQString() == "C:/Users/fairybow/Documents");
+        }
+
+        // Duplicate separators
+        {
+            auto p = Coco::Path("C://Users////fairybow");
+
+            qDebug() << "dupes pretty:" << p.prettyQString();
+            qDebug() << "match:       "
+                     << (p.prettyQString() == "C:/Users/fairybow");
+        }
+
+        // Preserves dot and dot-dot
+        {
+            auto p = Coco::Path("C:/Users/./fairybow/../Documents");
+
+            qDebug() << "dots pretty:" << p.prettyQString();
+            qDebug() << "match:      "
+                     << (p.prettyQString()
+                         == "C:/Users/./fairybow/../Documents");
+        }
+
+        // Backslashes only
+        {
+            auto p = Coco::Path("C:\\Users\\fairybow\\Documents");
+
+            qDebug() << "backslash pretty:" << p.prettyQString();
+            qDebug() << "match:           "
+                     << (p.prettyQString() == "C:/Users/fairybow/Documents");
+        }
+    }
+
+    return 0;
+}
+*/
+
+/*
+// Utility Tests (standard directory methods):
+
+#include "Coco/Path.h"
+
+#include <QDebug>
+
+int main()
+{
+    // Basic locations resolve to non-empty paths
+    qDebug() << "Root:      " << Coco::Path::Root();
+    qDebug() << "Home:      " << Coco::Path::Home();
+    qDebug() << "Desktop:   " << Coco::Path::Desktop();
+    qDebug() << "Documents: " << Coco::Path::Documents();
+    qDebug() << "Downloads: " << Coco::Path::Downloads();
+    qDebug() << "AppData:   " << Coco::Path::AppData();
+    qDebug() << "Cache:     " << Coco::Path::Cache();
+    qDebug() << "Temp:      " << Coco::Path::Temp();
+
+    // Subpath appending
+    {
+        auto app_config = Coco::Path::AppData("settings");
+
+        qDebug() << "AppData subpath:" << app_config;
+        qDebug() << "ends correctly: "
+                 << app_config.toQString().endsWith("settings");
+    }
+
+    // Null vs empty c-string
+    {
+        auto with_null = Coco::Path::Home(nullptr);
+        auto with_empty = Coco::Path::Home("");
+        auto plain = Coco::Path::Home();
+
+        qDebug() << "null == plain: " << (with_null == plain);
+        qDebug() << "empty == plain:" << (with_empty == plain);
     }
 
     return 0;

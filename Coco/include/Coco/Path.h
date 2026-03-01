@@ -198,13 +198,13 @@ public:
 
     // ----- Modification -----
 
-    void clear()
+    void clear() noexcept
     {
         d_->path.clear();
         d_->invalidateCache();
     }
 
-    Path& makePreferred()
+    Path& makePreferred() noexcept
     {
         d_->path.make_preferred();
         d_->invalidateCache();
@@ -225,7 +225,7 @@ public:
         return *this;
     }
 
-    Path& removeName()
+    Path& removeName() noexcept
     {
         d_->path.remove_filename();
         d_->invalidateCache();

@@ -80,25 +80,11 @@ public:
 
     // ----- Stream operators -----
 
-    // friend QTextStream& operator>>(QTextStream& in, Path& path)
-    //{
-    //     QString s{};
-    //     in >> s;
-    //     path = Path(s);
-    //     return in;
-    // }
-
-    // friend QTextStream& operator<<(QTextStream& out, const Path& path)
-    //{
-    //     return out << path.d_->qstr();
-    // }
-
     friend QDataStream& operator>>(QDataStream& in, Path& path)
     {
         QString s{};
         in >> s;
-        path.d_->path = s.toStdString();
-        path.d_->invalidateCache();
+        path = Path(s);
         return in;
     }
 
@@ -111,8 +97,9 @@ public:
     friend std::basic_istream<CharT, TraitsT>&
     operator>>(std::basic_istream<CharT, TraitsT>& in, Path& path)
     {
-        in >> path.d_->path;
-        path.d_->invalidateCache();
+        std::filesystem::path p{};
+        in >> p;
+        path = Path(p);
         return in;
     }
 
@@ -123,11 +110,17 @@ public:
         return out << path.d_->path;
     }
 
-    // By returning a QDebug object (not a reference), we allow the chaining of
-    // multiple operator<< calls
+    // Output only. By returning a QDebug object (not a reference), we allow the
+    // chaining of multiple operator<< calls
     friend QDebug operator<<(QDebug debug, const Path& path)
     {
         return debug << path.d_->qstr();
+    }
+
+    // Output only (input skipped due to whitespace limitation)
+    friend QTextStream& operator<<(QTextStream& out, const Path& path)
+    {
+        return out << path.d_->qstr();
     }
 
     // ----- Assignment operators -----
@@ -264,30 +257,31 @@ public:
     QString nameQString() const { return STD_TO_QSTR_(d_->path.filename()); }
     std::string nameString() const { return d_->path.filename().string(); }
 
-    QString prettyQString() const
-    {
-        return QString::fromStdString(prettyString());
-    }
+    // TODO: For a display path (normalized forward slashes but no other changes
+    // QString prettyQString() const
+    //{
+    //    return QString::fromStdString(prettyString());
+    //}
 
-    std::string prettyString() const
-    {
-        std::string pretty{};
-        auto last_ch_was_sep = false;
+    // std::string prettyString() const
+    //{
+    //     std::string pretty{};
+    //     auto last_ch_was_sep = false;
 
-        for (auto& ch : d_->str()) {
-            if (ch == '/' || ch == '\\') {
-                if (!last_ch_was_sep) {
-                    pretty += '/';
-                    last_ch_was_sep = true;
-                }
-            } else {
-                pretty += ch;
-                last_ch_was_sep = false;
-            }
-        }
+    //    for (auto& ch : d_->str()) {
+    //        if (ch == '/' || ch == '\\') {
+    //            if (!last_ch_was_sep) {
+    //                pretty += '/';
+    //                last_ch_was_sep = true;
+    //            }
+    //        } else {
+    //            pretty += ch;
+    //            last_ch_was_sep = false;
+    //        }
+    //    }
 
-        return pretty;
-    }
+    //    return pretty;
+    //}
 
     QString stemQString() const { return STD_TO_QSTR_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
@@ -655,3 +649,73 @@ inline Coco::Path operator"" _ccpath(const char* cString, std::size_t)
 #undef STD_TO_QSTR_
 
 Q_DECLARE_METATYPE(Coco::Path)
+
+/*
+// Stream Operator Test:
+#include "Coco/Path.h"
+
+#include <sstream>
+
+#include <QBuffer>
+#include <QDataStream>
+#include <QDebug>
+#include <QTextStream>
+
+int main()
+{
+    auto original = Coco::Path("C:/My Documents/test file.txt");
+
+    // std streams (quoted roundtrip)
+    {
+        std::stringstream ss{};
+        ss << original;
+
+        Coco::Path roundtripped{};
+        ss >> roundtripped;
+
+        qDebug() << "std out:" << original;
+        qDebug() << "std in: " << roundtripped;
+        qDebug() << "match:  " << (original == roundtripped);
+    }
+
+    // QDataStream (binary roundtrip)
+    {
+        QByteArray buffer{};
+
+        {
+            QDataStream out(&buffer, QIODevice::WriteOnly);
+            out << original;
+        }
+
+        Coco::Path roundtripped{};
+
+        {
+            QDataStream in(&buffer, QIODevice::ReadOnly);
+            in >> roundtripped;
+        }
+
+        qDebug() << "QDataStream out:" << original;
+        qDebug() << "QDataStream in: " << roundtripped;
+        qDebug() << "match:          " << (original == roundtripped);
+    }
+
+    // QTextStream (output only (input skipped due to whitespace limitation))
+    {
+        QString buffer{};
+
+        {
+            QTextStream out(&buffer, QIODevice::WriteOnly);
+            out << original;
+        }
+
+        qDebug() << "QTextStream out:" << buffer;
+    }
+
+    // QDebug (output only)
+    {
+        qDebug() << "QDebug:" << original;
+    }
+
+    return 0;
+}
+*/

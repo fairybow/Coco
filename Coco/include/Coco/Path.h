@@ -264,10 +264,12 @@ public:
     // for example, we might need it?
     std::string prettyString() const
     {
+        auto& d_str = d_->str();
         std::string pretty{};
+        pretty.reserve(d_str.size());
         auto last_was_sep = false;
 
-        for (auto& ch : d_->str()) {
+        for (auto& ch : d_str) {
             if (ch == '/' || ch == '\\') {
                 if (!last_was_sep) {
                     pretty += '/';
@@ -280,7 +282,7 @@ public:
         }
 
         // Don't strip if the slash is the root directory component
-        if (pretty.back() == '/' && pretty.size() > 1
+        if (pretty.size() > 1 && pretty.back() == '/'
             && pretty[pretty.size() - 2] != ':') {
             pretty.pop_back();
         }

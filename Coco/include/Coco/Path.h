@@ -198,13 +198,19 @@ public:
 
     // ----- Modification -----
 
-    void clear() noexcept
+    // Re: noexcept: Non-const access to d_ (QSharedDataPointer::operator->())
+    // may call detach(), which copies via `new` and can throw std::bad_alloc.
+    // So despite the underlying std::filesystem::path operations and
+    // invalidateCache() all being noexcept, these mutating methods cannot
+    // guarantee noexcept
+
+    void clear()
     {
         d_->path.clear();
         d_->invalidateCache();
     }
 
-    Path& makePreferred() noexcept
+    Path& makePreferred()
     {
         d_->path.make_preferred();
         d_->invalidateCache();
@@ -225,7 +231,7 @@ public:
         return *this;
     }
 
-    Path& removeName() noexcept
+    Path& removeName()
     {
         d_->path.remove_filename();
         d_->invalidateCache();
@@ -251,8 +257,6 @@ public:
 
     // For a uniform display path (single forward slashes and no trailing slash,
     // with no other changes (keeps dot and dot-dot))
-    // TODO (maybe): Caching? If this was used to display a path in a tree view,
-    // for example, we might need it?
     QString prettyQString() const
     {
         return QString::fromStdString(prettyString());
@@ -293,7 +297,7 @@ public:
     QString stemQString() const { return STD_TO_QSTR_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
 
-    std::filesystem::path toStd() const noexcept { return d_->path; }
+    std::filesystem::path toStd() const { return d_->path; }
     QString toQString() const { return d_->qstr(); }
     std::string toString() const { return d_->str(); }
 

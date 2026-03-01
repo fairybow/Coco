@@ -336,7 +336,7 @@ inline QColor blend(const QColor& base, const QColor& overlay, qreal strength)
             int(base.blue() * (1 - strength) + overlay.blue() * strength)));
 }
 
-void opacifyWidget(QWidget* widget, qreal opacity = 0.5)
+inline void opacify(QWidget* widget, qreal opacity = 0.5)
 {
     auto effect = new QGraphicsOpacityEffect(widget);
     effect->setOpacity(opacity);

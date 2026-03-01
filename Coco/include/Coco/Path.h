@@ -32,7 +32,7 @@
 
 #include "Bool.h"
 
-#define TO_QSTRING_(StdPath) QString::fromStdString(StdPath.string())
+#define STD_TO_QSTR_(StdPath) QString::fromStdString(StdPath.string())
 
 namespace Coco {
 
@@ -147,21 +147,21 @@ public:
     bool isFile() const
     {
         // return std::filesystem::is_regular_file(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid.
+        //  ^ Valid paths with non-standard characters won't return valid
         return QFileInfo(d_->qstr()).isFile();
     }
 
     bool isDir() const
     {
         // return std::filesystem::is_directory(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid.
+        //  ^ Valid paths with non-standard characters won't return valid
         return QFileInfo(d_->qstr()).isDir();
     }
 
     bool exists() const
     {
         // return std::filesystem::exists(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid.
+        //  ^ Valid paths with non-standard characters won't return valid
         return QFileInfo(d_->qstr()).exists();
     }
 
@@ -227,9 +227,9 @@ public:
         return newBase.d_->path / relative;
     }
 
-    QString extQString() const { return TO_QSTRING_(d_->path.extension()); }
+    QString extQString() const { return STD_TO_QSTR_(d_->path.extension()); }
     std::string extString() const { return d_->path.extension().string(); }
-    QString nameQString() const { return TO_QSTRING_(d_->path.filename()); }
+    QString nameQString() const { return STD_TO_QSTR_(d_->path.filename()); }
     std::string nameString() const { return d_->path.filename().string(); }
 
     QString prettyQString() const
@@ -257,12 +257,15 @@ public:
         return pretty;
     }
 
-    QString stemQString() const { return TO_QSTRING_(d_->path.stem()); }
+    QString stemQString() const { return STD_TO_QSTR_(d_->path.stem()); }
     std::string stemString() const { return d_->path.stem().string(); }
 
     std::filesystem::path toStd() const noexcept { return d_->path; }
     QString toQString() const { return d_->qstr(); }
     std::string toString() const { return d_->str(); }
+
+    // For batch queries
+    QFileInfo toQFileInfo() const { return QFileInfo(d_->qstr()); }
 
     // ----- Utility -----
 
@@ -631,6 +634,6 @@ inline QDataStream& operator>>(QDataStream& in, Coco::Path& path)
     return in;
 }
 
-#undef TO_QSTRING_
+#undef STD_TO_QSTR_
 
 Q_DECLARE_METATYPE(Coco::Path)

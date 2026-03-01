@@ -249,19 +249,19 @@ public:
     QString nameQString() const { return STD_TO_QSTR_(d_->path.filename()); }
     std::string nameString() const { return d_->path.filename().string(); }
 
-    // For a uniform display path (single forward slashes and no other changes)
+    // For a uniform display path (single forward slashes and no trailing slash,
+    // with no other changes (keeps dot and dot-dot))
     // TODO (maybe): Caching? If this was used to display a path in a tree view,
     // for example, we might need it?
-    // TODO: Could normalize (remove) trailing slashes?
     QString prettyQString() const
     {
         return QString::fromStdString(prettyString());
     }
 
-    // For a uniform display path (single forward slashes and no other changes)
+    // For a uniform display path (single forward slashes and no trailing slash,
+    // with no other changes (keeps dot and dot-dot))
     // TODO (maybe): Caching? If this was used to display a path in a tree view,
     // for example, we might need it?
-    // TODO: Could normalize (remove) trailing slashes?
     std::string prettyString() const
     {
         std::string pretty{};
@@ -277,6 +277,12 @@ public:
                 pretty += ch;
                 last_was_sep = false;
             }
+        }
+
+        // Don't strip if the slash is the root directory component
+        if (pretty.back() == '/' && pretty.size() > 1
+            && pretty[pretty.size() - 2] != ':') {
+            pretty.pop_back();
         }
 
         return pretty;
@@ -382,6 +388,8 @@ private:
     QSharedDataPointer<SharedData_> d_;
 };
 
+inline void swap(Path& a, Path& b) noexcept { a.swap(b); }
+
 using PathList = QList<Path>;
 
 // Creates all directories in the specified path.
@@ -394,7 +402,13 @@ inline bool mkdir(
 
 COCO_BOOL(Overwrite);
 
-// Copies a file at the specified path to a new path
+// Renames the file at the specified path
+inline bool rename(const Path& oldPath, const Path& newPath)
+{
+    return QFile::rename(oldPath.toQString(), newPath.toQString());
+}
+
+// Copies the file at the specified path to the new path
 inline bool
 copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
 {
@@ -402,7 +416,7 @@ copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
     return QFile::copy(path.toQString(), newPath.toQString());
 }
 
-// Removes a file at the specified path
+// Removes the file at the specified path
 inline bool remove(const Path& path) { return QFile::remove(path.toQString()); }
 
 // Copies the contents of one directory to another
@@ -412,7 +426,8 @@ inline bool copyContents(const Path& srcDir, const Path& dstDir)
     if (!dstDir.exists() && !mkdir(dstDir)) return false;
 
     QDir src_dir(srcDir.toQString());
-    auto entries = src_dir.entryList(QDir::AllEntries | QDir::NoDotAndDotDot);
+    auto entries = src_dir.entryList(
+        QDir::AllEntries | QDir::NoDotAndDotDot | QDir::NoSymLinks);
 
     for (const auto& entry : entries) {
         auto src_path = srcDir / entry;
@@ -603,6 +618,7 @@ inline PathList getFiles(
         options);
 
     PathList paths{};
+    paths.reserve(string_paths.size());
     for (const auto& str : string_paths)
         paths << Path(str);
 
@@ -1108,6 +1124,28 @@ int main()
             qDebug() << "backslash pretty:" << p.prettyQString();
             qDebug() << "match:           "
                      << (p.prettyQString() == "C:/Users/fairybow/Documents");
+        }
+
+        // Trailing slash normalization
+        {
+            auto p = Coco::Path("C:/Users/fairybow/");
+
+            qDebug() << "trailing slash pretty:" << p.prettyQString();
+            qDebug() << "match:                "
+                     << (p.prettyQString() == "C:/Users/fairybow");
+        }
+
+        // Root paths preserved
+        {
+            auto unix_root = Coco::Path("/");
+            auto win_root = Coco::Path("C:/");
+
+            qDebug() << "unix root pretty:" << unix_root.prettyQString();
+            qDebug() << "unix preserved:  "
+                     << (unix_root.prettyQString() == "/");
+            qDebug() << "win root pretty: " << win_root.prettyQString();
+            qDebug() << "win preserved:   "
+                     << (win_root.prettyQString() == "C:/");
         }
     }
 

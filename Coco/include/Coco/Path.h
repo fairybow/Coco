@@ -264,6 +264,8 @@ public:
 
     // For a uniform display path (single forward slashes and no trailing slash,
     // with no other changes (keeps dot and dot-dot))
+    // Edge case: a bare "//" input will be reduced to "/". This is acceptable
+    // since bare UNC prefixes are not valid paths
     // TODO (maybe): Caching? If this was used to display a path in a tree view,
     // for example, we might need it?
     std::string prettyString() const

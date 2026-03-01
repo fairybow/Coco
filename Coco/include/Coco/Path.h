@@ -9,8 +9,10 @@
 
 #pragma once
 
+#include <compare>
 #include <filesystem>
 #include <format>
+#include <istream>
 #include <ostream>
 #include <string>
 
@@ -76,21 +78,53 @@ public:
     {
     }
 
-    // ----- Stream output operators -----
+    // ----- Stream operators -----
 
-    friend QTextStream& operator<<(QTextStream& outStream, const Path& path)
+    // friend QTextStream& operator>>(QTextStream& in, Path& path)
+    //{
+    //     QString s{};
+    //     in >> s;
+    //     path = Path(s);
+    //     return in;
+    // }
+
+    // friend QTextStream& operator<<(QTextStream& out, const Path& path)
+    //{
+    //     return out << path.d_->qstr();
+    // }
+
+    friend QDataStream& operator>>(QDataStream& in, Path& path)
     {
-        return outStream << path.d_->qstr();
+        QString s{};
+        in >> s;
+        path.d_->path = s.toStdString();
+        path.d_->invalidateCache();
+        return in;
     }
 
-    friend std::ostream& operator<<(std::ostream& outStream, const Path& path)
+    friend QDataStream& operator<<(QDataStream& out, const Path& path)
     {
-        return outStream << path.d_->str();
+        return out << path.d_->qstr();
+    }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_istream<CharT, TraitsT>&
+    operator>>(std::basic_istream<CharT, TraitsT>& in, Path& path)
+    {
+        in >> path.d_->path;
+        path.d_->invalidateCache();
+        return in;
+    }
+
+    template <class CharT, class TraitsT>
+    friend std::basic_ostream<CharT, TraitsT>&
+    operator<<(std::basic_ostream<CharT, TraitsT>& out, const Path& path)
+    {
+        return out << path.d_->path;
     }
 
     // By returning a QDebug object (not a reference), we allow the chaining of
-    // multiple operator<< calls. This is similar to how std::ostream works, but
-    // with the added benefit of managing QDebug's internal state
+    // multiple operator<< calls
     friend QDebug operator<<(QDebug debug, const Path& path)
     {
         return debug << path.d_->qstr();
@@ -102,20 +136,18 @@ public:
     Path& operator=(Path&& other) noexcept = default;
 
     // ----- Comparison operators -----
+    // operator== and operator<=> are sufficient; the compiler synthesizes !=,
+    // <, >, <=, and >= from these two (C++20)
 
     bool operator==(const Path& other) const noexcept
     {
         return d_->path == other.d_->path;
     }
 
-    bool operator!=(const Path& other) const noexcept = default;
-
-    bool operator<(const Path& other) const noexcept
+    std::strong_ordering operator<=>(const Path& other) const noexcept
     {
-        return d_->path < other.d_->path;
+        return d_->path <=> other.d_->path;
     }
-
-    bool operator>(const Path& other) const noexcept = default;
 
     // ----- Concatenation operators -----
 
@@ -147,21 +179,21 @@ public:
     bool isFile() const
     {
         // return std::filesystem::is_regular_file(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid
+        //  ^ Valid paths with non-standard characters won't return valid.
         return QFileInfo(d_->qstr()).isFile();
     }
 
     bool isDir() const
     {
         // return std::filesystem::is_directory(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid
+        //  ^ Valid paths with non-standard characters won't return valid.
         return QFileInfo(d_->qstr()).isDir();
     }
 
     bool exists() const
     {
         // return std::filesystem::exists(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid
+        //  ^ Valid paths with non-standard characters won't return valid.
         return QFileInfo(d_->qstr()).exists();
     }
 
@@ -618,20 +650,6 @@ template <> struct formatter<Coco::Path> : formatter<string>
 inline Coco::Path operator"" _ccpath(const char* cString, std::size_t)
 {
     return Coco::Path(cString);
-}
-
-inline QDataStream& operator<<(QDataStream& out, const Coco::Path& path)
-{
-    out << path.toQString();
-    return out;
-}
-
-inline QDataStream& operator>>(QDataStream& in, Coco::Path& path)
-{
-    QString s{};
-    in >> s;
-    path = Coco::Path(s);
-    return in;
 }
 
 #undef STD_TO_QSTR_

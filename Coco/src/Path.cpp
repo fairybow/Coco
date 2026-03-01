@@ -15,9 +15,7 @@
 #include <QVariant>
 
 // Registers Path with Qt's meta-type system and adds bidirectional QString
-// converters, allowing Path to be stored in and retrieved from QVariant. This
-// enables interop with any QVariant-based API, including QSettings (which uses
-// the converters to serialize Path values as plain strings in INI files)
+// converters, allowing Path to be stored in and retrieved from QVariant
 static const int qMetaTypeInitializer_ = [] {
     constexpr auto name = "Coco::Path";
 

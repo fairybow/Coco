@@ -15,6 +15,7 @@
 #include <istream>
 #include <ostream>
 #include <string>
+#include <utility>
 
 #include <QDataStream>
 #include <QDebug>
@@ -144,13 +145,6 @@ public:
 
     // ----- Concatenation operators -----
 
-    Path operator/(const Path& other) const
-    {
-        Path path = *this;
-        path /= other;
-        return path;
-    }
-
     Path& operator/=(const Path& other)
     {
         d_->path /= other.d_->path;
@@ -237,12 +231,7 @@ public:
         return *this;
     }
 
-    void swap(Path& other) noexcept
-    {
-        d_->path.swap(other.d_->path);
-        d_->invalidateCache();
-        other.d_->invalidateCache();
-    }
+    void swap(Path& other) noexcept { d_->swap(*other.d_); }
 
     // ----- Conversion -----
 
@@ -333,6 +322,12 @@ public:
 #undef GEN_STD_DIR_METHOD_2_
 
 private:
+    // Thread safety: SharedData_ relies on QSharedData's copy-on-write for
+    // mutation safety, but const methods (str(), qstr()) lazily populate
+    // mutable cache fields. If two threads share the same underlying data (no
+    // prior write to trigger COW detachment) and both call a const method
+    // concurrently, they will race on the cache. This is fine for typical
+    // GUI-thread usage but needs care in multithreaded console applications
     class SharedData_ : public QSharedData
     {
     public:
@@ -347,6 +342,15 @@ private:
         {
             stringValid_ = false;
             qStringValid_ = false;
+        }
+
+        void swap(SharedData_& other) noexcept
+        {
+            std::swap(path, other.path);
+            std::swap(stringValid_, other.stringValid_);
+            std::swap(cachedString_, other.cachedString_);
+            std::swap(qStringValid_, other.qStringValid_);
+            std::swap(cachedQString_, other.cachedQString_);
         }
 
         const QString& qstr() const
@@ -371,14 +375,19 @@ private:
 
     private:
         mutable bool qStringValid_ = false;
-        mutable QString cachedQString_{};
-
         mutable bool stringValid_ = false;
+        mutable QString cachedQString_{};
         mutable std::string cachedString_{};
     };
 
     QSharedDataPointer<SharedData_> d_;
 };
+
+inline Path operator/(Path lhs, const Path& rhs)
+{
+    lhs /= rhs;
+    return lhs;
+}
 
 using PathList = QList<Path>;
 

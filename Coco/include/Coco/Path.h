@@ -13,9 +13,9 @@
 #include <filesystem>
 #include <format>
 #include <istream>
+#include <optional>
 #include <ostream>
 #include <string>
-#include <utility>
 
 #include <QDataStream>
 #include <QDebug>
@@ -52,11 +52,7 @@ public:
     {
     }
 
-    Path(const Path& other)
-        : d_(other.d_)
-    {
-    }
-
+    Path(const Path& other) = default;
     Path(Path&& other) noexcept = default;
 
     Path(const std::filesystem::path& path)
@@ -202,13 +198,13 @@ public:
 
     // ----- Modification -----
 
-    void clear() noexcept
+    void clear()
     {
         d_->path.clear();
         d_->invalidateCache();
     }
 
-    Path& makePreferred() noexcept
+    Path& makePreferred()
     {
         d_->path.make_preferred();
         d_->invalidateCache();
@@ -229,14 +225,14 @@ public:
         return *this;
     }
 
-    Path& removeName() noexcept
+    Path& removeName()
     {
         d_->path.remove_filename();
         d_->invalidateCache();
         return *this;
     }
 
-    void swap(Path& other) noexcept { d_->swap(*other.d_); }
+    void swap(Path& other) noexcept { d_.swap(other.d_); }
 
     // ----- Conversion -----
 
@@ -244,6 +240,7 @@ public:
     {
         auto rel = d_->path.lexically_relative(oldBase.d_->path);
         if (rel.empty()) return {};
+        if (rel == std::filesystem::path(".")) return newBase;
         return newBase.d_->path / rel;
     }
 
@@ -355,15 +352,6 @@ private:
             qStringValid_ = false;
         }
 
-        void swap(SharedData_& other) noexcept
-        {
-            std::swap(path, other.path);
-            std::swap(stringValid_, other.stringValid_);
-            std::swap(cachedString_, other.cachedString_);
-            std::swap(qStringValid_, other.qStringValid_);
-            std::swap(cachedQString_, other.cachedQString_);
-        }
-
         const QString& qstr() const
         {
             if (!qStringValid_) {
@@ -397,9 +385,11 @@ private:
 using PathList = QList<Path>;
 
 // Creates all directories in the specified path.
-inline bool mkdir(const Path& path)
+inline bool mkdir(
+    const Path& path,
+    std::optional<QFile::Permissions> permissions = std::nullopt)
 {
-    return std::filesystem::create_directories(path.toStd());
+    return QDir().mkpath(path.toQString(), permissions);
 }
 
 COCO_BOOL(Overwrite);
@@ -1043,6 +1033,14 @@ int main()
 
         qDebug() << "rebase same:" << rebased;
         qDebug() << "match:      " << (rebased == file);
+    }
+
+    // rebase (path equals base)
+    {
+        auto dir = Coco::Path("C:/project");
+        auto rebased = dir.rebase("C:/project", "D:/new");
+
+        qDebug() << "rebase identity:" << (rebased == Coco::Path("D:/new"));
     }
 
     // std::hash

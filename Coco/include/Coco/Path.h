@@ -248,8 +248,9 @@ public:
 
     Path rebase(const Path& oldBase, const Path& newBase) const
     {
-        auto relative = d_->path.lexically_relative(oldBase.d_->path);
-        return newBase.d_->path / relative;
+        auto rel = d_->path.lexically_relative(oldBase.d_->path);
+        if (rel.empty()) return {};
+        return newBase.d_->path / rel;
     }
 
     QString extQString() const { return STD_TO_QSTR_(d_->path.extension()); }
@@ -392,7 +393,7 @@ COCO_BOOL(Overwrite);
 inline bool
 copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
 {
-    if (overwrite && newPath.exists()) QFile::remove(newPath.toQString());
+    if (overwrite) QFile::remove(newPath.toQString());
     return QFile::copy(path.toQString(), newPath.toQString());
 }
 

@@ -145,6 +145,11 @@ public:
 
     // ----- Concatenation operators -----
 
+    friend Path operator/(const Path& lhs, const Path& rhs)
+    {
+        return Path(lhs) /= rhs;
+    }
+
     Path& operator/=(const Path& other)
     {
         d_->path /= other.d_->path;
@@ -388,12 +393,6 @@ private:
 
     QSharedDataPointer<SharedData_> d_;
 };
-
-inline Path operator/(Path lhs, const Path& rhs)
-{
-    lhs /= rhs;
-    return lhs;
-}
 
 using PathList = QList<Path>;
 

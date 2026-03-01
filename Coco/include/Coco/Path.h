@@ -248,12 +248,18 @@ public:
     std::string nameString() const { return d_->path.filename().string(); }
 
     // For a uniform display path (single forward slashes and no other changes)
+    // TODO (maybe): Caching? If this was used to display a path in a tree view,
+    // for example, we might need it?
+    // TODO: Could normalize (remove) trailing slashes?
     QString prettyQString() const
     {
         return QString::fromStdString(prettyString());
     }
 
     // For a uniform display path (single forward slashes and no other changes)
+    // TODO (maybe): Caching? If this was used to display a path in a tree view,
+    // for example, we might need it?
+    // TODO: Could normalize (remove) trailing slashes?
     std::string prettyString() const
     {
         std::string pretty{};

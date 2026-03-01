@@ -651,7 +651,7 @@ inline Coco::Path operator"" _ccpath(const char* cString, std::size_t)
 Q_DECLARE_METATYPE(Coco::Path)
 
 /*
-// Stream Operator Test:
+// Stream Operator Tests:
 #include "Coco/Path.h"
 
 #include <sstream>
@@ -699,7 +699,7 @@ int main()
         qDebug() << "match:          " << (original == roundtripped);
     }
 
-    // QTextStream (output only (input skipped due to whitespace limitation))
+    // QTextStream (output only)
     {
         QString buffer{};
 
@@ -714,6 +714,56 @@ int main()
     // QDebug (output only)
     {
         qDebug() << "QDebug:" << original;
+    }
+
+    // Empty path roundtrip
+    {
+        auto empty = Coco::Path();
+
+        std::stringstream ss{};
+        ss << empty;
+
+        Coco::Path roundtripped{};
+        ss >> roundtripped;
+
+        qDebug() << "empty std match:" << (empty == roundtripped);
+
+        QByteArray buffer{};
+
+        {
+            QDataStream out(&buffer, QIODevice::WriteOnly);
+            out << empty;
+        }
+
+        {
+            QDataStream in(&buffer, QIODevice::ReadOnly);
+            in >> roundtripped;
+        }
+
+        qDebug() << "empty QDS match:" << (empty == roundtripped);
+    }
+
+    // Multiple paths in one std stream
+    {
+        auto a = Coco::Path("C:/first path/file.txt");
+        auto b = Coco::Path("D:/second path/other.txt");
+
+        std::stringstream ss{};
+        ss << a << ' ' << b;
+
+        Coco::Path ra{};
+        Coco::Path rb{};
+        ss >> ra >> rb;
+
+        qDebug() << "multi std a match:" << (a == ra);
+        qDebug() << "multi std b match:" << (b == rb);
+    }
+
+    // std::format
+    {
+        auto p = Coco::Path("C:/My Documents/test.txt");
+        auto formatted = std::format("Path is: {}", p);
+        qDebug() << "std::format:" << QString::fromStdString(formatted);
     }
 
     return 0;

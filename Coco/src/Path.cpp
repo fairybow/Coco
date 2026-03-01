@@ -9,6 +9,7 @@
 
 #include "../include/Coco/Path.h"
 
+#include <QDebug>
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
@@ -26,17 +27,18 @@ static const int qMetaTypeInitializer_ = [] {
     QMetaType::registerConverter<QString, Coco::Path>(
         [](const QString& s) { return Coco::Path(s); });
 
-    {
-        auto id = QMetaType::fromName(name);
-        qDebug() << "Coco::Path registered:" << id.isValid()
-                 << "| id:" << id.id();
-        auto v1 = QVariant::fromValue(Coco::Path("debug/test"));
-        qDebug() << "Path -> QString:" << v1.canConvert<QString>()
-                 << "| value:" << v1.value<QString>();
-        auto v2 = QVariant::fromValue(QString("debug/test"));
-        qDebug() << "QString -> Path:" << v2.canConvert<Coco::Path>()
-                 << "| value:" << v2.value<Coco::Path>().toQString();
-    }
+#ifdef QT_DEBUG
+
+    auto id = QMetaType::fromName(name);
+    qDebug() << "Coco::Path registered:" << id.isValid() << "| id:" << id.id();
+    auto v1 = QVariant::fromValue(Coco::Path("debug/test"));
+    qDebug() << "Path -> QString:" << v1.canConvert<QString>()
+             << "| value:" << v1.value<QString>();
+    auto v2 = QVariant::fromValue(QString("debug/test"));
+    qDebug() << "QString -> Path:" << v2.canConvert<Coco::Path>()
+             << "| value:" << v2.value<Coco::Path>().toQString();
+
+#endif
 
     return 0;
 }();

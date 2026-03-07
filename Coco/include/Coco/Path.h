@@ -240,6 +240,8 @@ public:
 
     void swap(Path& other) noexcept { d_.swap(other.d_); }
 
+    friend void swap(Path& a, Path& b) noexcept { a.swap(b); }
+
     // ----- Conversion -----
 
     Path rebase(const Path& oldBase, const Path& newBase) const
@@ -395,8 +397,6 @@ private:
 
     QSharedDataPointer<SharedData_> d_;
 };
-
-inline void swap(Path& a, Path& b) noexcept { a.swap(b); }
 
 using PathList = QList<Path>;
 

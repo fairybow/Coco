@@ -459,6 +459,28 @@ inline bool exists(const Path& path)
     return path.exists();
 }
 
+inline QStringList toQStringList(const PathList& paths)
+{
+    QStringList result{};
+    result.reserve(paths.size());
+
+    for (auto& p : paths)
+        result << p.toQString();
+
+    return result;
+}
+
+inline QStringList toPrettyQStringList(const PathList& paths)
+{
+    QStringList result{};
+    result.reserve(paths.size());
+
+    for (auto& p : paths)
+        result << p.prettyQString();
+
+    return result;
+}
+
 // Iterator wrappers
 
 // Provide extensions as: `{ "*.mp3", "*.wav" }`

@@ -252,6 +252,13 @@ public:
         return newBase.d_->path / rel;
     }
 
+    Path lexicallyRelative(const Path& base) const
+    {
+        return d_->path.lexically_relative(base.d_->path);
+    }
+
+    std::string genericString() const { return d_->path.generic_string(); }
+
     QString extQString() const { return STD_TO_QSTR_(d_->path.extension()); }
     std::string extString() const { return d_->path.extension().string(); }
     QString nameQString() const { return STD_TO_QSTR_(d_->path.filename()); }

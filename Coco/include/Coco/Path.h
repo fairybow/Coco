@@ -167,14 +167,14 @@ public:
     bool isFile() const
     {
         // return std::filesystem::is_regular_file(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid.
+        //  ^ Valid paths with non-standard characters won't return valid
         return QFileInfo(d_->qstr()).isFile();
     }
 
     bool isDir() const
     {
         // return std::filesystem::is_directory(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid.
+        //  ^ Valid paths with non-standard characters won't return valid
         return QFileInfo(d_->qstr()).isDir();
     }
 
@@ -188,7 +188,7 @@ public:
     bool exists() const
     {
         // return std::filesystem::exists(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid.
+        //  ^ Valid paths with non-standard characters won't return valid
         return QFileInfo(d_->qstr()).exists();
     }
 
@@ -414,7 +414,7 @@ private:
 
 using PathList = QList<Path>;
 
-// Creates all directories in the specified path.
+// Creates all directories in the specified path
 inline bool mkdir(
     const Path& path,
     std::optional<QFile::Permissions> permissions = std::nullopt)

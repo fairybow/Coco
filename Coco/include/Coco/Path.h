@@ -178,6 +178,13 @@ public:
         return QFileInfo(d_->qstr()).isDir();
     }
 
+    bool isEmptyDir() const
+    {
+        if (!isDir()) return false;
+        return QDir(d_->qstr())
+            .isEmpty(QDir::AllEntries | QDir::NoDotAndDotDot);
+    }
+
     bool exists() const
     {
         // return std::filesystem::exists(d_->path);

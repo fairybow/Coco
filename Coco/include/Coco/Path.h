@@ -414,13 +414,27 @@ private:
 
 using PathList = QList<Path>;
 
-// Creates all directories in the specified path
+// Creates a single directory (parent must exist)
 inline bool mkdir(
+    const Path& dir,
+    std::optional<QFile::Permissions> permissions = std::nullopt)
+{
+    return QDir().mkdir(dir.toQString(), permissions);
+}
+
+// Creates all directories in the specified path (creates parents)
+inline bool mkpath(
     const Path& path,
     std::optional<QFile::Permissions> permissions = std::nullopt)
 {
     return QDir().mkpath(path.toQString(), permissions);
 }
+
+// Removes a single empty directory
+inline bool rmdir(const Path& dir) { return QDir().rmdir(dir.toQString()); }
+
+// Removes the directory and all empty parent directories in the path
+inline bool rmpath(const Path& path) { return QDir().rmpath(path.toQString()); }
 
 COCO_BOOL(Overwrite);
 

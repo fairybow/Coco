@@ -111,7 +111,7 @@ template <typename TagT> const Bool<TagT> Bool<TagT>::No{ false };
     {                                                                          \
         static constexpr const char* name() { return #Name; }                  \
     };                                                                         \
-    using Name = Coco::Bool<Name##Tag>
+    using Name = Coco::Bool<Name##Tag>;
 
 } // namespace Coco
 

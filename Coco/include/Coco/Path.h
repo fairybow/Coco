@@ -436,6 +436,12 @@ inline bool rmdir(const Path& dir) { return QDir().rmdir(dir.toQString()); }
 // Removes the directory and all empty parent directories in the path
 inline bool rmpath(const Path& path) { return QDir().rmpath(path.toQString()); }
 
+// Removes the directory and all its contents
+inline bool purge(const Path& dir)
+{
+    return QDir(dir.toQString()).removeRecursively();
+}
+
 COCO_BOOL(Overwrite)
 
 // Renames the file at the specified path

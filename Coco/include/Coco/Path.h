@@ -727,11 +727,6 @@ template <> struct formatter<Coco::Path> : formatter<string>
 
 } // namespace std
 
-inline Coco::Path operator"" _ccpath(const char* cString, std::size_t)
-{
-    return Coco::Path(cString);
-}
-
 #undef STD_TO_QSTR_
 
 Q_DECLARE_METATYPE(Coco::Path)
@@ -866,12 +861,10 @@ int main()
         auto from_qstr = Coco::Path(QString("C:/test/file.txt"));
         auto from_fspath =
             Coco::Path(std::filesystem::path("C:/test/file.txt"));
-        auto from_literal = "C:/test/file.txt"_ccpath;
 
         qDebug() << "all equal:"
                  << (from_cstr == from_std && from_std == from_qstr
-                     && from_qstr == from_fspath
-                     && from_fspath == from_literal);
+                     && from_qstr == from_fspath);
     }
 
     // Copy and move semantics (COW)

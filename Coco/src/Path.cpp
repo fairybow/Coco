@@ -1,10 +1,13 @@
 /*
- * Coco  Copyright (C) 2025-2026  fairybow
+ * Coco
+ * Copyright (C) 2026 fairybow
  *
- * Licensed under GPL 3 with additional terms under Section 7. See LICENSE, or
- * visit: <https://www.gnu.org/licenses/>
+ * This program is free software, redistributable and/or modifiable under the
+ * terms of the GNU GPL v3. It's distributed in the hope that it will be useful
+ * but without any warranty (even the implied warranty of merchantability or
+ * fitness for a particular purpose)
  *
- * Uses Qt 6 - <https://www.qt.io/>
+ * See the LICENSE file or visit <https://www.gnu.org/licenses/>
  */
 
 #include "../include/Coco/Path.h"

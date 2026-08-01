@@ -30,8 +30,8 @@ using LogSink = std::function<void(const QString&)>;
 
 // To be safe, don't call this before Qt has finished app construction
 void initialize(
-    bool verbose, // Coco::Bool?
-    const Coco::Path& logDir,
+    bool verbose = false, // Coco::Bool?
+    const Coco::Path& logDir = {},
     const QString& logPrefix = {},
     int logCap = 15);
 

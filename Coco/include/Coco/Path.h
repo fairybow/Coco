@@ -734,6 +734,9 @@ template <> struct formatter<Coco::Path> : formatter<string>
 
 Q_DECLARE_METATYPE(Coco::Path)
 
+
+/// TODO Add to Smoke.cpp?:
+
 /*
 // Stream Operator Tests:
 

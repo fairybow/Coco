@@ -42,7 +42,7 @@ auto LOG_EXT_ = u".log"_s;
 
 std::atomic<QtMsgType> minimumLevel_{ QtFatalMsg };
 std::atomic<uint64_t> logEntryCount_{ 0 };
-Coco::Path logDir_{};
+Path logDir_{};
 QString logPrefix_{};
 std::mutex mutex_{};
 QFile logFile_{};
@@ -121,7 +121,7 @@ void handler_(
 
 void initialize(
     bool verbose,
-    const Coco::Path& logDir,
+    const Path& logDir,
     const QString& logPrefix,
     int logCap)
 {

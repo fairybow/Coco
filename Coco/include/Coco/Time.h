@@ -63,7 +63,8 @@ template <typename SlotT>
 inline QTimer* newQTimer(QObject* parent, SlotT slot, int msec = -1)
 {
     auto timer = new QTimer(parent);
-    if (msec >= 0) timer->setInterval(msec);
+    if (msec >= 0)
+        timer->setInterval(msec);
     QObject::connect(timer, &QTimer::timeout, parent, slot);
     return timer;
 }
@@ -97,4 +98,4 @@ inline Debouncer* newDebouncer(QObject* parent, SlotT slot, int msec = -1)
     return newDelayer<SlotT>(parent, slot, msec);
 }
 
-}
+} // namespace Coco::Time

@@ -50,7 +50,7 @@ inline constexpr int severity(QtMsgType type) noexcept
 // To be safe, don't call this before Qt has finished app construction
 void initialize(
     bool verbose = false, // Coco::Bool?
-    const Coco::Path& logDir = {},
+    const Path& logDir = {},
     const QString& logPrefix = {},
     int logCap = 15);
 
@@ -187,7 +187,7 @@ inline void assertionFailed_(
 
 } // namespace Internal
 
-} // namespace Coco::Debug
+}
 
 #define LOG(Level)                                                             \
     Coco::Debug::Log(Level, __FILE__, __LINE__, __FUNCTION__).print

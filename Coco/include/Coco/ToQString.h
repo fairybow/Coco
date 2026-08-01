@@ -20,7 +20,6 @@
 #    include <QDomElement>
 #    include <QDomNamedNodeMap>
 #endif
-
 #include <QHashIterator>
 #include <QLatin1StringView>
 #include <QMapIterator>
@@ -94,7 +93,7 @@ template <typename T> inline QString toQString(const T* ptr)
 
 // Ptr can be nullptr. Overrides the generic pointer overload via partial
 // ordering when T derives from QObject
-template <Coco::Concepts::QObjectDerived T>
+template <Concepts::QObjectDerived T>
 inline QString toQString(const T* ptr)
 {
     if (!ptr)
@@ -128,6 +127,7 @@ inline QString toQString(const QPoint& point)
 inline QString toQString(const QStringList& list) { return list.join(u", "_s); }
 
 #ifdef COCO_HAS_XML
+
 inline QString toQString(const QDomElement& element)
 {
     if (element.isNull())
@@ -172,6 +172,7 @@ inline QString toQString(const QDomElement& element)
     out.append(u">)"_s);
     return out;
 }
+
 #endif
 
 // --- Variant containers ---
@@ -289,6 +290,8 @@ template <typename TagT> inline QString toQString(const Bool<TagT>& b)
 } // namespace Coco
 
 // QVariant Output Test:
+
+/// TODO Add to Smoke.cpp?
 
 /*#include <QByteArray>
 #include <QCborArray>

@@ -16,11 +16,9 @@
 #include <type_traits>
 
 #ifdef COCO_HAS_XML
-
-#include <QDomAttr>
-#include <QDomElement>
-#include <QDomNamedNodeMap>
-
+#    include <QDomAttr>
+#    include <QDomElement>
+#    include <QDomNamedNodeMap>
 #endif
 
 #include <QHashIterator>
@@ -130,7 +128,6 @@ inline QString toQString(const QPoint& point)
 inline QString toQString(const QStringList& list) { return list.join(u", "_s); }
 
 #ifdef COCO_HAS_XML
-
 inline QString toQString(const QDomElement& element)
 {
     if (element.isNull())
@@ -175,7 +172,6 @@ inline QString toQString(const QDomElement& element)
     out.append(u">)"_s);
     return out;
 }
-
 #endif
 
 // --- Variant containers ---
@@ -196,11 +192,9 @@ inline QString toQString(const QVariant& variant)
     }
 
 #ifdef COCO_HAS_XML
-
     if (variant.canConvert<QDomElement>()) {
         return toQString(variant.value<QDomElement>());
     }
-
 #endif
 
     switch (variant.typeId()) {

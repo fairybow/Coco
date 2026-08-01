@@ -25,6 +25,7 @@
 
 namespace Coco::Debug {
 
+using namespace Qt::StringLiterals;
 using LogSink = std::function<void(const QString&)>;
 
 // To be safe, don't call this before Qt has finished app construction
@@ -179,17 +180,16 @@ inline void assertionFailed_(
 
 #define TRACER DEBUG(__FUNCTION__)
 
-/// TODO: Need to set from outside / supply the "debug" condition from consumer
-#ifdef VERSION_DEBUG // TODO: Generalize / accept an arg?
-#define ASSERT(condition, ...)                                                 \
-    ((condition) ? static_cast<void>(0)                                        \
-                 : Coco::Debug::Internal::assertionFailed_(                    \
-                       #condition,                                             \
-                       __FILE__,                                               \
-                       __LINE__,                                               \
-                       __FUNCTION__ __VA_OPT__(, ) __VA_ARGS__))
+#ifdef COCO_DEBUG
+#    define ASSERT(condition, ...)                                             \
+        ((condition) ? static_cast<void>(0)                                    \
+                     : Coco::Debug::Internal::assertionFailed_(                \
+                           #condition,                                         \
+                           __FILE__,                                           \
+                           __LINE__,                                           \
+                           __FUNCTION__ __VA_OPT__(, ) __VA_ARGS__))
 #else
-#define ASSERT(condition, ...) static_cast<void>(false && (condition))
+#    define ASSERT(condition, ...) static_cast<void>(false && (condition))
 #endif
 
 #define UNREACHABLE(...)                                                       \

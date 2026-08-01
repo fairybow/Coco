@@ -10,7 +10,7 @@
  * See the LICENSE file or visit <https://www.gnu.org/licenses/>
  */
 
-#if !defined(COCO_HAS_NETWORK)
+#if defined(COCO_HAS_NETWORK)
 
 /// TODO Maybe for now just fold this back into header
 

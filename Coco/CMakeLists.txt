@@ -116,3 +116,23 @@ if(COCO_WITH_XML)
     # PUBLIC: ToQString.h is header-only; the consumer compiles the gated code.
     target_compile_definitions(Coco PUBLIC COCO_HAS_XML)
 endif()
+
+# --- Smoke test ------------------------------------------------------------
+# Built only when Coco is opened on its own (top-level), so a consumer that
+# does add_subdirectory(Coco) never builds it. This is the target you run from
+# Visual Studio's green play button.
+if(PROJECT_IS_TOP_LEVEL)
+    enable_testing()
+
+    add_executable(CocoSmoke src/Smoke.cpp)
+    target_link_libraries(CocoSmoke PRIVATE Coco::Coco)
+
+    # Encode what configure asked for, so Smoke.cpp's static_asserts can confirm
+    # Coco's PUBLIC COCO_HAS_* macros actually reached this executable.
+    target_compile_definitions(CocoSmoke PRIVATE
+        COCO_TEST_EXPECT_XML=$<IF:$<BOOL:${COCO_WITH_XML}>,1,0>
+        COCO_TEST_EXPECT_NET=$<IF:$<BOOL:${COCO_WITH_NETWORK}>,1,0>
+    )
+
+    add_test(NAME CocoSmoke COMMAND CocoSmoke)
+endif()

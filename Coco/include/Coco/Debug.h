@@ -28,6 +28,25 @@ namespace Coco::Debug {
 using namespace Qt::StringLiterals;
 using LogSink = std::function<void(const QString&)>;
 
+// Qt's QtMsgType enum is NOT ordered by severity, so use this
+inline constexpr int severity(QtMsgType type) noexcept
+{
+    switch (type) {
+    case QtDebugMsg:
+        return 0;
+    case QtInfoMsg:
+        return 1;
+    case QtWarningMsg:
+        return 2;
+    case QtCriticalMsg:
+        return 3;
+    case QtFatalMsg:
+        return 4;
+    }
+
+    return 0;
+}
+
 // To be safe, don't call this before Qt has finished app construction
 void initialize(
     bool verbose = false, // Coco::Bool?
@@ -57,7 +76,7 @@ struct Log
     inline void
     print(const QObject* obj, QStringView format, Args&&... args) const
     {
-        if (type != QtFatalMsg && type < minimumLevel())
+        if (severity(type) < severity(minimumLevel()))
             return;
 
         QString msg = sizeof...(Args) > 0

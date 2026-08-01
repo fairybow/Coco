@@ -91,8 +91,8 @@ QString logFileName_()
 void handler_(
     QtMsgType type, const QMessageLogContext& context, const QString& msg)
 {
-    if (type != QtFatalMsg &&
-        type < minimumLevel_.load(std::memory_order::relaxed)) {
+    if (severity(type) <
+        severity(minimumLevel_.load(std::memory_order::relaxed))) {
         return;
     }
 

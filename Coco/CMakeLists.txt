@@ -1,4 +1,5 @@
-# Coco — common code for Qt projects.
+# Coco — Common code for Qt projects
+# Copyright (C) 2025-2026 fairybow
 #
 # Consumed as a submodule via add_subdirectory + target_link_libraries(app Coco::Coco).
 # Qt Network and Qt Xml are optional: the consumer decides whether to pull them

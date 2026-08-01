@@ -10,7 +10,7 @@
  * See the LICENSE file or visit <https://www.gnu.org/licenses/>
  */
 
-#include "../include/Coco/Path.h"
+#include "Coco/Path.h"
 
 #include <QDebug>
 #include <QMetaType>

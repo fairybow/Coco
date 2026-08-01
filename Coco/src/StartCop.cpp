@@ -10,9 +10,11 @@
  * See the LICENSE file or visit <https://www.gnu.org/licenses/>
  */
 
-#if !defined(QT_NO_NETWORK)
+#if !defined(COCO_HAS_NETWORK)
 
-#    include "../include/Coco/StartCop.h"
+/// TODO Maybe for now just fold this back into header
+
+#    include "Coco/StartCop.h"
 
 #    include <QByteArray>
 #    include <QLocalServer>

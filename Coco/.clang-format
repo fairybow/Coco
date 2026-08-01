@@ -1,3 +1,5 @@
+# Adjust in (and copy from) Coco
+
 AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: Left
@@ -20,3 +22,25 @@ PointerAlignment: Left
 SortIncludes: CaseSensitive
 SpaceInEmptyBraces: Never
 Standard: c++20
+
+# AlignOperands: Align
+# AllowShortBlocksOnASingleLine: true
+# AllowShortLambdasOnASingleLine: Inline
+# AllowShortEnumsOnASingleLine: true
+# AllowShortFunctionsOnASingleLine: Empty
+# AllowShortIfStatementsOnASingleLine: WithoutElse
+# BasedOnStyle: WebKit
+# BreakAfterReturnType: Automatic
+# BreakBeforeBinaryOperators: NonAssignment
+# BreakBeforeTernaryOperators: true
+# IncludeBlocks: Preserve
+# IndentPPDirectives: AfterHash
+# PackConstructorInitializers: Never
+# ShortNamespaceLines: 0
+# SpaceBeforeAssignmentOperators: true
+# SpaceBeforeCaseColon: false
+# SpaceBeforeCpp11BracedList: false
+# SpaceBeforeCtorInitializerColon: true
+# SpaceBeforeInheritanceColon: true
+# SpaceBeforeRangeBasedForLoopColon: true
+# ExperimentalAutoDetectBinPacking: true

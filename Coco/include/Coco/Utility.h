@@ -15,7 +15,7 @@
 #include <QObject>
 #include <QVariant>
 
-#include "Concepts.h"
+#include "Coco/Concepts.h"
 
 // Shorthand for getting the sender of a signal inside a slot. Via Qt: "Warning:
 // This function violates the object-oriented principle of modularity. However,

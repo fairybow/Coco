@@ -14,7 +14,7 @@
 
 #if !defined(COCO_HAS_NETWORK)
 
-/// TODO Prolly just remove this warning
+/// TODO Prolly just remove this warning?
 
 #    warning                                                                   \
         "Qt Network module not available. Coco::StartCop class will be disabled."

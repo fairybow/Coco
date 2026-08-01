@@ -20,8 +20,8 @@
 #include <QStringView>
 #include <QtLogging>
 
-#include "Fmt.h"
-#include "Path.h"
+#include "Coco/Fmt.h"
+#include "Coco/Path.h"
 
 namespace Coco::Debug {
 

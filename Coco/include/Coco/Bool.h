@@ -84,7 +84,10 @@ public:
     template <typename OtherTagT>
     constexpr bool operator==(const Bool<OtherTagT>& other) const = delete;
 
-    // TODO: Anything else?
+    static QString name(const Bool& b)
+    {
+        return QString::asprintf("%s::%s", TagT::name(), b ? "Yes" : "No");
+    }
 
 private:
     bool value_;
@@ -96,12 +99,6 @@ private:
     constexpr explicit Bool(bool value)
         : value_(value)
     {
-    }
-
-    static QString name_(const Bool& b)
-    {
-        return QString::fromUtf8(
-            std::format("{}::{}", TagT::name(), b.value_ ? "Yes" : "No"));
     }
 };
 

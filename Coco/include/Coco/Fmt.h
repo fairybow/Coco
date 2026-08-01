@@ -20,7 +20,7 @@
 #include <QString>
 #include <QStringView>
 
-#include "ToQString.h"
+#include "Coco/ToQString.h"
 
 namespace Coco::Fmt {
 

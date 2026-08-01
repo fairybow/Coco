@@ -36,7 +36,7 @@
 #include <QTextStream>
 #include <QWidget>
 
-#include "Bool.h"
+#include "Coco/Bool.h"
 
 #define STD_TO_QSTR_(StdPath) QString::fromStdString(StdPath.string())
 

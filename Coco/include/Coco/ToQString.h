@@ -36,9 +36,9 @@
 #include <QVariantHash>
 #include <QVariantMap>
 
-#include "Bool.h"
-#include "Concepts.h"
-#include "Path.h"
+#include "Coco/Bool.h"
+#include "Coco/Concepts.h"
+#include "Coco/Path.h"
 
 namespace Coco {
 
@@ -279,14 +279,11 @@ inline QString toQString(const QVariantMap& variantMap)
 
 // --- Coco types ---
 
-inline QString toQString(const Coco::Path& path) { return path.toQString(); }
+inline QString toQString(const Path& path) { return path.toQString(); }
 
-/// TODO: Add Coco::Bool::toString/toQString? (Like Path has, above, and just
-// route through here) Reproduces Coco::Bool's QDebug/formatter output:
-// "TagName::Yes" or "TagName::No"
-template <typename TagT> inline QString toQString(const Coco::Bool<TagT>& b)
+template <typename TagT> inline QString toQString(const Bool<TagT>& b)
 {
-    return QString::asprintf("%s::%s", TagT::name(), b ? "Yes" : "No");
+    return Bool<TagT>::name(b);
 }
 
 } // namespace Coco

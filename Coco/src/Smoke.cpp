@@ -20,20 +20,18 @@
 //   3. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
 
 #include <QCoreApplication>
-#include <QDebug>
-#include <QString>
-#include <QVariant>
-
-#include <Coco/Path.h>
-#include <Coco/ToQString.h>
-
 #if defined(COCO_HAS_XML)
 #    include <QDomDocument>
 #endif
+#include <QString>
+#include <QVariant>
 
+#include <Coco/Debug.h>
+#include <Coco/Path.h>
 #if defined(COCO_HAS_NETWORK)
 #    include <Coco/StartCop.h>
 #endif
+#include <Coco/ToQString.h>
 
 // COCO_TEST_EXPECT_* come from this test's own CMake and encode what the
 // configure step requested, independent of Coco. Cross-checking them against
@@ -64,16 +62,20 @@ static int failures = 0;
 static void check(bool ok, const char* what)
 {
     if (ok) {
-        qInfo() << "ok  :" << what;
+        INFO("ok  : {}", what);
     } else {
-        qWarning() << "FAIL:" << what;
+        WARN("FAIL:", what);
         ++failures;
     }
 }
 
 int main(int argc, char* argv[])
 {
+    using namespace Qt::StringLiterals;
+
     QCoreApplication app(argc, argv);
+
+    Coco::Debug::initialize(true);
 
     // --- Path converter registration --------------------------------------
     // The converters are installed ONLY by Path.cpp's static initializer, and
@@ -88,7 +90,7 @@ int main(int argc, char* argv[])
         !asVariant.value<QString>().isEmpty(),
         "Path -> QString yields a value");
 
-    auto fromString = QVariant(QStringLiteral("a/b/c.md"));
+    auto fromString = QVariant(u"a/b/c.md"_s);
     check(
         fromString.canConvert<Coco::Path>(),
         "QString -> Path converter installed");
@@ -97,36 +99,34 @@ int main(int argc, char* argv[])
         "QString -> Path round-trips");
 
     // --- ToQString core paths (no optional modules) -----------------------
-    check(Coco::toQString(42) == QStringLiteral("42"), "toQString(int)");
-    check(
-        Coco::toQString(QStringLiteral("hi")) == QStringLiteral("hi"),
-        "toQString(QString)");
+    check(Coco::toQString(42) == u"42"_s, "toQString(int)");
+    check(Coco::toQString(u"hi"_s) == u"hi"_s, "toQString(QString)");
 
     // --- Optional: Qt Xml -------------------------------------------------
 #if defined(COCO_HAS_XML)
     QDomDocument doc;
-    auto el = doc.createElement(QStringLiteral("t"));
-    el.setAttribute(QStringLiteral("a"), QStringLiteral("b"));
-    qInfo() << "xml :" << Coco::toQString(el);
+    auto el = doc.createElement(u"t"_s);
+    el.setAttribute(u"a"_s, u"b"_s);
+    INFO("xml: {}", Coco::toQString(el));
     check(!Coco::toQString(el).isEmpty(), "toQString(QDomElement) works");
 #else
-    qInfo() << "xml : disabled at configure time";
+    INFO("xml : disabled at configure time");
 #endif
 
     // --- Optional: Qt Network (also link-checks StartCop's moc output) -----
 #if defined(COCO_HAS_NETWORK)
     // Constructing + connecting to the typed signal references StartCop's
     // staticMetaObject; if AUTOMOC didn't run, this fails to LINK.
-    Coco::StartCop cop(QStringLiteral("coco-smoke-test"), argc, argv);
+    Coco::StartCop cop(u"coco-smoke-test"_s, argc, argv);
     QObject::connect(
         &cop,
         &Coco::StartCop::appRelaunched,
         [](const QStringList&) {});
-    qInfo() << "net : StartCop constructed and connected";
+    INFO("net : StartCop constructed and connected");
 #else
-    qInfo() << "net : disabled at configure time";
+    INFO("net : disabled at configure time");
 #endif
 
-    qInfo() << (failures ? "SMOKE TEST FAILED" : "smoke test passed");
+    INFO(failures ? "SMOKE TEST FAILED" : "smoke test passed");
     return failures ? 1 : 0;
 }

@@ -15,7 +15,7 @@
 #include <QString>
 #include <QStringList>
 
-#include "Path.h"
+#include "Coco/Path.h"
 
 namespace Coco::Disk {
 

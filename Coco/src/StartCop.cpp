@@ -12,8 +12,6 @@
 
 #if defined(COCO_HAS_NETWORK)
 
-/// TODO Maybe for now just fold this back into header
-
 #    include "Coco/StartCop.h"
 
 #    include <QByteArray>
@@ -29,12 +27,12 @@
 #        include <shellapi.h>
 #    endif
 
-// ----- Internal -----
+using namespace Qt::StringLiterals;
 
 constexpr auto WAIT_ = 100;
 constexpr auto TIMEOUT_ = 1000;
-static const QString DELIMITER_ =
-    QStringLiteral("\x1F\x1E\x1F"); // Ancient ASCII unit & record separators
+static const auto DELIMITER_ =
+    u"\x1F\x1E\x1F"_s; // Ancient ASCII unit & record separators
 
 static QByteArray serialize_(const QStringList& args)
 {
@@ -46,7 +44,8 @@ static QStringList deserialize_(const QByteArray& data)
     return QString::fromUtf8(data).split(DELIMITER_);
 }
 
-static QStringList qStringListArgs_(const int& argc, const char* const* argv)
+static QStringList qStringListArgs_(
+    [[maybe_unused]] const int& argc, [[maybe_unused]] const char* const* argv)
 {
     QStringList args{};
 
@@ -54,9 +53,6 @@ static QStringList qStringListArgs_(const int& argc, const char* const* argv)
 
     // Windows uses the local code page (Windows-1252), so QString::fromUtf8()
     // mangles non-ASCII characters!
-
-    (void)argc;
-    (void)argv;
 
     auto wargc = 0;
     auto wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
@@ -90,7 +86,8 @@ StartCop::StartCop(const QString& key, const int& argc, const char* const* argv)
 
 bool StartCop::isRunning()
 {
-    if (serverExists_()) return true;
+    if (serverExists_())
+        return true;
 
     startServer_();
     return false;
@@ -102,7 +99,8 @@ bool StartCop::serverExists_() const
     socket.connectToServer(key_);
     auto exists = socket.waitForConnected(WAIT_);
 
-    if (exists) sendArgs_(socket);
+    if (exists)
+        sendArgs_(socket);
 
     socket.close();
     return exists;
@@ -139,10 +137,12 @@ void StartCop::startServer_()
 
 void StartCop::onServerNewConnection_()
 {
-    if (debouncer_->isActive()) return;
+    if (debouncer_->isActive())
+        return;
 
     auto next = server_->nextPendingConnection();
-    if (!next) return;
+    if (!next)
+        return;
 
     if (next->waitForReadyRead(WAIT_)) {
         auto data = next->readAll();

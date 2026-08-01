@@ -64,6 +64,11 @@ endif()
 # archive the linker discards that TU because nothing references a symbol in it,
 # and the registration silently never runs. An OBJECT library links every object
 # into the consumer, so the initializer always fires.
+
+if(MSVC)
+    add_compile_options(/EHsc)
+endif()
+
 add_library(Coco OBJECT
     src/Debug.cpp
     src/Path.cpp

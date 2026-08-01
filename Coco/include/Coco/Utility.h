@@ -1,6 +1,6 @@
 /*
- * Coco
- * Copyright (C) 2026 fairybow
+ * Coco — Common code for Qt projects
+ * Copyright (C) 2025-2026 fairybow
  *
  * This program is free software, redistributable and/or modifiable under the
  * terms of the GNU GPL v3. It's distributed in the hope that it will be useful
@@ -15,7 +15,7 @@
 #include <QObject>
 #include <QVariant>
 
-#include "Concepts.h"
+#include "Coco/Concepts.h"
 
 // Shorthand for getting the sender of a signal inside a slot. Via Qt: "Warning:
 // This function violates the object-oriented principle of modularity. However,

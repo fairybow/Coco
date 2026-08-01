@@ -1,6 +1,6 @@
 /*
- * Coco
- * Copyright (C) 2026 fairybow
+ * Coco — Common code for Qt projects
+ * Copyright (C) 2025-2026 fairybow
  *
  * This program is free software, redistributable and/or modifiable under the
  * terms of the GNU GPL v3. It's distributed in the hope that it will be useful
@@ -12,7 +12,9 @@
 
 #pragma once
 
-#if defined(QT_NO_NETWORK)
+#if !defined(COCO_HAS_NETWORK)
+
+/// TODO Prolly just remove this warning?
 
 #    warning                                                                   \
         "Qt Network module not available. Coco::StartCop class will be disabled."

@@ -13,6 +13,7 @@ Cpp11BracedListStyle: Block
 FixNamespaceComments: true
 IndentWidth: 4
 InsertNewlineAtEOF: true
+IndentPPDirectives: AfterHash
 LineEnding: CRLF
 PointerAlignment: Left
 SortIncludes: CaseSensitive

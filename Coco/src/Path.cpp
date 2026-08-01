@@ -1,6 +1,6 @@
 /*
- * Coco
- * Copyright (C) 2026 fairybow
+ * Coco — Common code for Qt projects
+ * Copyright (C) 2025-2026 fairybow
  *
  * This program is free software, redistributable and/or modifiable under the
  * terms of the GNU GPL v3. It's distributed in the hope that it will be useful
@@ -10,12 +10,13 @@
  * See the LICENSE file or visit <https://www.gnu.org/licenses/>
  */
 
-#include "../include/Coco/Path.h"
+#include "Coco/Path.h"
 
-#include <QDebug>
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
+
+#include "Coco/Debug.h"
 
 // Registers Path with Qt's meta-type system and adds bidirectional QString
 // converters, allowing Path to be stored in and retrieved from QVariant
@@ -28,17 +29,21 @@ static const int qMetaTypeInitializer_ = [] {
     QMetaType::registerConverter<QString, Coco::Path>(
         [](const QString& s) { return Coco::Path(s); });
 
-#ifdef QT_DEBUG
-
+#ifdef COCO_DEBUG
     auto id = QMetaType::fromName(name);
-    qDebug() << "Coco::Path registered:" << id.isValid() << "| id:" << id.id();
-    auto v1 = QVariant::fromValue(Coco::Path("debug/test"));
-    qDebug() << "Path -> QString:" << v1.canConvert<QString>()
-             << "| value:" << v1.value<QString>();
-    auto v2 = QVariant::fromValue(QString("debug/test"));
-    qDebug() << "QString -> Path:" << v2.canConvert<Coco::Path>()
-             << "| value:" << v2.value<Coco::Path>().toQString();
+    DEBUG("Coco::Path registered: {} | id: {}", id.isValid(), id.id());
 
+    auto v1 = QVariant::fromValue(Coco::Path("debug/test"));
+    DEBUG(
+        "Path -> QString: {} | value: {}",
+        v1.canConvert<QString>(),
+        v1.value<QString>());
+
+    auto v2 = QVariant::fromValue(QString("debug/test"));
+    DEBUG(
+        "QString -> Path: {} | value: {}",
+        v2.canConvert<Coco::Path>(),
+        v2.value<Coco::Path>().toQString());
 #endif
 
     return 0;

@@ -1,6 +1,6 @@
 /*
- * Coco
- * Copyright (C) 2026 fairybow
+ * Coco — Common code for Qt projects
+ * Copyright (C) 2025-2026 fairybow
  *
  * This program is free software, redistributable and/or modifiable under the
  * terms of the GNU GPL v3. It's distributed in the hope that it will be useful
@@ -84,7 +84,10 @@ public:
     template <typename OtherTagT>
     constexpr bool operator==(const Bool<OtherTagT>& other) const = delete;
 
-    // TODO: Anything else?
+    static QString name(const Bool& b)
+    {
+        return QString::asprintf("%s::%s", TagT::name(), b ? "Yes" : "No");
+    }
 
 private:
     bool value_;
@@ -96,12 +99,6 @@ private:
     constexpr explicit Bool(bool value)
         : value_(value)
     {
-    }
-
-    static QString name_(const Bool& b)
-    {
-        return QString::fromUtf8(
-            std::format("{}::{}", TagT::name(), b.value_ ? "Yes" : "No"));
     }
 };
 

@@ -19,8 +19,8 @@ mkdir "%OUT_DIR%"
 copy "%ROOT_DIR%\README.md" "%OUT_DIR%\" > nul
 
 copy "%PROJ_DIR%\.clang-format" "%OUT_DIR%\" > nul
-REM copy "%PROJ_DIR%\CMakeLists.txt" "%OUT_DIR%\" > nul
-REM copy "%PROJ_DIR%\cpp.hint" "%OUT_DIR%\" > nul
+copy "%PROJ_DIR%\CMakeLists.txt" "%OUT_DIR%\" > nul
+copy "%PROJ_DIR%\cpp.hint" "%OUT_DIR%\" > nul
 
 for /r "%INCLUDE_DIR%" %%f in (*) do (
     copy "%%f" "%OUT_DIR%\" > nul

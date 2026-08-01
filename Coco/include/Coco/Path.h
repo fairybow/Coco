@@ -183,7 +183,8 @@ public:
 
     bool isEmptyDir() const
     {
-        if (!isDir()) return false;
+        if (!isDir())
+            return false;
         return QDir(d_->qstr())
             .isEmpty(QDir::AllEntries | QDir::NoDotAndDotDot);
     }
@@ -257,8 +258,10 @@ public:
     Path rebase(const Path& oldBase, const Path& newBase) const
     {
         auto rel = d_->path.lexically_relative(oldBase.d_->path);
-        if (rel.empty()) return {};
-        if (rel == std::filesystem::path(".")) return newBase;
+        if (rel.empty())
+            return {};
+        if (rel == std::filesystem::path("."))
+            return newBase;
         return newBase.d_->path / rel;
     }
 
@@ -307,8 +310,8 @@ public:
         }
 
         // Don't strip if the slash is the root directory component
-        if (pretty.size() > 1 && pretty.back() == '/'
-            && pretty[pretty.size() - 2] != ':') {
+        if (pretty.size() > 1 && pretty.back() == '/' &&
+            pretty[pretty.size() - 2] != ':') {
             pretty.pop_back();
         }
 
@@ -457,7 +460,8 @@ inline bool rename(const Path& oldPath, const Path& newPath)
 inline bool
 copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
 {
-    if (overwrite) QFile::remove(newPath.toQString());
+    if (overwrite)
+        QFile::remove(newPath.toQString());
     return QFile::copy(path.toQString(), newPath.toQString());
 }
 
@@ -467,8 +471,10 @@ inline bool remove(const Path& path) { return QFile::remove(path.toQString()); }
 // Copies the contents of one directory to another
 inline bool copyContents(const Path& srcDir, const Path& dstDir)
 {
-    if (!srcDir.exists() || !srcDir.isDir()) return false;
-    if (!dstDir.exists() && !mkdir(dstDir)) return false;
+    if (!srcDir.exists() || !srcDir.isDir())
+        return false;
+    if (!dstDir.exists() && !mkdir(dstDir))
+        return false;
 
     QDir src_dir(srcDir.toQString());
     auto entries = src_dir.entryList(
@@ -480,10 +486,13 @@ inline bool copyContents(const Path& srcDir, const Path& dstDir)
 
         if (src_path.isDir()) {
             // Recurse
-            if (!mkdir(dst_path)) return false;
-            if (!copyContents(src_path, dst_path)) return false;
+            if (!mkdir(dst_path))
+                return false;
+            if (!copyContents(src_path, dst_path))
+                return false;
         } else {
-            if (!copy(src_path, dst_path)) return false;
+            if (!copy(src_path, dst_path))
+                return false;
         }
     }
 
@@ -733,7 +742,6 @@ template <> struct formatter<Coco::Path> : formatter<string>
 #undef STD_TO_QSTR_
 
 Q_DECLARE_METATYPE(Coco::Path)
-
 
 /// TODO Add to Smoke.cpp?:
 

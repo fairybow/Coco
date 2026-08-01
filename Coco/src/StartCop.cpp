@@ -45,7 +45,8 @@ static QStringList deserialize_(const QByteArray& data)
 }
 
 static QStringList qStringListArgs_(
-    [[maybe_unused]] const int& argc, [[maybe_unused]] const char* const* argv)
+    [[maybe_unused]] const int& argc,
+    [[maybe_unused]] const char* const* argv)
 {
     QStringList args{};
 

@@ -57,7 +57,8 @@ template <Concepts::QObjectPointer ParentT>
 inline ParentT findParent(QObject* object)
 {
     for (auto obj = object; obj; obj = obj->parent())
-        if (auto parent = qobject_cast<ParentT>(obj)) return parent;
+        if (auto parent = qobject_cast<ParentT>(obj))
+            return parent;
 
     return nullptr;
 }

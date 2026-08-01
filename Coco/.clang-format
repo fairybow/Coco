@@ -2,6 +2,7 @@ AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: Left
 AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 BinPackArguments: false # Deprecated, but VS clang isn't updated
 BinPackParameters: false # Deprecated, but VS clang isn't updated
 BreakAfterOpenBracketFunction: true

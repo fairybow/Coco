@@ -93,8 +93,7 @@ template <typename T> inline QString toQString(const T* ptr)
 
 // Ptr can be nullptr. Overrides the generic pointer overload via partial
 // ordering when T derives from QObject
-template <Concepts::QObjectDerived T>
-inline QString toQString(const T* ptr)
+template <Concepts::QObjectDerived T> inline QString toQString(const T* ptr)
 {
     if (!ptr)
         return u"nullptr"_s;

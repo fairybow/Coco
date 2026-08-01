@@ -187,7 +187,7 @@ inline void assertionFailed_(
 
 } // namespace Internal
 
-}
+} // namespace Coco::Debug
 
 #define LOG(Level)                                                             \
     Coco::Debug::Log(Level, __FILE__, __LINE__, __FUNCTION__).print

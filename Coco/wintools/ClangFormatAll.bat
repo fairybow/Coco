@@ -1,5 +1,5 @@
 @echo off
-set CF="C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\Llvm\bin\clang-format.exe"
+set CF="C:\Program Files\Microsoft Visual Studio\18\Community\VC\Tools\Llvm\x64\bin\clang-format.exe"
 
 for /r "%~dp0..\include\Coco" %%f in (*.h *.mm) do (
     %CF% -i "%%f"

@@ -12,11 +12,10 @@
 
 #include "Coco/Path.h"
 
+#include <QDebug>
 #include <QMetaType>
 #include <QString>
 #include <QVariant>
-
-#include "Coco/Debug.h"
 
 // Registers Path with Qt's meta-type system and adds bidirectional QString
 // converters, allowing Path to be stored in and retrieved from QVariant
@@ -30,20 +29,21 @@ static const int qMetaTypeInitializer_ = [] {
         [](const QString& s) { return Coco::Path(s); });
 
 #ifdef COCO_DEBUG
+
+    // Use QDebug, since these will run before QApplication is initialized (and
+    // thus before Coco::Debug can be initialized)
+
     auto id = QMetaType::fromName(name);
-    DEBUG("Coco::Path registered: {} | id: {}", id.isValid(), id.id());
+    qDebug() << "Coco::Path registered:" << id.isValid() << "| id:" << id.id();
 
     auto v1 = QVariant::fromValue(Coco::Path("debug/test"));
-    DEBUG(
-        "Path -> QString: {} | value: {}",
-        v1.canConvert<QString>(),
-        v1.value<QString>());
+    qDebug() << "Path -> QString:" << v1.canConvert<QString>()
+             << "| value:" << v1.value<QString>();
 
     auto v2 = QVariant::fromValue(QString("debug/test"));
-    DEBUG(
-        "QString -> Path: {} | value: {}",
-        v2.canConvert<Coco::Path>(),
-        v2.value<Coco::Path>().toQString());
+    qDebug() << "QString -> Path:" << v2.canConvert<Coco::Path>()
+             << "| value:" << v2.value<Coco::Path>().toQString();
+
 #endif
 
     return 0;

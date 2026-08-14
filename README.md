@@ -1,3 +1,3 @@
 # Coco
 
-**<ins>Co</ins>**mmon **<ins>co</ins>**de for my Qt projects.
+<b><ins>Co</ins></b>mmon <b><ins>co</ins></b>de for my Qt projects.

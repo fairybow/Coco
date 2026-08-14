@@ -26,7 +26,7 @@
 
 // idc I'm the only one using this lol
 // TODO: Prefix with cc_?
-#define qVar(T) QVariant::fromValue(T)
+#define qVar(Value) QVariant::fromValue(Value)
 
 // I occasionally subclass solely in order to: 1) check memory via destructor
 // debug output; and 2) have debug output show up as a custom class and not,
@@ -37,7 +37,6 @@
     {                                                                          \
     public:                                                                    \
         using Base::Base;                                                      \
-        virtual ~Class() override { COCO_TRACER; }                             \
     }
 
 // Since this adds the Q_OBJECT macro, it cannot be nested
@@ -48,7 +47,6 @@
                                                                                \
     public:                                                                    \
         using Base::Base;                                                      \
-        virtual ~Class() override { COCO_TRACER; }                             \
     }
 
 namespace Coco {

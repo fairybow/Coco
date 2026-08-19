@@ -23,6 +23,9 @@
 #include "Coco/Fmt.h"
 #include "Coco/Path.h"
 
+// TODO: Address macro pollution? COCO_ prefix on macros? If so, need to change
+// existing COCO_DEBUG name
+
 namespace Coco::Debug {
 
 using namespace Qt::StringLiterals;

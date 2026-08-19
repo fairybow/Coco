@@ -1,5 +1,7 @@
 # Adjust in (and copy from) Coco
 
+# BasedOnStyle: WebKit
+
 AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AlignArrayOfStructures: Left
@@ -29,7 +31,6 @@ Standard: c++20
 # AllowShortEnumsOnASingleLine: true
 # AllowShortFunctionsOnASingleLine: Empty
 # AllowShortIfStatementsOnASingleLine: WithoutElse
-# BasedOnStyle: WebKit
 # BreakAfterReturnType: Automatic
 # BreakBeforeBinaryOperators: NonAssignment
 # BreakBeforeTernaryOperators: true

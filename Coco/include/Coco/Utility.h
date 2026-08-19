@@ -32,7 +32,7 @@
 // debug output; and 2) have debug output show up as a custom class and not,
 // say, QWidget or something unhelpful. Additionally, this can be useful for
 // quickly creating a nested class that doesn't need the Q_OBJECT macro
-#define COCO_TRIVIAL_CLASS(Class, Base)                                        \
+#define TRIVIAL_CLASS(Class, Base)                                             \
     class Class : public Base                                                  \
     {                                                                          \
     public:                                                                    \
@@ -40,7 +40,7 @@
     }
 
 // Since this adds the Q_OBJECT macro, it cannot be nested
-#define COCO_TRIVIAL_QCLASS(Class, Base)                                       \
+#define TRIVIAL_QCLASS(Class, Base)                                            \
     class Class : public Base                                                  \
     {                                                                          \
         Q_OBJECT                                                               \
@@ -51,20 +51,20 @@
 
 namespace Coco {
 
-template <Concepts::QObjectPointer ParentT>
-inline ParentT findParent(QObject* object)
+template <Concepts::QObjectPointer ParentPtrT>
+inline ParentPtrT findParent(QObject* object)
 {
     for (auto obj = object; obj; obj = obj->parent())
-        if (auto parent = qobject_cast<ParentT>(obj))
+        if (auto parent = qobject_cast<ParentPtrT>(obj))
             return parent;
 
     return nullptr;
 }
 
-template <Concepts::QObjectPointer ParentT>
-inline ParentT findParent(const QObject* object)
+template <Concepts::QObjectPointer ParentPtrT>
+inline ParentPtrT findParent(const QObject* object)
 {
-    return findParent<ParentT>(const_cast<QObject*>(object));
+    return findParent<ParentPtrT>(const_cast<QObject*>(object));
 }
 
 } // namespace Coco

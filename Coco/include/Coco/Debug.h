@@ -51,7 +51,7 @@ inline constexpr int severity(QtMsgType type) noexcept
 }
 
 // To be safe, don't call this before Qt has finished app construction
-void initialize(
+void init(
     bool verbose = false, // Coco::Bool?
     const Path& logDir = {},
     const QString& logPrefix = {},
@@ -214,6 +214,8 @@ inline void assertionFailed_(
 #    define ASSERT(condition, ...) static_cast<void>(false && (condition))
 #endif
 
+// TODO: Remember why I made this different than Qt's version and then explain
+// why lol
 #define UNREACHABLE(...)                                                       \
     Coco::Debug::Internal::assertionFailed_(                                   \
         "UNREACHABLE",                                                         \

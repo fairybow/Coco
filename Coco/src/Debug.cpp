@@ -121,7 +121,7 @@ void handler_(
 
 } // namespace
 
-void initialize(
+void init(
     bool verbose,
     const Path& logDir,
     const QString& logPrefix,

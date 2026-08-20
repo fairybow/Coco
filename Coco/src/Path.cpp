@@ -28,7 +28,7 @@ static const int qMetaTypeInitializer_ = [] {
     QMetaType::registerConverter<QString, Coco::Path>(
         [](const QString& s) { return Coco::Path(s); });
 
-#ifdef COCO_DEBUG
+#ifdef COCO_HAS_DIAGNOSTICS
 
     // Use QDebug, since these will run before QApplication is initialized (and
     // thus before Coco::Debug can be initialized)

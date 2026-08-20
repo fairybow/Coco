@@ -24,7 +24,7 @@
 #include "Coco/Path.h"
 
 // TODO: Address macro pollution? COCO_ prefix on macros? (COCO_DEBUG is free
-// now that assertion gating uses COCO_ASSERTIONS)
+// now that assertion gating uses COCO_HAS_ASSERTIONS)
 
 namespace Coco::Debug {
 
@@ -202,7 +202,7 @@ inline void assertionFailed_(
 
 #define TRACER DEBUG(__FUNCTION__)
 
-#ifdef COCO_ASSERTIONS
+#ifdef COCO_HAS_ASSERTIONS
 #    define ASSERT(condition, ...)                                             \
         ((condition) ? static_cast<void>(0)                                    \
                      : Coco::Debug::Internal::assertionFailed_(                \

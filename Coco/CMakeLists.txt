@@ -101,9 +101,44 @@ target_include_directories(Coco PUBLIC
 # Required modules propagate PUBLIC: anyone including Coco headers needs them.
 target_link_libraries(Coco PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 
-# Assertions in Debug.h are expanded in consumer TUs, so this must be PUBLIC and
-# evaluated in the consumer's own config.
-target_compile_definitions(Coco PUBLIC $<$<CONFIG:Debug>:COCO_ASSERTIONS>)
+# --- Assertions and diagnostics --------------------------------------------
+#
+# Tri-state rather than option(): option() is a single configure-time boolean,
+# but "is this a Debug build" varies per config in multi-config generators
+# (Visual Studio). AUTO keeps that config-sensitivity; ON/OFF force it.
+#
+# Consumers set these before add_subdirectory(), or with -D on the CLI:
+#   set(COCO_WITH_ASSERTIONS "OFF")
+#   set(COCO_WITH_DIAGNOSTICS "ON")
+#
+# PUBLIC is required: ASSERT expands in the consumer's own TUs, so a PRIVATE
+# definition would leave every consumer assertion silently dead.
+
+# TODO: DIAGNOSTICS maybe can be all qDebug (or DEBUG, after QApp is constructed) output
+
+set(COCO_WITH_ASSERTIONS "AUTO" CACHE STRING
+    "Coco ASSERT: ON, OFF, or AUTO (Debug configs only)")
+set_property(CACHE COCO_WITH_ASSERTIONS PROPERTY STRINGS ON OFF AUTO)
+
+set(COCO_WITH_DIAGNOSTICS "AUTO" CACHE STRING
+    "Coco startup qDebug output: ON, OFF, or AUTO (Debug configs only)")
+set_property(CACHE COCO_WITH_DIAGNOSTICS PROPERTY STRINGS ON OFF AUTO)
+
+if(COCO_WITH_ASSERTIONS STREQUAL "ON")
+    target_compile_definitions(Coco PUBLIC COCO_HAS_ASSERTIONS)
+elseif(COCO_WITH_ASSERTIONS STREQUAL "AUTO")
+    target_compile_definitions(Coco PUBLIC $<$<CONFIG:Debug>:COCO_HAS_ASSERTIONS>)
+elseif(NOT COCO_WITH_ASSERTIONS STREQUAL "OFF")
+    message(FATAL_ERROR "COCO_WITH_ASSERTIONS must be ON, OFF, or AUTO.")
+endif()
+
+if(COCO_WITH_DIAGNOSTICS STREQUAL "ON")
+    target_compile_definitions(Coco PUBLIC COCO_HAS_DIAGNOSTICS)
+elseif(COCO_WITH_DIAGNOSTICS STREQUAL "AUTO")
+    target_compile_definitions(Coco PUBLIC $<$<CONFIG:Debug>:COCO_HAS_DIAGNOSTICS>)
+elseif(NOT COCO_WITH_DIAGNOSTICS STREQUAL "OFF")
+    message(FATAL_ERROR "COCO_WITH_DIAGNOSTICS must be ON, OFF, or AUTO.")
+endif()
 
 # --- Optional: Qt Network (StartCop) ---------------------------------------
 if(COCO_WITH_NETWORK)

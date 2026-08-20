@@ -103,7 +103,7 @@ target_link_libraries(Coco PUBLIC Qt6::Core Qt6::Gui Qt6::Widgets)
 
 # Assertions in Debug.h are expanded in consumer TUs, so this must be PUBLIC and
 # evaluated in the consumer's own config.
-target_compile_definitions(Coco PUBLIC $<$<CONFIG:Debug>:COCO_DEBUG>)
+target_compile_definitions(Coco PUBLIC $<$<CONFIG:Debug>:COCO_ASSERTIONS>)
 
 # --- Optional: Qt Network (StartCop) ---------------------------------------
 if(COCO_WITH_NETWORK)

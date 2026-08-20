@@ -23,8 +23,8 @@
 #include "Coco/Fmt.h"
 #include "Coco/Path.h"
 
-// TODO: Address macro pollution? COCO_ prefix on macros? If so, need to change
-// existing COCO_DEBUG name
+// TODO: Address macro pollution? COCO_ prefix on macros? (COCO_DEBUG is free
+// now that assertion gating uses COCO_ASSERTIONS)
 
 namespace Coco::Debug {
 
@@ -202,7 +202,7 @@ inline void assertionFailed_(
 
 #define TRACER DEBUG(__FUNCTION__)
 
-#ifdef COCO_DEBUG
+#ifdef COCO_ASSERTIONS
 #    define ASSERT(condition, ...)                                             \
         ((condition) ? static_cast<void>(0)                                    \
                      : Coco::Debug::Internal::assertionFailed_(                \

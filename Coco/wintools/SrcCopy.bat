@@ -9,7 +9,7 @@ set INCLUDE_DIR=%~dp0..\include\Coco
 set SRC_DIR=%~dp0..\src
 set DOCS_DIR=%~dp0..\docs
 
-set OUT_DIR=%~dp0..\..\..\CocoSrc
+set OUT_DIR=%~dp0..\..\..\_CocoSrc
 
 REM ----------------------------------------
 

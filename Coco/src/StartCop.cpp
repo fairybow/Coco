@@ -149,7 +149,7 @@ void StartCop::onServerNewConnection_()
         auto data = next->readAll();
         auto new_args = deserialize_(data);
 
-        emit appRelaunched(new_args);
+        emit relaunched(new_args);
     }
 
     next->disconnectFromServer();

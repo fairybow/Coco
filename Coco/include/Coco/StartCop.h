@@ -50,7 +50,7 @@ namespace Coco {
 //     QApplication app(argc, argv);
 //
 //     MainWindow w;
-//     w.connect(&s, &StartCop::appRelaunched, &w, &MainWindow::slot);
+//     w.connect(&s, &StartCop::relaunched, &w, &MainWindow::slot);
 //     w.show();
 //
 //     return app.exec();
@@ -72,7 +72,7 @@ public:
     bool isRunning();
 
 signals:
-    void appRelaunched(const QStringList& args);
+    void relaunched(const QStringList& args);
 
 private:
     QStringList args_;

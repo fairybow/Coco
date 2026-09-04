@@ -37,6 +37,8 @@ inline LocalTime now()
     return { secs, ms };
 }
 
+inline qint64 epoch() noexcept { return QDateTime::currentMSecsSinceEpoch(); }
+
 template <typename SlotT>
 inline void delay(int msecs, const QObject* context, SlotT slot)
 {

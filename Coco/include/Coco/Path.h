@@ -196,6 +196,27 @@ public:
         return QFileInfo(d_->qstr()).exists();
     }
 
+    // True if this path is `base` itself or nested inside it. A pure walk up
+    // the parents, comparing with operator== (std::filesystem::path's own,
+    // which treats both separators as separators) — so it never routes through
+    // prettyString, toQString, or any display form. Bounded by the parent fixed
+    // point (a root's parent_path is itself), so an unrelated absolute path
+    // terminates rather than looping
+    bool isAtOrUnder(const Path& base) const
+    {
+        auto p = *this;
+        while (true) {
+            if (p == base)
+                return true;
+
+            auto up = p.parent();
+            if (up == p) // a root: parent_path stops shrinking
+                return false;
+
+            p = up;
+        }
+    }
+
     // ----- Decomposition -----
 
     Path rootName() const { return d_->path.root_name(); }

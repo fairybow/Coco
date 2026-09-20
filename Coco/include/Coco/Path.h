@@ -15,6 +15,7 @@
 #include <compare>
 #include <filesystem>
 #include <format>
+#include <functional>
 #include <istream>
 #include <optional>
 #include <ostream>
@@ -666,6 +667,51 @@ inline PathList filePaths(
 inline PathList allFilePaths(const PathList& dirs, const QStringList& exts)
 {
     return paths(dirs, exts, QDir::Files, QDirIterator::Subdirectories);
+}
+
+// Every file under dir, recursively, descending only into the subdirectories
+// shouldDescend accepts. Unlike allFilePaths, a rejected subdirectory is
+// pruned, not filtered afterward: nothing beneath it is ever visited, so a
+// large subtree the caller doesn't want (a .git/, say) costs one predicate
+// call, not a walk.
+//
+// Symlinked and junctioned directories are never descended — QDirIterator's
+// own default (no FollowSymlinks), and it rules out cycles. Entries with the
+// Windows hidden attribute are skipped, since QDir::Hidden isn't set. Order
+// is unspecified
+inline PathList walkFilePaths(
+    const Path& dir,
+    const std::function<bool(const Path& subdir)>& shouldDescend)
+{
+    PathList result{};
+    PathList pending{ dir };
+
+    while (!pending.isEmpty()) {
+        auto current = pending.takeLast();
+
+        QDirIterator it(
+            current.toQString(),
+            QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot);
+
+        while (it.hasNext()) {
+            it.next();
+            auto info = it.fileInfo();
+            Path path(it.filePath());
+
+            if (!info.isDir()) {
+                result << path;
+                continue;
+            }
+
+            if (info.isSymLink() || info.isJunction())
+                continue;
+
+            if (shouldDescend(path))
+                pending << path;
+        }
+    }
+
+    return result;
 }
 
 inline Path getDir(

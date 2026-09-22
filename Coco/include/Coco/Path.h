@@ -490,6 +490,15 @@ copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
 // Removes the file at the specified path
 inline bool remove(const Path& path) { return QFile::remove(path.toQString()); }
 
+// Moves the file or directory at the specified path to the system trash.
+// Returns false, leaving the entry in place, if the platform has no trash for
+// it (on Windows, a network share or an item too large for the Recycle Bin —
+// Qt refuses rather than deleting permanently)
+inline bool moveToTrash(const Path& path)
+{
+    return QFile::moveToTrash(path.toQString());
+}
+
 // Copies the contents of one directory to another
 inline bool copyContents(const Path& srcDir, const Path& dstDir)
 {

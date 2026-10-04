@@ -745,8 +745,8 @@ static void testPathNonAsciiFile(const char* tag, const QString& name)
 // two UTF-16 code units)
 static void testPathNonAscii()
 {
-    auto accented = u"é"_s;
-    auto japanese = u"日本語"_s;
+    auto accented = u"\u00E9"_s;
+    auto japanese = u"\u65E5\u672C\u8A9E"_s;
     auto emoji = u"\U0001F4C1"_s;
 
     testPathNonAsciiName("accented", accented, "\xC3\xA9");

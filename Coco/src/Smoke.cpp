@@ -14,12 +14,13 @@
 //
 // Assumes the Hearth->Coco fold is done (toQString lives in namespace Coco,
 // headers included as <Coco/...>). Returns non-zero on failure so CTest catches
-// it. Covers four things:
+// it. Covers five things:
 //   1. COCO_HAS_* macro propagation to a consumer TU (compile-time, both ways)
 //   2. Path meta-type converter registration (runtime; proves Path.cpp linked)
 //   3. Path behavior: streams, construction, comparison, decomposition,
 //      modification, conversion, and the standard-directory functions
-//   4. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
+//   4. toQString output, for each overload and for each kind of QVariant
+//   5. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
 
 #include <filesystem>
 #include <format>
@@ -35,10 +36,21 @@
 #    include <QDomDocument>
 #endif
 #include <QIODevice>
+#include <QLatin1StringView>
+#include <QMetaType>
+#include <QModelIndex>
+#include <QObject>
+#include <QPoint>
+#include <QRect>
 #include <QString>
+#include <QStringList>
+#include <QStringView>
 #include <QTextStream>
 #include <QVariant>
+#include <QVariantHash>
+#include <QVariantMap>
 
+#include <Coco/Bool.h>
 #include <Coco/Debug.h>
 #include <Coco/Path.h>
 #if defined(COCO_HAS_NETWORK)
@@ -71,6 +83,8 @@ static_assert(
     COCO_TEST_EXPECT_NET == 0,
     "COCO_HAS_NETWORK is not defined but the build configured Network ON");
 #endif
+
+COCO_BOOL(SmokeFlag)
 
 static int failures = 0;
 
@@ -570,6 +584,224 @@ static void testPathStandardDirs()
     }
 }
 
+static void testToQString()
+{
+    check(
+        Coco::toQString(QStringView(u"view")) == u"view"_s,
+        "toQString(QStringView)");
+    check(
+        Coco::toQString(QLatin1StringView("latin")) == u"latin"_s,
+        "toQString(QLatin1StringView)");
+    check(Coco::toQString("chars") == u"chars"_s, "toQString(const char*)");
+
+    check(Coco::toQString(true) == u"true"_s, "toQString(true)");
+    check(Coco::toQString(false) == u"false"_s, "toQString(false)");
+
+    check(Coco::toQString(55u) == u"55"_s, "toQString(unsigned)");
+    check(Coco::toQString(-55LL) == u"-55"_s, "toQString(long long)");
+    check(Coco::toQString(1.5) == u"1.5"_s, "toQString(double)");
+
+    // The type name in a plain pointer's text is implementation-defined, so
+    // only the null case has an exact form
+    {
+        const int* null_ptr = nullptr;
+        auto value = 0;
+
+        check(
+            Coco::toQString(null_ptr) == u"nullptr"_s,
+            "toQString(null pointer)");
+
+        auto text = Coco::toQString(&value);
+        check(!text.isEmpty() && text != u"nullptr"_s, "toQString(pointer)");
+    }
+
+    // A QObject pointer names its class, from the meta-object
+    {
+        QObject* null_object = nullptr;
+        QObject object{};
+
+        check(
+            Coco::toQString(null_object) == u"nullptr"_s,
+            "toQString(null QObject*)");
+        check(
+            Coco::toQString(&object).startsWith(u"QObject("_s),
+            "toQString(QObject*)");
+        check(
+            Coco::toQString(QCoreApplication::instance())
+                .startsWith(u"QCoreApplication("_s),
+            "toQString(QObject subclass*)");
+    }
+
+    check(
+        Coco::toQString(QModelIndex()) == u"QModelIndex(Invalid)"_s,
+        "toQString(invalid QModelIndex)");
+    check(
+        Coco::toQString(QPoint(10, 20)) == u"QPoint(x:10, y:20)"_s,
+        "toQString(QPoint)");
+    check(
+        Coco::toQString(QStringList{ u"one"_s, u"two"_s, u"three"_s }) ==
+            u"one, two, three"_s,
+        "toQString(QStringList)");
+
+    check(
+        Coco::toQString(Coco::Path("a/b/c.md")) == u"a/b/c.md"_s,
+        "toQString(Path)");
+    check(
+        Coco::toQString(SmokeFlag::Yes) == u"SmokeFlag::Yes"_s,
+        "toQString(Bool Yes)");
+    check(
+        Coco::toQString(SmokeFlag::No) == u"SmokeFlag::No"_s,
+        "toQString(Bool No)");
+
+#if defined(COCO_HAS_XML)
+
+    {
+        QDomDocument doc{};
+        auto bare = doc.createElement(u"t"_s);
+        auto with_attr = doc.createElement(u"t"_s);
+        with_attr.setAttribute(u"a"_s, u"b"_s);
+
+        check(
+            Coco::toQString(QDomElement()) == u"QDomElement(Null)"_s,
+            "toQString(null QDomElement)");
+        check(
+            Coco::toQString(bare) == u"QDomElement(<t>)"_s,
+            "toQString(QDomElement)");
+        check(
+            Coco::toQString(with_attr) == u"QDomElement(<t a='b'>)"_s,
+            "toQString(QDomElement with an attribute)");
+    }
+
+#endif
+}
+
+// A QVariant gives its value's text with no "QVariant(...)" wrapper, and a
+// label only when there is no value to show
+static void testToQStringVariant()
+{
+    check(
+        Coco::toQString(QVariant()) == u"QVariant(Invalid)"_s,
+        "toQString(invalid QVariant)");
+
+    // A variant made from a type alone has a type and no value
+    check(
+        Coco::toQString(QVariant(QMetaType::fromType<QString>())) ==
+            u"QVariant(Null)"_s,
+        "toQString(null QVariant)");
+
+    check(Coco::toQString(QVariant(55)) == u"55"_s, "toQString(QVariant int)");
+    check(
+        Coco::toQString(QVariant(true)) == u"true"_s,
+        "toQString(QVariant bool)");
+    check(
+        Coco::toQString(QVariant(u"Hello"_s)) == u"Hello"_s,
+        "toQString(QVariant QString)");
+
+    // QVariant::toString gives nothing for these, so each has its own text
+    check(
+        Coco::toQString(QVariant(QPoint(10, 20))) == u"QPoint(x:10, y:20)"_s,
+        "toQString(QVariant QPoint)");
+    check(
+        Coco::toQString(
+            QVariant(QStringList{ u"one"_s, u"two"_s, u"three"_s })) ==
+            u"one, two, three"_s,
+        "toQString(QVariant QStringList)");
+    check(
+        Coco::toQString(QVariant::fromValue(QModelIndex())) ==
+            u"QModelIndex(Invalid)"_s,
+        "toQString(QVariant QModelIndex)");
+
+    // A type with no text of its own and no overload here
+    check(
+        Coco::toQString(QVariant(QRect(1, 2, 3, 4))) ==
+            u"QVariant(Non-printable)"_s,
+        "toQString(QVariant with no text)");
+
+    // A QMap iterates in key order, so two keys have one possible text
+    {
+        QVariantMap map{
+            { u"a"_s, 1        },
+            { u"b"_s, u"two"_s }
+        };
+
+        check(
+            Coco::toQString(QVariantMap{}) == u"QVariantMap()"_s,
+            "toQString(empty QVariantMap)");
+        check(
+            Coco::toQString(map) ==
+                u"QVariantMap({ \"a\", 1 }, { \"b\", two })"_s,
+            "toQString(QVariantMap)");
+        check(
+            Coco::toQString(QVariant(map)) == Coco::toQString(map),
+            "toQString(QVariant QVariantMap)");
+    }
+
+    // A QHash has no fixed order, so one key keeps the text exact
+    {
+        QVariantHash hash{
+            { u"key"_s, 1 }
+        };
+
+        check(
+            Coco::toQString(QVariantHash{}) == u"QVariantHash()"_s,
+            "toQString(empty QVariantHash)");
+        check(
+            Coco::toQString(hash) == u"QVariantHash({ \"key\", 1 })"_s,
+            "toQString(QVariantHash)");
+        check(
+            Coco::toQString(QVariant(hash)) == Coco::toQString(hash),
+            "toQString(QVariant QVariantHash)");
+    }
+
+    // A value inside a container goes through the same QVariant overload
+    {
+        QVariantMap map{
+            { u"p"_s, QPoint(1, 2) }
+        };
+
+        check(
+            Coco::toQString(map) ==
+                u"QVariantMap({ \"p\", QPoint(x:1, y:2) })"_s,
+            "toQString(QVariantMap holding a QPoint)");
+    }
+
+    // A QObject pointer held in a variant names its real class, whether the
+    // variant holds it as a QObject* or as a pointer to the subclass. A null
+    // pointer makes the variant itself null, which is reported first
+    {
+        QObject object{};
+        auto* app = QCoreApplication::instance();
+
+        check(
+            Coco::toQString(QVariant::fromValue(&object))
+                .startsWith(u"QObject("_s),
+            "toQString(QVariant QObject*)");
+        check(
+            Coco::toQString(QVariant::fromValue(app))
+                .startsWith(u"QCoreApplication("_s),
+            "toQString(QVariant QObject subclass*)");
+        check(
+            Coco::toQString(QVariant::fromValue<QObject*>(nullptr)) ==
+                u"QVariant(Null)"_s,
+            "toQString(QVariant null QObject*)");
+    }
+
+#if defined(COCO_HAS_XML)
+
+    {
+        QDomDocument doc{};
+        auto element = doc.createElement(u"t"_s);
+        element.setAttribute(u"a"_s, u"b"_s);
+
+        check(
+            Coco::toQString(QVariant::fromValue(element)) ==
+                u"QDomElement(<t a='b'>)"_s,
+            "toQString(QVariant QDomElement)");
+    }
+
+#endif
+}
+
 int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
@@ -609,6 +841,8 @@ int main(int argc, char* argv[])
     // --- ToQString core paths (no optional modules) -----------------------
     check(Coco::toQString(42) == u"42"_s, "toQString(int)");
     check(Coco::toQString(u"hi"_s) == u"hi"_s, "toQString(QString)");
+    testToQString();
+    testToQStringVariant();
 
     // --- Optional: Qt Xml -------------------------------------------------
 #if defined(COCO_HAS_XML)

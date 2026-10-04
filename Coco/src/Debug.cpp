@@ -71,27 +71,31 @@ QString timestamp_()
 inline void
 prune_(const Path& dir, const QString& prefix, const QString& ext, int cap)
 {
-    if (cap < 1)
+    if (cap < 1) {
         return;
+    }
 
     auto all_files = filePaths(dir);
     QStringList matches{};
 
     for (auto& path : all_files) {
         auto name = path.nameQString();
-        if (name.startsWith(prefix) && name.endsWith(ext))
+        if (name.startsWith(prefix) && name.endsWith(ext)) {
             matches << name;
+        }
     }
 
-    if (matches.size() <= cap)
+    if (matches.size() <= cap) {
         return;
+    }
 
     matches.sort();
 
     auto to_remove = matches.size() - cap;
 
-    for (qsizetype i = 0; i < to_remove; ++i)
+    for (qsizetype i = 0; i < to_remove; ++i) {
         remove(dir / matches[i]);
+    }
 }
 
 QString logFileName_()
@@ -135,14 +139,18 @@ void handler_(
         qt_handler = qtHandler_;
         log_sink = logSink_;
 
-        if (logStream_.device())
+        if (logStream_.device()) {
             logStream_ << new_msg << Qt::endl;
+        }
     }
 
-    if (log_sink)
+    if (log_sink) {
         log_sink(new_msg);
-    if (qt_handler)
+    }
+
+    if (qt_handler) {
         qt_handler(type, context, new_msg);
+    }
 }
 
 } // namespace
@@ -198,8 +206,9 @@ void Log::dispatch_(
 {
     // Right now, VOC_FORMAT_ is the only reason this needs to be in the
     // source file, which is fine, but worth pointing out
-    if (obj)
+    if (obj) {
         msg = Fmt::format(VOC_FORMAT_, obj, msg);
+    }
 
     auto logger = QMessageLogger(file, line, function);
     constexpr auto fmt = "%s";

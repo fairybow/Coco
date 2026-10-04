@@ -182,8 +182,10 @@ public:
 
     bool isEmptyDir() const
     {
-        if (!isDir())
+        if (!isDir()) {
             return false;
+        }
+
         return QDir(d_->qstr())
             .isEmpty(QDir::AllEntries | QDir::NoDotAndDotDot);
     }
@@ -200,12 +202,14 @@ public:
     {
         auto p = *this;
         while (true) {
-            if (p == base)
+            if (p == base) {
                 return true;
+            }
 
             auto up = p.parent();
-            if (up == p) // a root: parent_path stops shrinking
+            if (up == p) { // a root: parent_path stops shrinking
                 return false;
+            }
 
             p = up;
         }
@@ -219,11 +223,13 @@ public:
         auto p = *this;
         while (true) {
             auto up = p.parent();
-            if (up == p) // a root: parent_path stops shrinking
+            if (up == p) { // a root: parent_path stops shrinking
                 return false;
+            }
 
-            if (up == base)
+            if (up == base) {
                 return true;
+            }
 
             p = up;
         }
@@ -291,10 +297,15 @@ public:
     Path rebase(const Path& oldBase, const Path& newBase) const
     {
         auto rel = d_->path.lexically_relative(oldBase.d_->path);
-        if (rel.empty())
+
+        if (rel.empty()) {
             return {};
-        if (rel == std::filesystem::path("."))
+        }
+
+        if (rel == std::filesystem::path(".")) {
             return newBase;
+        }
+        
         return newBase.d_->path / rel;
     }
 
@@ -526,8 +537,10 @@ inline bool rename(const Path& oldPath, const Path& newPath)
 inline bool
 copy(const Path& path, const Path& newPath, Overwrite overwrite = Overwrite::No)
 {
-    if (overwrite)
+    if (overwrite) {
         QFile::remove(newPath.toQString());
+    }
+
     return QFile::copy(path.toQString(), newPath.toQString());
 }
 
@@ -546,10 +559,13 @@ inline bool moveToTrash(const Path& path)
 // Copies the contents of one directory to another
 inline bool copyContents(const Path& srcDir, const Path& dstDir)
 {
-    if (!srcDir.exists() || !srcDir.isDir())
+    if (!srcDir.exists() || !srcDir.isDir()) {
         return false;
-    if (!dstDir.exists() && !mkdir(dstDir))
+    }
+
+    if (!dstDir.exists() && !mkdir(dstDir)) {
         return false;
+    }
 
     QDir src_dir(srcDir.toQString());
     auto entries = src_dir.entryList(
@@ -561,13 +577,18 @@ inline bool copyContents(const Path& srcDir, const Path& dstDir)
 
         if (src_path.isDir()) {
             // Recurse
-            if (!mkdir(dst_path))
+            if (!mkdir(dst_path)) {
                 return false;
-            if (!copyContents(src_path, dst_path))
+            }
+
+            if (!copyContents(src_path, dst_path)) {
                 return false;
+            }
+
         } else {
-            if (!copy(src_path, dst_path))
+            if (!copy(src_path, dst_path)) {
                 return false;
+            }
         }
     }
 
@@ -585,8 +606,9 @@ inline QStringList toQStringList(const PathList& paths)
     QStringList result{};
     result.reserve(paths.size());
 
-    for (auto& p : paths)
+    for (auto& p : paths) {
         result << p.toQString();
+    }
 
     return result;
 }
@@ -596,8 +618,9 @@ inline QStringList toPrettyQStringList(const PathList& paths)
     QStringList result{};
     result.reserve(paths.size());
 
-    for (auto& p : paths)
+    for (auto& p : paths) {
         result << p.prettyQString();
+    }
 
     return result;
 }
@@ -756,11 +779,13 @@ inline PathList walkFilePaths(
                 continue;
             }
 
-            if (info.isSymLink() || info.isJunction())
+            if (info.isSymLink() || info.isJunction()) {
                 continue;
+            }
 
-            if (shouldDescend(path))
+            if (shouldDescend(path)) {
                 pending << path;
+            }
         }
     }
 
@@ -815,8 +840,10 @@ inline PathList getFiles(
 
     PathList paths{};
     paths.reserve(string_paths.size());
-    for (const auto& str : string_paths)
+
+    for (const auto& str : string_paths) {
         paths << Path(str);
+    }
 
     return paths;
 }

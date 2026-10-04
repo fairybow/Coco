@@ -81,8 +81,9 @@ template <std::floating_point T> inline QString toQString(T value)
 // Ptr can be nullptr
 template <typename T> inline QString toQString(const T* ptr)
 {
-    if (!ptr)
+    if (!ptr) {
         return u"nullptr"_s;
+    }
 
     // TODO: Untested - check print output (implementation defined)
     return QString::asprintf(
@@ -95,8 +96,9 @@ template <typename T> inline QString toQString(const T* ptr)
 // ordering when T derives from QObject
 template <Concepts::QObjectDerived T> inline QString toQString(const T* ptr)
 {
-    if (!ptr)
+    if (!ptr) {
         return u"nullptr"_s;
+    }
 
     return QString::asprintf(
         "%s(%p)",
@@ -108,8 +110,9 @@ template <Concepts::QObjectDerived T> inline QString toQString(const T* ptr)
 
 inline QString toQString(const QModelIndex& index)
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return u"QModelIndex(Invalid)"_s;
+    }
 
     return QString::asprintf(
         "QModelIndex(row:%d, col:%d, %p)",
@@ -129,8 +132,9 @@ inline QString toQString(const QStringList& list) { return list.join(u", "_s); }
 
 inline QString toQString(const QDomElement& element)
 {
-    if (element.isNull())
+    if (element.isNull()) {
         return u"QDomElement(Null)"_s;
+    }
 
     auto tag = element.tagName();
     auto attrs = element.attributes();
@@ -179,8 +183,9 @@ inline QString toQString(const QDomElement& element)
 // Like QVariant::toString, we don't wrap printable values in "QVariant(...)"
 inline QString toQString(const QVariant& variant)
 {
-    if (!variant.isValid())
+    if (!variant.isValid()) {
         return u"QVariant(Invalid)"_s;
+    }
 
     // Check for QObject-derived pointer types via meta-type flags (the
     // documented-correct way). canConvert<QObject*>() + value<QObject*>() is
@@ -192,8 +197,9 @@ inline QString toQString(const QVariant& variant)
         return toQString(variant.value<QObject*>());
     }
 
-    if (variant.isNull())
+    if (variant.isNull()) {
         return u"QVariant(Null)"_s;
+    }
 
 #ifdef COCO_HAS_XML
     if (variant.canConvert<QDomElement>()) {
@@ -227,8 +233,9 @@ inline QString toQString(const QVariant& variant)
 
 inline QString toQString(const QVariantHash& variantHash)
 {
-    if (variantHash.isEmpty())
+    if (variantHash.isEmpty()) {
         return u"QVariantHash()"_s;
+    }
 
     QString out{};
     out.reserve(64 + variantHash.size() * 32); // rough guess
@@ -239,8 +246,11 @@ inline QString toQString(const QVariantHash& variantHash)
 
     while (it.hasNext()) {
         it.next();
-        if (!first)
+
+        if (!first) {
             out.append(u", "_s);
+        }
+
         first = false;
 
         out.append(u"{ \""_s);
@@ -256,8 +266,9 @@ inline QString toQString(const QVariantHash& variantHash)
 
 inline QString toQString(const QVariantMap& variantMap)
 {
-    if (variantMap.isEmpty())
+    if (variantMap.isEmpty()) {
         return u"QVariantMap()"_s;
+    }
 
     QString out{};
     out.reserve(64 + variantMap.size() * 32); // rough guess
@@ -268,8 +279,11 @@ inline QString toQString(const QVariantMap& variantMap)
 
     while (it.hasNext()) {
         it.next();
-        if (!first)
+
+        if (!first) {
             out.append(u", "_s);
+        }
+
         first = false;
 
         out.append(u"{ \""_s);

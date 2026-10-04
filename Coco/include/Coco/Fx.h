@@ -42,8 +42,9 @@ inline auto greyscale = [](QRgb pixel) {
 
 inline auto invert = [](QRgb pixel) {
     auto alpha = qAlpha(pixel);
-    if (alpha < 1)
+    if (alpha < 1) {
         return pixel; // Skip transparent pixels
+    }
 
     auto r = 255 - qRed(pixel);
     auto g = 255 - qGreen(pixel);
@@ -55,8 +56,9 @@ inline auto invert = [](QRgb pixel) {
 // https://stackoverflow.com/questions/65344928/sepia-filter-inverting
 inline auto sepia = [](QRgb pixel) {
     auto alpha = qAlpha(pixel);
-    if (alpha < 1)
+    if (alpha < 1) {
         return pixel; // Skip transparent pixels
+    }
 
     auto r = qRed(pixel);
     auto g = qGreen(pixel);
@@ -88,8 +90,9 @@ inline auto brightness = [](int adjustment) {
 
     return [adjustment](QRgb pixel) {
         auto alpha = qAlpha(pixel);
-        if (alpha < 1)
+        if (alpha < 1) {
             return pixel; // Skip transparent pixels
+        }
 
         auto r = clamp(qRed(pixel) + adjustment);
         auto g = clamp(qGreen(pixel) + adjustment);
@@ -116,8 +119,9 @@ inline auto contrast = [](double factor) {
 
     return [factor](QRgb pixel) {
         auto alpha = qAlpha(pixel);
-        if (alpha < 1)
+        if (alpha < 1) {
             return pixel; // Skip transparent pixels
+        }
 
         constexpr auto apply_ = [](int value, double factor) {
             auto normalized =
@@ -150,8 +154,9 @@ inline auto tint = [](QColor tintColor, double strength) {
 
     return [tintColor, strength](QRgb pixel) {
         auto alpha = qAlpha(pixel);
-        if (alpha < 1)
+        if (alpha < 1) {
             return pixel; // Skip transparent pixels
+        }
 
         auto r = clamp(
             static_cast<int>(
@@ -182,8 +187,9 @@ inline auto threshold = [](int thresholdValue) {
 
     return [thresholdValue](QRgb pixel) {
         auto alpha = qAlpha(pixel);
-        if (alpha < 1)
+        if (alpha < 1) {
             return pixel; // Skip transparent pixels
+        }
 
         auto grey = qGray(pixel);
         auto binary = grey >= thresholdValue ? 255 : 0;
@@ -201,8 +207,9 @@ inline QList<QColor>
 goldenRatioColors(int count, const QColor& startColor = Qt::red)
 {
     QList<QColor> result{};
-    if (count < 1)
+    if (count < 1) {
         return result;
+    }
 
     double h = startColor.hsvHueF();
 
@@ -249,8 +256,9 @@ inline bool isLight(const QColor& color) noexcept
 template <typename... FxOps>
 inline QPixmap apply(const QPixmap& pixmap, FxOps... ops)
 {
-    if (pixmap.isNull())
+    if (pixmap.isNull()) {
         return {};
+    }
 
     auto original = pixmap.toImage().convertToFormat(QImage::Format_ARGB32);
     QImage edited = original;
@@ -310,9 +318,11 @@ bandedGradient(qreal x1, qreal y1, qreal x2, qreal y2, T&&... colors)
     auto color_array = std::array{ QColor(std::forward<T>(colors))... };
 
     // Check if any color construction failed
-    for (auto& color : color_array)
-        if (!color.isValid())
+    for (auto& color : color_array) {
+        if (!color.isValid()) {
             goto defaultReturn; // idc
+        }
+    }
 
     // For 4 colors, we should have gradient positions of 0.0, 0.25, 0.5,
     // and 0.75

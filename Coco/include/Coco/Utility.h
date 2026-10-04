@@ -54,9 +54,11 @@ namespace Coco {
 template <Concepts::QObjectPointer ParentPtrT>
 inline ParentPtrT findParent(QObject* object)
 {
-    for (auto obj = object; obj; obj = obj->parent())
-        if (auto parent = qobject_cast<ParentPtrT>(obj))
+    for (auto obj = object; obj; obj = obj->parent()) {
+        if (auto parent = qobject_cast<ParentPtrT>(obj)) {
             return parent;
+        }
+    }
 
     return nullptr;
 }

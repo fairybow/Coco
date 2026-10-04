@@ -59,15 +59,18 @@ static QStringList qStringListArgs_(
     auto wargv = CommandLineToArgvW(GetCommandLineW(), &wargc);
 
     if (wargv) {
-        for (auto i = 0; i < wargc; ++i)
+        for (auto i = 0; i < wargc; ++i) {
             args << QString::fromWCharArray(wargv[i]);
+        }
+
         LocalFree(wargv);
     }
 
 #    else
 
-    for (auto i = 0; i < argc; ++i)
+    for (auto i = 0; i < argc; ++i) {
         args << QString::fromUtf8(argv[i]);
+    }
 
 #    endif
 
@@ -87,8 +90,9 @@ StartCop::StartCop(const QString& key, const int& argc, const char* const* argv)
 
 bool StartCop::isRunning()
 {
-    if (serverExists_())
+    if (serverExists_()) {
         return true;
+    }
 
     startServer_();
     return false;
@@ -100,8 +104,9 @@ bool StartCop::serverExists_() const
     socket.connectToServer(key_);
     auto exists = socket.waitForConnected(WAIT_);
 
-    if (exists)
+    if (exists) {
         sendArgs_(socket);
+    }
 
     socket.close();
     return exists;
@@ -138,12 +143,15 @@ void StartCop::startServer_()
 
 void StartCop::onServerNewConnection_()
 {
-    if (debouncer_->isActive())
+    if (debouncer_->isActive()) {
         return;
+    }
 
     auto next = server_->nextPendingConnection();
-    if (!next)
+
+    if (!next) {
         return;
+    }
 
     if (next->waitForReadyRead(WAIT_)) {
         auto data = next->readAll();

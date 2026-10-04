@@ -79,8 +79,9 @@ struct Log
     inline void
     print(const QObject* obj, QStringView format, Args&&... args) const
     {
-        if (severity(type) < severity(minimumLevel()))
+        if (severity(type) < severity(minimumLevel())) {
             return;
+        }
 
         QString msg = sizeof...(Args) > 0
                           ? Fmt::format(format, std::forward<Args>(args)...)

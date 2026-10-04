@@ -181,15 +181,19 @@ inline QString toQString(const QVariant& variant)
 {
     if (!variant.isValid())
         return u"QVariant(Invalid)"_s;
-    if (variant.isNull())
-        return u"QVariant(Null)"_s;
 
     // Check for QObject-derived pointer types via meta-type flags (the
     // documented-correct way). canConvert<QObject*>() + value<QObject*>() is
-    // unreliable for subclasses
+    // unreliable for subclasses.
+    //
+    // Before the null check: a variant holding a null pointer is itself null,
+    // and a null QObject* prints as the pointer it is
     if (variant.metaType().flags() & QMetaType::PointerToQObject) {
         return toQString(variant.value<QObject*>());
     }
+
+    if (variant.isNull())
+        return u"QVariant(Null)"_s;
 
 #ifdef COCO_HAS_XML
     if (variant.canConvert<QDomElement>()) {

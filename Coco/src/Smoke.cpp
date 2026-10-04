@@ -767,7 +767,8 @@ static void testToQStringVariant()
 
     // A QObject pointer held in a variant names its real class, whether the
     // variant holds it as a QObject* or as a pointer to the subclass. A null
-    // pointer makes the variant itself null, which is reported first
+    // one prints as it does outside a variant, though the variant is then
+    // null too
     {
         QObject object{};
         auto* app = QCoreApplication::instance();
@@ -782,8 +783,12 @@ static void testToQStringVariant()
             "toQString(QVariant QObject subclass*)");
         check(
             Coco::toQString(QVariant::fromValue<QObject*>(nullptr)) ==
-                u"QVariant(Null)"_s,
+                u"nullptr"_s,
             "toQString(QVariant null QObject*)");
+        check(
+            Coco::toQString(QVariant::fromValue<QCoreApplication*>(nullptr)) ==
+                u"nullptr"_s,
+            "toQString(QVariant null QObject subclass*)");
     }
 
 #if defined(COCO_HAS_XML)

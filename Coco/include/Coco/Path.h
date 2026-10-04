@@ -211,6 +211,24 @@ public:
         }
     }
 
+    // True if this path is nested inside `base`, and is not `base` itself. The
+    // same walk up the parents as isAtOrUnder, starting one step up, so the
+    // path is never compared against `base` directly
+    bool isUnder(const Path& base) const
+    {
+        auto p = *this;
+        while (true) {
+            auto up = p.parent();
+            if (up == p) // a root: parent_path stops shrinking
+                return false;
+
+            if (up == base)
+                return true;
+
+            p = up;
+        }
+    }
+
     // ----- Decomposition -----
 
     Path rootName() const { return d_->path.root_name(); }

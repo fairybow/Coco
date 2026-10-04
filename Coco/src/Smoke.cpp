@@ -322,6 +322,16 @@ static void testPathDecomposition()
     check(dotfile.name() == Coco::Path(".gitignore"), "dotfile Path name");
     check(dotfile.stem() == Coco::Path(".gitignore"), "dotfile Path stem");
     check(dotfile.ext().isEmpty(), "dotfile Path has no ext");
+
+    check(
+        Coco::Path("C:/a/b").isUnder(Coco::Path("C:/a")),
+        "Path isUnder a parent");
+    check(
+        !Coco::Path("C:/a").isUnder(Coco::Path("C:/a")),
+        "Path is not under itself");
+    check(
+        !Coco::Path("C:/ab").isUnder(Coco::Path("C:/a")),
+        "Path is not under a name it only starts with");
 }
 
 static void testPathModification()

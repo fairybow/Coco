@@ -1,5 +1,5 @@
 /*
- * Coco — Common code for Qt projects
+ * Coco — Common code for my Qt projects
  * Copyright (C) 2025-2026 fairybow
  *
  * This program is free software, redistributable and/or modifiable under the
@@ -69,7 +69,7 @@ inline QTimer* newQTimer(QObject* parent, SlotT slot, int msec = -1)
     if (msec >= 0) {
         timer->setInterval(msec);
     }
-    
+
     QObject::connect(timer, &QTimer::timeout, parent, slot);
     return timer;
 }

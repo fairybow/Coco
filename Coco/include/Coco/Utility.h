@@ -1,5 +1,5 @@
 /*
- * Coco — Common code for Qt projects
+ * Coco — Common code for my Qt projects
  * Copyright (C) 2025-2026 fairybow
  *
  * This program is free software, redistributable and/or modifiable under the

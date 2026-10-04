@@ -76,7 +76,6 @@ add_library(Coco OBJECT
     include/Coco/Bool.h
     include/Coco/Concepts.h
     include/Coco/Debug.h
-    include/Coco/Disk.h
     include/Coco/Fmt.h
     include/Coco/Fx.h
     include/Coco/Path.h

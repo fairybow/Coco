@@ -14,16 +14,29 @@
 //
 // Assumes the Hearth->Coco fold is done (toQString lives in namespace Coco,
 // headers included as <Coco/...>). Returns non-zero on failure so CTest catches
-// it. Covers three things:
+// it. Covers four things:
 //   1. COCO_HAS_* macro propagation to a consumer TU (compile-time, both ways)
 //   2. Path meta-type converter registration (runtime; proves Path.cpp linked)
-//   3. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
+//   3. Path behavior: streams, construction, comparison, decomposition,
+//      modification, conversion, and the standard-directory functions
+//   4. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
 
+#include <filesystem>
+#include <format>
+#include <functional>
+#include <sstream>
+#include <string>
+
+#include <QByteArray>
 #include <QCoreApplication>
+#include <QDataStream>
+#include <QDebug>
 #if defined(COCO_HAS_XML)
 #    include <QDomDocument>
 #endif
+#include <QIODevice>
 #include <QString>
+#include <QTextStream>
 #include <QVariant>
 
 #include <Coco/Debug.h>
@@ -32,6 +45,8 @@
 #    include <Coco/StartCop.h>
 #endif
 #include <Coco/ToQString.h>
+
+using namespace Qt::StringLiterals;
 
 // COCO_TEST_EXPECT_* come from this test's own CMake and encode what the
 // configure step requested, independent of Coco. Cross-checking them against
@@ -64,15 +79,499 @@ static void check(bool ok, const char* what)
     if (ok) {
         INFO("ok  : {}", what);
     } else {
-        WARN("FAIL:", what);
+        WARN("FAIL: {}", what);
         ++failures;
+    }
+}
+
+// The "C:/..." literals below are used on every platform. Off Windows they are
+// relative paths whose first component is "C:", which changes nothing for the
+// lexical operations checked here. Only root decomposition differs, and that
+// is checked per platform in testPathDecomposition
+
+static void testPathStreams()
+{
+    auto original = Coco::Path("C:/My Documents/test file.txt");
+
+    // std streams write a path quoted, so one with spaces reads back whole
+    {
+        std::stringstream ss{};
+        ss << original;
+
+        Coco::Path round_tripped{};
+        ss >> round_tripped;
+
+        check(original == round_tripped, "Path std stream round-trips");
+    }
+
+    {
+        QByteArray buffer{};
+
+        {
+            QDataStream out(&buffer, QIODevice::WriteOnly);
+            out << original;
+        }
+
+        Coco::Path round_tripped{};
+
+        {
+            QDataStream in(&buffer, QIODevice::ReadOnly);
+            in >> round_tripped;
+        }
+
+        check(original == round_tripped, "Path QDataStream round-trips");
+    }
+
+    // Output only
+    {
+        QString buffer{};
+
+        {
+            QTextStream out(&buffer, QIODevice::WriteOnly);
+            out << original;
+        }
+
+        check(buffer == original.toQString(), "Path QTextStream output");
+    }
+
+    // Output only. QDebug quotes a string and adds a trailing space, so look
+    // for the path inside the output
+    {
+        QString buffer{};
+
+        {
+            QDebug out(&buffer);
+            out << original;
+        }
+
+        check(buffer.contains(original.toQString()), "Path QDebug output");
+    }
+
+    // An empty path must overwrite what the target held, on both stream kinds
+    {
+        auto empty = Coco::Path();
+
+        std::stringstream ss{};
+        ss << empty;
+
+        auto round_tripped = Coco::Path("not/empty");
+        ss >> round_tripped;
+
+        check(round_tripped.isEmpty(), "empty Path std stream round-trips");
+    }
+
+    {
+        auto empty = Coco::Path();
+        QByteArray buffer{};
+
+        {
+            QDataStream out(&buffer, QIODevice::WriteOnly);
+            out << empty;
+        }
+
+        auto round_tripped = Coco::Path("not/empty");
+
+        {
+            QDataStream in(&buffer, QIODevice::ReadOnly);
+            in >> round_tripped;
+        }
+
+        check(round_tripped.isEmpty(), "empty Path QDataStream round-trips");
+    }
+
+    {
+        auto a = Coco::Path("C:/first path/file.txt");
+        auto b = Coco::Path("D:/second path/other.txt");
+
+        std::stringstream ss{};
+        ss << a << ' ' << b;
+
+        Coco::Path read_a{};
+        Coco::Path read_b{};
+        ss >> read_a >> read_b;
+
+        check(a == read_a, "two Paths in one std stream: first");
+        check(b == read_b, "two Paths in one std stream: second");
+    }
+}
+
+static void testPathConstructionAndComparison()
+{
+    {
+        auto from_cstr = Coco::Path("C:/test/file.txt");
+        auto from_std = Coco::Path(std::string("C:/test/file.txt"));
+        auto from_qstr = Coco::Path(u"C:/test/file.txt"_s);
+        auto from_fspath =
+            Coco::Path(std::filesystem::path("C:/test/file.txt"));
+
+        check(
+            from_cstr == from_std && from_std == from_qstr &&
+                from_qstr == from_fspath,
+            "Path constructors agree");
+    }
+
+    // Copies share data until one is written to
+    {
+        auto original = Coco::Path("C:/test/file.txt");
+        auto copied = original;
+
+        check(original == copied, "Path copy equals its source");
+
+        copied /= "subdir";
+
+        check(original != copied, "Path copy diverges when modified");
+        check(
+            original == Coco::Path("C:/test/file.txt"),
+            "Path source is unchanged by a modified copy");
+        check(
+            copied == Coco::Path("C:/test/file.txt/subdir"),
+            "Path copy holds the modification");
+    }
+
+    {
+        auto a = Coco::Path("aaa");
+        auto b = Coco::Path("bbb");
+        auto a2 = Coco::Path("aaa");
+
+        check(a == a2, "Path ==");
+        check(a != b, "Path !=");
+        check(a < b, "Path <");
+        check(b > a, "Path >");
+        check(a <= a2, "Path <=");
+        check(a >= a2, "Path >=");
+    }
+
+    {
+        auto empty = Coco::Path();
+        auto also_empty = Coco::Path("");
+
+        check(empty.isEmpty(), "default Path is empty");
+        check(also_empty.isEmpty(), "Path from \"\" is empty");
+        check(empty == also_empty, "empty Paths are equal");
+    }
+}
+
+static void testPathDecomposition()
+{
+    auto p = Coco::Path("C:/Users/fairybow/Documents/report.tar.gz");
+
+    check(
+        p.parent() == Coco::Path("C:/Users/fairybow/Documents"),
+        "Path parent");
+    check(p.name() == Coco::Path("report.tar.gz"), "Path name");
+    check(p.stem() == Coco::Path("report.tar"), "Path stem");
+    check(p.ext() == Coco::Path(".gz"), "Path ext");
+
+#if defined(Q_OS_WIN)
+
+    check(p.rootName() == Coco::Path("C:"), "Path rootName");
+    check(p.rootDir() == Coco::Path("/"), "Path rootDir");
+    check(p.root() == Coco::Path("C:/"), "Path root");
+    check(
+        p.relative() == Coco::Path("Users/fairybow/Documents/report.tar.gz"),
+        "Path relative");
+
+#else
+
+    auto rooted = Coco::Path("/Users/fairybow/Documents/report.tar.gz");
+
+    check(rooted.rootName().isEmpty(), "Path rootName");
+    check(rooted.rootDir() == Coco::Path("/"), "Path rootDir");
+    check(rooted.root() == Coco::Path("/"), "Path root");
+    check(
+        rooted.relative() ==
+            Coco::Path("Users/fairybow/Documents/report.tar.gz"),
+        "Path relative");
+
+#endif
+
+    auto root_only = Coco::Path("C:/");
+
+    check(root_only.name().isEmpty(), "root-only Path has no name");
+    check(root_only.stem().isEmpty(), "root-only Path has no stem");
+    check(root_only.ext().isEmpty(), "root-only Path has no ext");
+
+    auto no_ext = Coco::Path("C:/Users/Makefile");
+
+    check(no_ext.name() == Coco::Path("Makefile"), "extensionless Path name");
+    check(no_ext.stem() == Coco::Path("Makefile"), "extensionless Path stem");
+    check(no_ext.ext().isEmpty(), "extensionless Path has no ext");
+
+    // A leading dot starts a name, not an extension
+    auto dotfile = Coco::Path("C:/Users/.gitignore");
+
+    check(dotfile.name() == Coco::Path(".gitignore"), "dotfile Path name");
+    check(dotfile.stem() == Coco::Path(".gitignore"), "dotfile Path stem");
+    check(dotfile.ext().isEmpty(), "dotfile Path has no ext");
+}
+
+static void testPathModification()
+{
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.replaceExt(".md");
+
+        check(p == Coco::Path("C:/docs/file.md"), "Path replaceExt");
+    }
+
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.replaceExt();
+
+        check(p == Coco::Path("C:/docs/file"), "Path replaceExt removes");
+    }
+
+    {
+        auto p = Coco::Path("C:/docs/old.txt");
+        p.replaceName("new.txt");
+
+        check(p == Coco::Path("C:/docs/new.txt"), "Path replaceName");
+    }
+
+    // The trailing separator stays
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.removeName();
+
+        check(p == Coco::Path("C:/docs/"), "Path removeName");
+    }
+
+    {
+        auto p = Coco::Path("C:/docs/file.txt");
+        p.clear();
+
+        check(p.isEmpty(), "Path clear");
+    }
+
+    {
+        auto a = Coco::Path("C:/first");
+        auto b = Coco::Path("D:/second");
+        a.swap(b);
+
+        check(a == Coco::Path("D:/second"), "Path swap: first");
+        check(b == Coco::Path("C:/first"), "Path swap: second");
+    }
+
+    {
+        auto base = Coco::Path("C:/Users");
+        auto joined = base / "fairybow" / "Documents";
+
+        check(
+            joined == Coco::Path("C:/Users/fairybow/Documents"),
+            "Path operator/");
+
+        auto appended = Coco::Path("C:/file");
+        appended += ".txt";
+
+        check(appended == Coco::Path("C:/file.txt"), "Path operator+=");
+    }
+
+    // Changes the separators' spelling, not the path's value
+    {
+        auto p = Coco::Path("C:/Users/fairybow/Documents");
+        p.makePreferred();
+
+        check(
+            p == Coco::Path("C:/Users/fairybow/Documents"),
+            "Path makePreferred keeps the value");
+
+#if defined(Q_OS_WIN)
+
+        check(
+            !p.toQString().contains(u'/'),
+            "Path makePreferred uses backslashes");
+
+#endif
+    }
+
+    {
+        auto p = Coco::Path("C:/My Documents/test.txt");
+        auto formatted = std::format("Path is: {}", p);
+
+        check(
+            formatted == "Path is: C:/My Documents/test.txt",
+            "Path std::format");
+    }
+}
+
+static void testPathConversion()
+{
+    auto p = Coco::Path("C:/Users/fairybow/Documents/file.txt");
+
+    check(
+        p.toQString() == u"C:/Users/fairybow/Documents/file.txt"_s,
+        "Path toQString");
+    check(
+        p.toString() == "C:/Users/fairybow/Documents/file.txt",
+        "Path toString");
+    check(Coco::Path(p.toStd()) == p, "Path toStd round-trips");
+
+    check(p.extQString() == u".txt"_s, "Path extQString");
+    check(p.extString() == ".txt", "Path extString");
+    check(p.nameQString() == u"file.txt"_s, "Path nameQString");
+    check(p.nameString() == "file.txt", "Path nameString");
+    check(p.stemQString() == u"file"_s, "Path stemQString");
+    check(p.stemString() == "file", "Path stemString");
+
+    {
+        auto file = Coco::Path("C:/old/project/src/main.cpp");
+        auto rebased = file.rebase("C:/old/project", "D:/new/project");
+
+        check(
+            rebased == Coco::Path("D:/new/project/src/main.cpp"),
+            "Path rebase");
+    }
+
+    // A path that can't be expressed relative to the old base rebases to an
+    // empty path: a different drive on Windows, an absolute path against a
+    // relative base elsewhere
+    {
+
+#if defined(Q_OS_WIN)
+
+        auto file = Coco::Path("C:/completely/different/path.txt");
+        auto rebased = file.rebase("D:/unrelated", "E:/target");
+
+#else
+
+        auto file = Coco::Path("/completely/different/path.txt");
+        auto rebased = file.rebase("unrelated", "/target");
+
+#endif
+
+        check(rebased.isEmpty(), "Path rebase from an unreachable base");
+    }
+
+    {
+        auto file = Coco::Path("C:/project/file.txt");
+        auto rebased = file.rebase("C:/project", "C:/project");
+
+        check(rebased == file, "Path rebase onto the same base");
+    }
+
+    {
+        auto dir = Coco::Path("C:/project");
+        auto rebased = dir.rebase("C:/project", "D:/new");
+
+        check(rebased == Coco::Path("D:/new"), "Path rebase of the base");
+    }
+
+    {
+        auto a = Coco::Path("C:/test/file.txt");
+        auto b = Coco::Path("C:/test/file.txt");
+        auto c = Coco::Path("C:/test/other.txt");
+
+        auto hash_a = std::hash<Coco::Path>{}(a);
+        auto hash_b = std::hash<Coco::Path>{}(b);
+        auto hash_c = std::hash<Coco::Path>{}(c);
+
+        check(hash_a == hash_b, "equal Paths hash equal");
+        check(hash_a != hash_c, "different Paths hash differently");
+    }
+
+    {
+        auto original = Coco::Path("C:/test/file.txt");
+        auto variant = QVariant::fromValue(original);
+
+        check(
+            variant.value<Coco::Path>() == original,
+            "Path QVariant round-trips");
+        check(
+            variant.value<QString>() == original.toQString(),
+            "Path QVariant converts to QString");
+    }
+}
+
+// prettyQString gives single forward slashes and no trailing slash, and
+// changes nothing else
+static void testPathPrettyString()
+{
+    {
+        auto p = Coco::Path("C:/Users") / "fairybow" / "Documents";
+
+        check(
+            p.prettyQString() == u"C:/Users/fairybow/Documents"_s,
+            "pretty Path: joined");
+    }
+
+    {
+        auto p = Coco::Path("C://Users////fairybow");
+
+        check(
+            p.prettyQString() == u"C:/Users/fairybow"_s,
+            "pretty Path: repeated separators");
+    }
+
+    {
+        auto p = Coco::Path("C:/Users/./fairybow/../Documents");
+
+        check(
+            p.prettyQString() == u"C:/Users/./fairybow/../Documents"_s,
+            "pretty Path: dot and dot-dot kept");
+    }
+
+    {
+        auto p = Coco::Path("C:\\Users\\fairybow\\Documents");
+
+        check(
+            p.prettyQString() == u"C:/Users/fairybow/Documents"_s,
+            "pretty Path: backslashes");
+    }
+
+    {
+        auto p = Coco::Path("C:/Users/fairybow/");
+
+        check(
+            p.prettyQString() == u"C:/Users/fairybow"_s,
+            "pretty Path: trailing slash");
+    }
+
+    {
+        auto unix_root = Coco::Path("/");
+        auto win_root = Coco::Path("C:/");
+
+        check(unix_root.prettyQString() == u"/"_s, "pretty Path: / kept");
+        check(win_root.prettyQString() == u"C:/"_s, "pretty Path: C:/ kept");
+    }
+}
+
+// The locations themselves differ per machine, so only their shape is checked
+static void testPathStandardDirs()
+{
+    check(!Coco::Path::Root().isEmpty(), "Path::Root is not empty");
+    check(!Coco::Path::Home().isEmpty(), "Path::Home is not empty");
+    check(!Coco::Path::Desktop().isEmpty(), "Path::Desktop is not empty");
+    check(!Coco::Path::Documents().isEmpty(), "Path::Documents is not empty");
+    check(!Coco::Path::Downloads().isEmpty(), "Path::Downloads is not empty");
+    check(!Coco::Path::AppData().isEmpty(), "Path::AppData is not empty");
+    check(!Coco::Path::Cache().isEmpty(), "Path::Cache is not empty");
+    check(!Coco::Path::Temp().isEmpty(), "Path::Temp is not empty");
+
+    {
+        auto sub = Coco::Path::AppData("settings");
+
+        check(
+            sub.name() == Coco::Path("settings"),
+            "Path standard dir appends a subpath");
+        check(
+            sub.parent() == Coco::Path::AppData(),
+            "Path standard dir subpath sits under the dir");
+    }
+
+    {
+        auto plain = Coco::Path::Home();
+
+        check(
+            Coco::Path::Home(nullptr) == plain,
+            "Path standard dir with nullptr");
+        check(
+            Coco::Path::Home("") == plain,
+            "Path standard dir with an empty string");
     }
 }
 
 int main(int argc, char* argv[])
 {
-    using namespace Qt::StringLiterals;
-
     QCoreApplication app(argc, argv);
 
     Coco::Debug::init(true);
@@ -98,6 +597,15 @@ int main(int argc, char* argv[])
         fromString.value<Coco::Path>() == Coco::Path("a/b/c.md"),
         "QString -> Path round-trips");
 
+    // --- Path behavior ----------------------------------------------------
+    testPathStreams();
+    testPathConstructionAndComparison();
+    testPathDecomposition();
+    testPathModification();
+    testPathConversion();
+    testPathPrettyString();
+    testPathStandardDirs();
+
     // --- ToQString core paths (no optional modules) -----------------------
     check(Coco::toQString(42) == u"42"_s, "toQString(int)");
     check(Coco::toQString(u"hi"_s) == u"hi"_s, "toQString(QString)");
@@ -118,10 +626,8 @@ int main(int argc, char* argv[])
     // Constructing + connecting to the typed signal references StartCop's
     // staticMetaObject; if AUTOMOC didn't run, this fails to LINK.
     Coco::StartCop cop(u"coco-smoke-test"_s, argc, argv);
-    QObject::connect(
-        &cop,
-        &Coco::StartCop::relaunched,
-        [](const QStringList&) {});
+    QObject::connect(&cop, &Coco::StartCop::relaunched, [](const QStringList&) {
+    });
     INFO("net : StartCop constructed and connected");
 #else
     INFO("net : disabled at configure time");

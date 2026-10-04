@@ -24,10 +24,10 @@
 #include <QMessageLogger>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 #include <QTextStream>
 #include <QtLogging>
 
-#include "Coco/Disk.h"
 #include "Coco/Fmt.h"
 #include "Coco/Path.h"
 #include "Coco/Time.h"
@@ -66,6 +66,32 @@ QString timestamp_()
         static_cast<int>(hms.minutes().count()),
         static_cast<int>(hms.seconds().count()),
         static_cast<int>(now.milliseconds));
+}
+
+inline void
+prune_(const Path& dir, const QString& prefix, const QString& ext, int cap)
+{
+    if (cap < 1)
+        return;
+
+    auto all_files = filePaths(dir);
+    QStringList matches{};
+
+    for (auto& path : all_files) {
+        auto name = path.nameQString();
+        if (name.startsWith(prefix) && name.endsWith(ext))
+            matches << name;
+    }
+
+    if (matches.size() <= cap)
+        return;
+
+    matches.sort();
+
+    auto to_remove = matches.size() - cap;
+
+    for (qsizetype i = 0; i < to_remove; ++i)
+        remove(dir / matches[i]);
 }
 
 QString logFileName_()
@@ -142,7 +168,7 @@ void init(
 
         if (logFile_.open(QIODevice::WriteOnly | QIODevice::Text)) {
             logStream_.setDevice(&logFile_);
-            Disk::prune(logDir, logPrefix, LOG_EXT_, logCap);
+            prune_(logDir, logPrefix, LOG_EXT_, logCap);
             logStream_ << "VERBOSITY: " << (verbose ? "true" : "false")
                        << Qt::endl;
         }

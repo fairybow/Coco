@@ -73,7 +73,7 @@ public:
 
     friend QDebug operator<<(QDebug debug, const Bool& b)
     {
-        return debug << qUtf8Printable(name_(b));
+        return debug << qUtf8Printable(name(b));
     }
 
     constexpr operator bool() const { return value_; }

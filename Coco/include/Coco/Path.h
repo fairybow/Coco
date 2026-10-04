@@ -16,6 +16,7 @@
 #include <filesystem>
 #include <format>
 #include <functional>
+#include <iomanip>
 #include <istream>
 #include <optional>
 #include <ostream>
@@ -39,8 +40,6 @@
 
 #include "Coco/Bool.h"
 
-#define STD_TO_QSTR_(StdPath) QString::fromStdString(StdPath.string())
-
 namespace Coco {
 
 // Path is a Swiss Army class designed to be a `std::filesystem::path` surrogate
@@ -48,6 +47,13 @@ namespace Coco {
 // functionality as well as various utility functions to make it easier to work
 // with (and to allow avoidance of `QDir`, `QFile`, and related classes unless
 // really needed)
+//
+// Encoding: every narrow string this class takes or returns (const char*,
+// std::string, std::format output, std streams) is UTF-8, on every platform.
+// Qt does all the converting. std::filesystem::path is only ever handed
+// UTF-16 or its own native string, and is never asked for a narrow one: on
+// Windows it would use the system code page, which reads UTF-8 as something
+// else and throws for a character the code page lacks
 class Path
 {
 public:
@@ -64,18 +70,20 @@ public:
     {
     }
 
+    // UTF-8
     Path(const char* path)
-        : d_(new SharedData_(path))
+        : d_(new SharedData_(toStd_(QString::fromUtf8(path))))
     {
     }
 
+    // UTF-8
     Path(const std::string& path)
-        : d_(new SharedData_(path))
+        : d_(new SharedData_(toStd_(QString::fromStdString(path))))
     {
     }
 
     Path(const QString& path)
-        : d_(new SharedData_(path.toStdString()))
+        : d_(new SharedData_(toStd_(path)))
     {
     }
 
@@ -94,21 +102,19 @@ public:
         return out << path.d_->qstr();
     }
 
-    template <class CharT, class TraitsT>
-    friend std::basic_istream<CharT, TraitsT>&
-    operator>>(std::basic_istream<CharT, TraitsT>& in, Path& path)
+    // UTF-8, quoted (as std::filesystem::path's own operators quote), so a
+    // path with spaces reads back whole
+    friend std::istream& operator>>(std::istream& in, Path& path)
     {
-        std::filesystem::path p{};
-        in >> p;
-        path = Path(p);
+        std::string s{};
+        in >> std::quoted(s);
+        path = Path(s);
         return in;
     }
 
-    template <class CharT, class TraitsT>
-    friend std::basic_ostream<CharT, TraitsT>&
-    operator<<(std::basic_ostream<CharT, TraitsT>& out, const Path& path)
+    friend std::ostream& operator<<(std::ostream& out, const Path& path)
     {
-        return out << path.d_->path;
+        return out << std::quoted(path.d_->str());
     }
 
     // Output only. By returning a QDebug object (not a reference), we allow the
@@ -168,19 +174,11 @@ public:
 
     bool isEmpty() const noexcept { return d_->path.empty(); }
 
-    bool isFile() const
-    {
-        // return std::filesystem::is_regular_file(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid
-        return QFileInfo(d_->qstr()).isFile();
-    }
+    // isFile, isDir, and exists ask QFileInfo, not std::filesystem, so they
+    // also answer for Qt resource paths (":/...")
 
-    bool isDir() const
-    {
-        // return std::filesystem::is_directory(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid
-        return QFileInfo(d_->qstr()).isDir();
-    }
+    bool isFile() const { return QFileInfo(d_->qstr()).isFile(); }
+    bool isDir() const { return QFileInfo(d_->qstr()).isDir(); }
 
     bool isEmptyDir() const
     {
@@ -190,12 +188,7 @@ public:
             .isEmpty(QDir::AllEntries | QDir::NoDotAndDotDot);
     }
 
-    bool exists() const
-    {
-        // return std::filesystem::exists(d_->path);
-        //  ^ Valid paths with non-standard characters won't return valid
-        return QFileInfo(d_->qstr()).exists();
-    }
+    bool exists() const { return QFileInfo(d_->qstr()).exists(); }
 
     // True if this path is `base` itself or nested inside it. A pure walk up
     // the parents, comparing with operator== (std::filesystem::path's own,
@@ -292,12 +285,20 @@ public:
         return d_->path.lexically_relative(base.d_->path);
     }
 
-    std::string genericString() const { return d_->path.generic_string(); }
+    // The std::string forms below are UTF-8
 
-    QString extQString() const { return STD_TO_QSTR_(d_->path.extension()); }
-    std::string extString() const { return d_->path.extension().string(); }
-    QString nameQString() const { return STD_TO_QSTR_(d_->path.filename()); }
-    std::string nameString() const { return d_->path.filename().string(); }
+    // Forward slashes only. Asked for in the path's own character type, so
+    // std::filesystem converts nothing
+    std::string genericString() const
+    {
+        using NativeChar = std::filesystem::path::value_type;
+        return toUtf8_(d_->path.generic_string<NativeChar>());
+    }
+
+    QString extQString() const { return toQString_(d_->path.extension()); }
+    std::string extString() const { return toUtf8_(d_->path.extension()); }
+    QString nameQString() const { return toQString_(d_->path.filename()); }
+    std::string nameString() const { return toUtf8_(d_->path.filename()); }
 
     // For a uniform display path (single forward slashes and no trailing slash,
     // with no other changes (keeps dot and dot-dot))
@@ -340,8 +341,8 @@ public:
         return pretty;
     }
 
-    QString stemQString() const { return STD_TO_QSTR_(d_->path.stem()); }
-    std::string stemString() const { return d_->path.stem().string(); }
+    QString stemQString() const { return toQString_(d_->path.stem()); }
+    std::string stemString() const { return toUtf8_(d_->path.stem()); }
 
     std::filesystem::path toStd() const { return d_->path; }
     QString toQString() const { return d_->qstr(); }
@@ -388,6 +389,30 @@ public:
 #undef GEN_STD_DIR_METHOD_2_
 
 private:
+    // The three conversions every string in or out of a Path goes through.
+    // They match Qt's own (QtPrivate::toFilesystemPath and fromFilesystemPath,
+    // in qfile.h): UTF-16 in, the native string out. On Windows the native
+    // string is already UTF-16, so nothing is converted and nothing can fail
+
+    static std::filesystem::path toStd_(const QString& s)
+    {
+        return std::filesystem::path(s.toStdU16String());
+    }
+
+    static QString toQString_(const std::filesystem::path& p)
+    {
+#if defined(Q_OS_WIN)
+        return QString::fromStdWString(p.native());
+#else
+        return QString::fromStdString(p.native());
+#endif
+    }
+
+    static std::string toUtf8_(const std::filesystem::path& p)
+    {
+        return toQString_(p).toStdString();
+    }
+
     // Thread safety: SharedData_ relies on QSharedData's copy-on-write for
     // mutation safety, but const methods (str(), qstr()) lazily populate
     // mutable cache fields. If two threads share the same underlying data (no
@@ -413,17 +438,18 @@ private:
         const QString& qstr() const
         {
             if (!qStringValid_) {
-                cachedQString_ = QString::fromStdString(str());
+                cachedQString_ = toQString_(path);
                 qStringValid_ = true;
             }
 
             return cachedQString_;
         }
 
+        // UTF-8
         const std::string& str() const
         {
             if (!stringValid_) {
-                cachedString_ = path.string();
+                cachedString_ = qstr().toStdString();
                 stringValid_ = true;
             }
 
@@ -814,7 +840,5 @@ template <> struct formatter<Coco::Path> : formatter<string>
 };
 
 } // namespace std
-
-#undef STD_TO_QSTR_
 
 Q_DECLARE_METATYPE(Coco::Path)

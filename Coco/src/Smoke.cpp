@@ -661,6 +661,28 @@ static void testPathNonAsciiName(
     checkNoThrow(label("Path std::format is UTF-8"), [&] {
         return std::format("{}", Coco::Path(name)) == nameUtf8;
     });
+
+    checkNoThrow(label("Path genericString is UTF-8"), [&] {
+        auto file = Coco::Path(u"dir"_s) / Coco::Path(name);
+        return file.genericString() == "dir/" + nameUtf8;
+    });
+
+    checkNoThrow(label("Path std stream writes UTF-8"), [&] {
+        std::stringstream ss{};
+        ss << Coco::Path(name);
+
+        return ss.str() == "\"" + nameUtf8 + "\"";
+    });
+
+    checkNoThrow(label("Path std stream round-trips"), [&] {
+        std::stringstream ss{};
+        ss << Coco::Path(name);
+
+        Coco::Path round_tripped{};
+        ss >> round_tripped;
+
+        return round_tripped.toStd() == expected;
+    });
 }
 
 // The same name as a real file. Qt creates it, so the file on disk has the

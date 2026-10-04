@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 
     QCoreApplication app(argc, argv);
 
-    Coco::Debug::initialize(true);
+    Coco::Debug::init(true);
 
     // --- Path converter registration --------------------------------------
     // The converters are installed ONLY by Path.cpp's static initializer, and
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
     Coco::StartCop cop(u"coco-smoke-test"_s, argc, argv);
     QObject::connect(
         &cop,
-        &Coco::StartCop::appRelaunched,
+        &Coco::StartCop::relaunched,
         [](const QStringList&) {});
     INFO("net : StartCop constructed and connected");
 #else

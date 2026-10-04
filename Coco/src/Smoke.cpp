@@ -18,15 +18,18 @@
 //   1. COCO_HAS_* macro propagation to a consumer TU (compile-time, both ways)
 //   2. Path meta-type converter registration (runtime; proves Path.cpp linked)
 //   3. Path behavior: streams, construction, comparison, decomposition,
-//      modification, conversion, and the standard-directory functions
+//      modification, conversion, the standard-directory functions, and names
+//      outside ASCII
 //   4. toQString output, for each overload and for each kind of QVariant
 //   5. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
 
+#include <exception>
 #include <filesystem>
 #include <format>
 #include <functional>
 #include <sstream>
 #include <string>
+#include <system_error>
 
 #include <QByteArray>
 #include <QCoreApplication>
@@ -35,6 +38,7 @@
 #if defined(COCO_HAS_XML)
 #    include <QDomDocument>
 #endif
+#include <QFile>
 #include <QIODevice>
 #include <QLatin1StringView>
 #include <QMetaType>
@@ -45,6 +49,7 @@
 #include <QString>
 #include <QStringList>
 #include <QStringView>
+#include <QTemporaryDir>
 #include <QTextStream>
 #include <QVariant>
 #include <QVariantHash>
@@ -584,6 +589,143 @@ static void testPathStandardDirs()
     }
 }
 
+// Runs a check whose body may throw: a string conversion inside
+// std::filesystem::path throws when it can't convert. A throw is a failure,
+// reported with its message, and the run goes on
+template <typename TestT>
+static void checkNoThrow(const QByteArray& what, TestT test)
+{
+    try {
+        check(test(), what.constData());
+    } catch (const std::exception& e) {
+        WARN("threw: {}", e.what());
+        check(false, what.constData());
+    }
+}
+
+// One name outside ASCII, as UTF-16 text and as the same text's UTF-8 bytes.
+// The stored path is compared against a std::filesystem::path built from the
+// UTF-16 text, which converts the same way under any system code page
+static void testPathNonAsciiName(
+    const char* tag,
+    const QString& name,
+    const std::string& nameUtf8)
+{
+    auto label = [tag](const char* what) {
+        return QByteArray(tag) + ": " + what;
+    };
+
+    auto expected = std::filesystem::path(name.toStdU16String());
+
+    checkNoThrow(label("Path(QString) stores the name"), [&] {
+        return Coco::Path(name).toStd() == expected;
+    });
+
+    checkNoThrow(label("Path(const char*) stores the name"), [&] {
+        return Coco::Path(nameUtf8.c_str()).toStd() == expected;
+    });
+
+    checkNoThrow(label("Path(std::string) stores the name"), [&] {
+        return Coco::Path(nameUtf8).toStd() == expected;
+    });
+
+    checkNoThrow(label("Path(std::filesystem::path) reads back"), [&] {
+        return Coco::Path(expected).toQString() == name;
+    });
+
+    checkNoThrow(label("Path(QString) reads back"), [&] {
+        return Coco::Path(name).toQString() == name;
+    });
+
+    checkNoThrow(label("Path constructors agree"), [&] {
+        return Coco::Path(name) == Coco::Path(nameUtf8.c_str()) &&
+               Coco::Path(name) == Coco::Path(expected);
+    });
+
+    checkNoThrow(label("Path toString is UTF-8"), [&] {
+        return Coco::Path(name).toString() == nameUtf8;
+    });
+
+    checkNoThrow(label("Path name, stem, and ext"), [&] {
+        auto file = Coco::Path(u"dir"_s) / Coco::Path(name + u".txt"_s);
+
+        return file.nameQString() == name + u".txt"_s &&
+               file.stemQString() == name && file.extQString() == u".txt"_s;
+    });
+
+    checkNoThrow(label("pretty Path"), [&] {
+        auto file = Coco::Path(u"dir"_s) / Coco::Path(name);
+        return file.prettyQString() == u"dir/"_s + name;
+    });
+
+    checkNoThrow(label("Path std::format is UTF-8"), [&] {
+        return std::format("{}", Coco::Path(name)) == nameUtf8;
+    });
+}
+
+// The same name as a real file. Qt creates it, so the file on disk has the
+// right name however Path stores it
+static void testPathNonAsciiFile(const char* tag, const QString& name)
+{
+    auto label = [tag](const char* what) {
+        return QByteArray(tag) + ": " + what;
+    };
+
+    QTemporaryDir temp_dir{};
+    auto file_name = name + u".txt"_s;
+    auto file_path = temp_dir.filePath(file_name);
+
+    {
+        QFile file(file_path);
+
+        if (!temp_dir.isValid() || !file.open(QIODevice::WriteOnly)) {
+            check(false, label("temp file created").constData());
+            return;
+        }
+    }
+
+    checkNoThrow(label("Path exists and isFile"), [&] {
+        auto path = Coco::Path(file_path);
+        return path.exists() && path.isFile();
+    });
+
+    checkNoThrow(label("std::filesystem finds Path's toStd"), [&] {
+        std::error_code error{};
+        return std::filesystem::exists(Coco::Path(file_path).toStd(), error);
+    });
+
+    checkNoThrow(label("filePaths lists the file by name"), [&] {
+        for (const auto& path : Coco::filePaths(Coco::Path(temp_dir.path()))) {
+            if (path.nameQString() == file_name) {
+                return true;
+            }
+        }
+
+        return false;
+    });
+}
+
+// Written as escapes so the checks don't depend on how the compiler reads this
+// file: U+00E9, then U+65E5 U+672C U+8A9E, then U+1F4C1 (outside the BMP, so
+// two UTF-16 code units)
+static void testPathNonAscii()
+{
+    auto accented = u"é"_s;
+    auto japanese = u"日本語"_s;
+    auto emoji = u"\U0001F4C1"_s;
+
+    testPathNonAsciiName("accented", accented, "\xC3\xA9");
+    testPathNonAsciiName(
+        "japanese",
+        japanese,
+        "\xE6\x97\xA5\xE6\x9C\xAC\xE8\xAA\x9E");
+    testPathNonAsciiName("emoji", emoji, "\xF0\x9F\x93\x81");
+
+    testPathNonAsciiFile("accented", accented);
+    testPathNonAsciiFile("japanese", japanese);
+    testPathNonAsciiFile("emoji", emoji);
+}
+
 static void testToQString()
 {
     check(
@@ -842,6 +984,7 @@ int main(int argc, char* argv[])
     testPathConversion();
     testPathPrettyString();
     testPathStandardDirs();
+    testPathNonAscii();
 
     // --- ToQString core paths (no optional modules) -----------------------
     check(Coco::toQString(42) == u"42"_s, "toQString(int)");

@@ -1,0 +1,117 @@
+# =============================================================================
+# Coco: CI
+# =============================================================================
+#
+# Builds Coco on its own and runs its smoke test. Triggered by a push to any
+# branch, by a pull request, and by hand (Actions tab, "Run workflow"). A
+# change to nothing but docs doesn't trigger it.
+#
+# Jobs:
+#   linux  -> ubuntu-22.04, gcc-13
+#   macos  -> macos-14 (ARM / Apple Silicon), Apple clang
+#
+# There is no Windows job: Qt 6.11 on Windows installs only through the
+# official installer, which needs a Qt account, and Windows is where Coco is
+# developed and run every day.
+#
+# The build is Debug, which turns on Coco's assertions and its startup
+# diagnostics. Qt Network and Qt Xml come with the base install, so the smoke
+# test's optional parts (StartCop, QDomElement) are built and run too.
+#
+# Path assumptions (from repo root):
+#   (.github/workflows/ci.yml)
+#   Coco/                            (CMake source dir)
+#   Coco/src/Smoke.cpp               (built only when Coco is top-level)
+
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'LICENSE'
+  workflow_dispatch:
+
+# A newer push to the same branch replaces a run still in progress
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  QT_VERSION: '6.11.2'
+  BUILD_TYPE: Debug
+
+jobs:
+
+  # ===========================================================================
+  # Linux
+  # ===========================================================================
+
+  linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: linux_gcc_64
+          cache: true
+
+      # NB: gcc-13 comes from the toolchain PPA for C++20 (<format>)
+      - name: Install system dependencies
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-13 g++-13 \
+            libxcb1-dev libx11-xcb-dev libxkbcommon-dev \
+            libgl1-mesa-dev
+
+      - name: Configure
+        run: |
+          cmake -B build -S Coco \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_CXX_COMPILER=g++-13
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  # ===========================================================================
+  # macOS (ARM / Apple Silicon)
+  # ===========================================================================
+
+  macos:
+    runs-on: macos-14
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: clang_64
+          cache: true
+
+      - name: Configure
+        run: |
+          cmake -B build -S Coco \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure

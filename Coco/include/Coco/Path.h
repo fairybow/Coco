@@ -235,6 +235,28 @@ public:
         }
     }
 
+    // True if this path has a root name, a root directory, or both ("C:/a",
+    // "/a", and "C:a" all do). Stricter than "is absolute": on Windows "/a" and
+    // "C:a" are not absolute, yet appending either to a base path replaces
+    // part of the base instead of nesting under it
+    bool hasRoot() const { return d_->path.has_root_path(); }
+
+    // True if every component after the root is a real name: no ".", no "..",
+    // and no trailing separator (which reads as an empty last component). Such
+    // a path names its target exactly one way, so comparing it lexically is
+    // sound. An empty path and a bare root are plain; repeated separators do
+    // not count against a path, since they compare equal to single ones
+    bool isPlain() const
+    {
+        for (const auto& part : d_->path.relative_path()) {
+            if (part.empty() || part == "." || part == "..") {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     // ----- Decomposition -----
 
     Path rootName() const { return d_->path.root_name(); }

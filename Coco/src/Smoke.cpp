@@ -281,6 +281,49 @@ static void testPathQueries()
     check(
         !Coco::Path("C:/ab").isUnder(Coco::Path("C:/a")),
         "Path is not under a name it only starts with");
+
+    check(!Coco::Path("a/b").hasRoot(), "relative Path has no root");
+    check(!Coco::Path().hasRoot(), "empty Path has no root");
+    check(Coco::Path("/a").hasRoot(), "Path with a root directory has a root");
+
+#if defined(Q_OS_WIN)
+
+    check(Coco::Path("C:/a").hasRoot(), "Path with a drive has a root");
+    check(Coco::Path("C:a").hasRoot(), "drive-relative Path has a root");
+    check(Coco::Path("C:\\a").hasRoot(), "backslash Path has a root");
+
+#endif
+
+    check(Coco::Path("a/b").isPlain(), "Path of names is plain");
+    check(Coco::Path("/a/b").isPlain(), "rooted Path of names is plain");
+    check(Coco::Path().isPlain(), "empty Path is plain");
+    check(Coco::Path("/").isPlain(), "bare root is plain");
+    check(Coco::Path("a//b").isPlain(), "repeated separator is plain");
+    check(Coco::Path(".hidden").isPlain(), "leading-dot name is plain");
+    check(Coco::Path("a/..b").isPlain(), "name starting with dots is plain");
+    check(Coco::Path("...").isPlain(), "three dots is a name, so plain");
+
+    check(!Coco::Path(".").isPlain(), "\".\" is not plain");
+    check(!Coco::Path("..").isPlain(), "\"..\" is not plain");
+    check(!Coco::Path("a/./b").isPlain(), "Path through \".\" is not plain");
+    check(!Coco::Path("a/../b").isPlain(), "Path through \"..\" is not plain");
+    check(!Coco::Path("a/b/..").isPlain(), "Path ending \"..\" is not plain");
+    check(!Coco::Path("/a/../b").isPlain(), "rooted \"..\" is not plain");
+    check(!Coco::Path("a/b/").isPlain(), "trailing separator is not plain");
+
+#if defined(Q_OS_WIN)
+
+    check(Coco::Path("C:/a/b").isPlain(), "drive Path of names is plain");
+    check(Coco::Path("C:/").isPlain(), "bare drive root is plain");
+    check(!Coco::Path("C:/a/../b").isPlain(), "drive \"..\" is not plain");
+    check(
+        !Coco::Path("C:\\a\\..\\b").isPlain(),
+        "backslash \"..\" is not plain");
+    check(
+        !Coco::Path("C:\\a\\b\\").isPlain(),
+        "trailing backslash is not plain");
+
+#endif
 }
 
 static void testPathDecomposition()

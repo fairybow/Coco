@@ -830,6 +830,11 @@ static void testToQString()
         Coco::toQString(SmokeFlag::No) == u"SmokeFlag::No"_s,
         "toQString(Bool No)");
 
+    // Bool's std::format support, which nothing else here goes through
+    check(
+        std::format("{}", SmokeFlag::Yes) == "SmokeFlag::Yes",
+        "Bool std::format");
+
 #if defined(COCO_HAS_XML)
 
     {

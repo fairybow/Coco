@@ -115,10 +115,14 @@ template <typename TagT> const Bool<TagT> Bool<TagT>::No{ false };
 
 } // namespace Coco
 
+// format takes any format context, not only std::format_context: whether a
+// type can be formatted is decided against a context type of the standard
+// library's own choosing, and libc++ picks a different one
 template <typename TagT>
 struct std::formatter<Coco::Bool<TagT>> : std::formatter<std::string>
 {
-    auto format(const Coco::Bool<TagT>& b, std::format_context& ctx) const
+    template <typename FormatContextT>
+    auto format(const Coco::Bool<TagT>& b, FormatContextT& ctx) const
     {
         return std::format_to(
             ctx.out(),

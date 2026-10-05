@@ -876,9 +876,13 @@ template <> struct hash<Coco::Path>
     }
 };
 
+// format takes any format context, not only std::format_context: whether a
+// type can be formatted is decided against a context type of the standard
+// library's own choosing, and libc++ picks a different one
 template <> struct formatter<Coco::Path> : formatter<string>
 {
-    auto format(const Coco::Path& path, format_context& ctx) const
+    template <typename FormatContextT>
+    auto format(const Coco::Path& path, FormatContextT& ctx) const
     {
         return formatter<string>::format(path.toString(), ctx);
     }

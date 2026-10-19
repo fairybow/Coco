@@ -346,6 +346,13 @@ public:
         return d_->path.lexically_relative(base.d_->path);
     }
 
+    // "." and ".." removed by reading the path alone, without asking the file
+    // system, so it works for a path that doesn't exist. A ".." after a
+    // symlinked folder steps back up the path as written, not out of the
+    // link's target. A path ending in ".." keeps a trailing separator ("a/b/.."
+    // becomes "a/")
+    Path lexicallyNormal() const { return d_->path.lexically_normal(); }
+
     // The std::string forms below are UTF-8
 
     // Forward slashes only. Asked for in the path's own character type, so

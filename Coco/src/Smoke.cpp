@@ -531,6 +531,16 @@ static void testPathConversion()
         check(rebased == Coco::Path("D:/new"), "Path rebase of the base");
     }
 
+    check(
+        Coco::Path("C:/a/./b/../c").lexicallyNormal() == Coco::Path("C:/a/c"),
+        "Path lexicallyNormal removes \".\" and \"..\"");
+    check(
+        Coco::Path("C:/a/b/..").lexicallyNormal() == Coco::Path("C:/a/"),
+        "Path lexicallyNormal keeps a trailing separator after \"..\"");
+    check(
+        Coco::Path("C:/a/b").lexicallyNormal() == Coco::Path("C:/a/b"),
+        "Path lexicallyNormal leaves a plain path alone");
+
     {
         auto a = Coco::Path("C:/test/file.txt");
         auto b = Coco::Path("C:/test/file.txt");
@@ -555,6 +565,51 @@ static void testPathConversion()
             variant.value<QString>() == original.toQString(),
             "Path QVariant converts to QString");
     }
+}
+
+// canonical asks the file system, so these checks use real files
+static void testPathCanonical()
+{
+    QTemporaryDir temp_dir{};
+    auto dir = Coco::Path(temp_dir.path());
+    auto file = dir / "file.txt";
+
+    {
+        QFile created(file.toQString());
+
+        if (!temp_dir.isValid() || !Coco::mkdir(dir / "sub") ||
+            !created.open(QIODevice::WriteOnly)) {
+            check(false, "canonical: temp files created");
+            return;
+        }
+    }
+
+    auto resolved = file.canonical();
+
+    check(!resolved.isEmpty(), "Path canonical of an existing file");
+    check(resolved.toStd().is_absolute(), "Path canonical is absolute");
+    check(
+        (dir / "sub/../file.txt").canonical() == resolved,
+        "Path canonical removes \"..\"");
+    check(
+        (dir / "./file.txt").canonical() == resolved,
+        "Path canonical removes \".\"");
+    check(
+        (dir / "missing.txt").canonical().isEmpty(),
+        "Path canonical of a missing path is empty");
+
+#if !defined(Q_OS_WIN)
+
+    // QFile::link makes a symlink here. On Windows it makes a .lnk shortcut,
+    // which the file system doesn't follow
+    auto link = dir / "link.txt";
+
+    check(
+        QFile::link(file.toQString(), link.toQString()) &&
+            link.canonical() == resolved,
+        "Path canonical follows a symlink");
+
+#endif
 }
 
 // prettyQString gives single forward slashes and no trailing slash, and
@@ -1066,6 +1121,7 @@ int main(int argc, char* argv[])
     testPathDecomposition();
     testPathModification();
     testPathConversion();
+    testPathCanonical();
     testPathPrettyString();
     testPathStandardDirs();
     testPathNonAscii();

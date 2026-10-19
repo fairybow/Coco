@@ -192,6 +192,16 @@ public:
 
     bool exists() const { return QFileInfo(d_->qstr()).exists(); }
 
+    // The path as the file system resolves it: absolute, with symlinks
+    // followed and "." and ".." gone. Empty when nothing exists at the path,
+    // since there is nothing to resolve. Letter case is left as written, even
+    // on a file system that ignores case
+    Path canonical() const
+    {
+        auto resolved = QFileInfo(d_->qstr()).canonicalFilePath();
+        return resolved.isEmpty() ? Path{} : Path(resolved);
+    }
+
     // True if this path is `base` itself or nested inside it. A pure walk up
     // the parents, comparing with operator== (std::filesystem::path's own,
     // which treats both separators as separators) — so it never routes through

@@ -368,46 +368,64 @@ public:
     QString nameQString() const { return toQString_(d_->path.filename()); }
     std::string nameString() const { return toUtf8_(d_->path.filename()); }
 
-    // For a uniform display path (single forward slashes and no trailing slash,
-    // with no other changes (keeps dot and dot-dot))
+    // The path written uniformly: its root as the platform reads it, then each
+    // name after it, separated by a single forward slash, with no separator at
+    // the end. Nothing else changes: "." and ".." are kept, and every name is
+    // kept exactly as written. For display, and for storing a path as text.
+    //
+    // Built from the path's own parts, so the platform decides what is a
+    // separator. On Windows both slashes are, and a UNC root ("//server") keeps
+    // its two. Elsewhere only "/" is, and a backslash stays part of a name.
+    //
+    // Path(p.prettyQString()) names what p names. The one difference is a
+    // trailing separator, which is dropped, though it insists that the last
+    // name is a folder. A Windows device path ("\\?\C:\...", "\\.\COM1"), in
+    // which "/" is not a separator, is returned exactly as written, so it reads
+    // back unchanged. (On Linux, a name that isn't valid UTF-8 doesn't read
+    // back, but it survives no QString form)
     QString prettyQString() const
     {
-        return QString::fromStdString(prettyString());
-    }
+#if defined(Q_OS_WIN)
 
-    // For a uniform display path (single forward slashes and no trailing slash,
-    // with no other changes (keeps dot and dot-dot))
-    // Edge case: a bare "//" input will be reduced to "/". This is acceptable
-    // since bare UNC prefixes are not valid paths
-    // TODO (maybe): Caching? If this was used to display a path in a tree view,
-    // for example, we might need it?
-    std::string prettyString() const
-    {
-        auto& d_str = d_->str();
-        std::string pretty{};
-        pretty.reserve(d_str.size());
-        auto last_was_sep = false;
-
-        for (auto& ch : d_str) {
-            if (ch == '/' || ch == '\\') {
-                if (!last_was_sep) {
-                    pretty += '/';
-                    last_was_sep = true;
-                }
-            } else {
-                pretty += ch;
-                last_was_sep = false;
-            }
+        if (isWindowsDevicePath_(d_->qstr())) {
+            return d_->qstr();
         }
 
-        // Don't strip if the slash is the root directory component
-        if (pretty.size() > 1 && pretty.back() == '/' &&
-            pretty[pretty.size() - 2] != ':') {
-            pretty.pop_back();
+#endif
+
+        const auto& path = d_->path;
+        auto pretty = toQString_(path.root_name());
+
+#if defined(Q_OS_WIN)
+
+        pretty.replace(u'\\', u'/');
+
+#endif
+
+        if (path.has_root_directory()) {
+            pretty += u'/';
+        }
+
+        auto first = true;
+
+        for (const auto& part : path.relative_path()) {
+            if (part.empty()) {
+                continue;
+            }
+
+            if (!first) {
+                pretty += u'/';
+            }
+
+            pretty += toQString_(part);
+            first = false;
         }
 
         return pretty;
     }
+
+    // prettyQString, in UTF-8
+    std::string prettyString() const { return prettyQString().toStdString(); }
 
     QString stemQString() const { return toQString_(d_->path.stem()); }
     std::string stemString() const { return toUtf8_(d_->path.stem()); }
@@ -480,6 +498,27 @@ private:
     {
         return toQString_(p).toStdString();
     }
+
+#if defined(Q_OS_WIN)
+
+    // "\\?\", "\\.\", or "\??\" at the start, with either slash. Windows reads
+    // what follows without its usual rules, so "/" may not be a separator there
+    static bool isWindowsDevicePath_(const QString& s)
+    {
+        auto is_sep = [](QChar ch) { return ch == u'\\' || ch == u'/'; };
+
+        if (s.size() < 4 || !is_sep(s[0]) || !is_sep(s[3])) {
+            return false;
+        }
+
+        if (is_sep(s[1])) {
+            return s[2] == u'?' || s[2] == u'.';
+        }
+
+        return s[1] == u'?' && s[2] == u'?';
+    }
+
+#endif
 
     // Thread safety: SharedData_ relies on QSharedData's copy-on-write for
     // mutation safety, but const methods (str(), qstr()) lazily populate

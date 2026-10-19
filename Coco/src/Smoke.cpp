@@ -612,57 +612,128 @@ static void testPathCanonical()
 #endif
 }
 
-// prettyQString gives single forward slashes and no trailing slash, and
-// changes nothing else
+// What a path names, read from its parts: its root name (with forward
+// slashes), whether it has a root directory, and each name after them. A
+// repeated or trailing separator makes an empty name, which names nothing, so
+// those are left out
+static QStringList partsOf(const Coco::Path& path)
+{
+    QStringList parts{
+        QString::fromStdString(path.rootName().genericString()),
+        path.rootDir().isEmpty() ? QString{} : u"/"_s,
+    };
+
+    for (const auto& part : path.relative().toStd()) {
+        if (!part.empty()) {
+            parts << Coco::Path(part).toQString();
+        }
+    }
+
+    return parts;
+}
+
+// path's pretty form is expected, and reading it back names what path names
+static void
+checkPretty(const Coco::Path& path, const QString& expected, const char* what)
+{
+    auto pretty = path.prettyQString();
+
+    check(pretty == expected, what);
+    check(
+        partsOf(Coco::Path(pretty)) == partsOf(path),
+        (QByteArray(what) + ", read back").constData());
+}
+
+// prettyQString gives the root as the platform reads it, then single forward
+// slashes between names and none at the end, and changes nothing else
 static void testPathPrettyString()
 {
+    checkPretty(Coco::Path(), QString{}, "pretty Path: empty");
+    checkPretty(Coco::Path("a/b") / "c", u"a/b/c"_s, "pretty Path: joined");
+    checkPretty(
+        Coco::Path("a//b////c"),
+        u"a/b/c"_s,
+        "pretty Path: repeated separators");
+    checkPretty(
+        Coco::Path("a/./b/../c"),
+        u"a/./b/../c"_s,
+        "pretty Path: dot and dot-dot kept");
+    checkPretty(
+        Coco::Path("a/b/.."),
+        u"a/b/.."_s,
+        "pretty Path: ending dot-dot kept");
+    checkPretty(Coco::Path("."), u"."_s, "pretty Path: dot alone");
+    checkPretty(Coco::Path("a/b/"), u"a/b"_s, "pretty Path: trailing slash");
+    checkPretty(Coco::Path("/"), u"/"_s, "pretty Path: / kept");
+    checkPretty(
+        Coco::Path("/a//b/"),
+        u"/a/b"_s,
+        "pretty Path: rooted, repeated and trailing separators");
+
+#if defined(Q_OS_WIN)
+
+    checkPretty(
+        Coco::Path("C:\\Users\\fairybow\\Documents"),
+        u"C:/Users/fairybow/Documents"_s,
+        "pretty Path: backslashes");
+    checkPretty(
+        Coco::Path("C:\\Users/fairybow\\\\Documents\\"),
+        u"C:/Users/fairybow/Documents"_s,
+        "pretty Path: mixed separators");
+    checkPretty(Coco::Path("C:/"), u"C:/"_s, "pretty Path: C:/ kept");
+    checkPretty(Coco::Path("C:\\"), u"C:/"_s, "pretty Path: C:\\ is C:/");
+    checkPretty(
+        Coco::Path("C:a\\b"),
+        u"C:a/b"_s,
+        "pretty Path: drive-relative");
+    checkPretty(
+        Coco::Path("\\\\server\\share\\dir\\"),
+        u"//server/share/dir"_s,
+        "pretty Path: UNC keeps its two slashes");
+    checkPretty(
+        Coco::Path("//server/share"),
+        u"//server/share"_s,
+        "pretty Path: UNC with forward slashes");
+    checkPretty(
+        Coco::Path("\\\\?\\C:\\Users\\fairybow"),
+        u"\\\\?\\C:\\Users\\fairybow"_s,
+        "pretty Path: long-path prefix kept as written");
+    checkPretty(
+        Coco::Path("\\\\.\\COM1"),
+        u"\\\\.\\COM1"_s,
+        "pretty Path: device path kept as written");
+
+#else
+
     {
-        auto p = Coco::Path("C:/Users") / "fairybow" / "Documents";
+        auto p = Coco::Path("dir/a\\b.txt");
+
+        checkPretty(
+            p,
+            u"dir/a\\b.txt"_s,
+            "pretty Path: a backslash is part of a name");
+        check(
+            partsOf(p).size() == 4,
+            "pretty Path: a backslash doesn't split a name");
+    }
+
+    // Off Windows "C:" is an ordinary name, and "C:/" a relative folder
+    checkPretty(
+        Coco::Path("C:/"),
+        u"C:"_s,
+        "pretty Path: C:/ is a folder named C:");
+
+    // How a leading "//" is read is the platform's to say. Only that it reads
+    // back is checked
+    {
+        auto p = Coco::Path("//server/share");
 
         check(
-            p.prettyQString() == u"C:/Users/fairybow/Documents"_s,
-            "pretty Path: joined");
+            partsOf(Coco::Path(p.prettyQString())) == partsOf(p),
+            "pretty Path: leading // reads back");
     }
 
-    {
-        auto p = Coco::Path("C://Users////fairybow");
-
-        check(
-            p.prettyQString() == u"C:/Users/fairybow"_s,
-            "pretty Path: repeated separators");
-    }
-
-    {
-        auto p = Coco::Path("C:/Users/./fairybow/../Documents");
-
-        check(
-            p.prettyQString() == u"C:/Users/./fairybow/../Documents"_s,
-            "pretty Path: dot and dot-dot kept");
-    }
-
-    {
-        auto p = Coco::Path("C:\\Users\\fairybow\\Documents");
-
-        check(
-            p.prettyQString() == u"C:/Users/fairybow/Documents"_s,
-            "pretty Path: backslashes");
-    }
-
-    {
-        auto p = Coco::Path("C:/Users/fairybow/");
-
-        check(
-            p.prettyQString() == u"C:/Users/fairybow"_s,
-            "pretty Path: trailing slash");
-    }
-
-    {
-        auto unix_root = Coco::Path("/");
-        auto win_root = Coco::Path("C:/");
-
-        check(unix_root.prettyQString() == u"/"_s, "pretty Path: / kept");
-        check(win_root.prettyQString() == u"C:/"_s, "pretty Path: C:/ kept");
-    }
+#endif
 }
 
 // The locations themselves differ per machine, so only their shape is checked

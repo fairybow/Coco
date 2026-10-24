@@ -1,2 +1,5 @@
 * text=auto
 *.h linguist-language=C++
+CMakeLists.txt linguist-detectable=false
+*.bat linguist-detectable=false
+*.ps1 linguist-detectable=false

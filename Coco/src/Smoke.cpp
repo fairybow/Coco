@@ -736,10 +736,12 @@ static void testPathPrettyString()
 #endif
 }
 
-// The locations themselves differ per machine, so only their shape is checked
+// The locations themselves differ per machine, so only their shape is
+// checked. The executable's folder always exists, so it's checked for that
 static void testPathStandardDirs()
 {
     check(!Coco::Path::Root().isEmpty(), "Path::Root is not empty");
+    check(Coco::Path::AppDir().exists(), "Path::AppDir exists");
     check(!Coco::Path::Home().isEmpty(), "Path::Home is not empty");
     check(!Coco::Path::Desktop().isEmpty(), "Path::Desktop is not empty");
     check(!Coco::Path::Documents().isEmpty(), "Path::Documents is not empty");

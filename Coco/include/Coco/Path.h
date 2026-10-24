@@ -22,6 +22,7 @@
 #include <ostream>
 #include <string>
 
+#include <QCoreApplication>
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
@@ -449,6 +450,7 @@ public:
     GEN_STD_DIR_METHOD_1_(Name, QStandardPaths::writableLocation(QtLocation))
 
     GEN_STD_DIR_METHOD_1_(Root, QDir::rootPath())
+    GEN_STD_DIR_METHOD_1_(AppDir, QCoreApplication::applicationDirPath())
     GEN_STD_DIR_METHOD_2_(AppConfig, QStandardPaths::AppConfigLocation)
     GEN_STD_DIR_METHOD_2_(AppData, QStandardPaths::AppDataLocation)
     GEN_STD_DIR_METHOD_2_(AppLocalData, QStandardPaths::AppLocalDataLocation)

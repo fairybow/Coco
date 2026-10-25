@@ -6,3 +6,4 @@
 #define emit
 #define signals
 #define slots
+#define COCO_BOOL(Name) struct Name##Tag { static constexpr const char* name() { return #Name; } }; using Name = Coco::Bool<Name##Tag>;

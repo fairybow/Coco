@@ -52,20 +52,7 @@ QtMessageHandler qtHandler_ = nullptr;
 
 QString timestamp_()
 {
-    auto now = Time::now();
-    auto days = std::chrono::floor<std::chrono::days>(now.seconds);
-    std::chrono::year_month_day ymd{ days };
-    std::chrono::hh_mm_ss hms{ now.seconds - days };
-
-    return QString::asprintf(
-        "%04d-%02d-%02d | %02d:%02d:%02d.%03d",
-        static_cast<int>(ymd.year()),
-        static_cast<unsigned>(ymd.month()),
-        static_cast<unsigned>(ymd.day()),
-        static_cast<int>(hms.hours().count()),
-        static_cast<int>(hms.minutes().count()),
-        static_cast<int>(hms.seconds().count()),
-        static_cast<int>(now.milliseconds));
+    return Time::nowQString(u"yyyy-MM-dd | HH:mm:ss.zzz");
 }
 
 inline void
@@ -100,19 +87,7 @@ prune_(const Path& dir, const QString& prefix, const QString& ext, int cap)
 
 QString logFileName_()
 {
-    auto now = Time::now();
-    auto days = std::chrono::floor<std::chrono::days>(now.seconds);
-    std::chrono::year_month_day ymd{ days };
-    std::chrono::hh_mm_ss hms{ now.seconds - days };
-
-    auto timestamp = QString::asprintf(
-        "%04d-%02d-%02d_%02d.%02d.%02d",
-        static_cast<int>(ymd.year()),
-        static_cast<unsigned>(ymd.month()),
-        static_cast<unsigned>(ymd.day()),
-        static_cast<int>(hms.hours().count()),
-        static_cast<int>(hms.minutes().count()),
-        static_cast<int>(hms.seconds().count()));
+    auto timestamp = Time::nowQString(u"yyyy-MM-dd_HH.mm.ss");
 
     return logPrefix_.isEmpty() ? timestamp + LOG_EXT_
                                 : logPrefix_ + "_" + timestamp + LOG_EXT_;

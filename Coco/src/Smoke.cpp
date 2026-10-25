@@ -14,15 +14,17 @@
 //
 // Assumes the Hearth->Coco fold is done (toQString lives in namespace Coco,
 // headers included as <Coco/...>). Returns non-zero on failure so CTest catches
-// it. Covers five things:
+// it. Covers six things:
 //   1. COCO_HAS_* macro propagation to a consumer TU (compile-time, both ways)
 //   2. Path meta-type converter registration (runtime; proves Path.cpp linked)
 //   3. Path behavior: streams, construction, comparison, decomposition,
 //      modification, conversion, the standard-directory functions, and names
 //      outside ASCII
 //   4. toQString output, for each overload and for each kind of QVariant
-//   5. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
+//   5. Time: clockQString, Countdown, and the local clock (now, nowQString)
+//   6. StartCop meta-object linkage (link-time; proves AUTOMOC ran)
 
+#include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <format>
@@ -51,6 +53,7 @@
 #include <QStringView>
 #include <QTemporaryDir>
 #include <QTextStream>
+#include <QTime>
 #include <QVariant>
 #include <QVariantHash>
 #include <QVariantMap>
@@ -61,6 +64,7 @@
 #if defined(COCO_HAS_NETWORK)
 #    include <Coco/StartCop.h>
 #endif
+#include <Coco/Time.h>
 #include <Coco/ToQString.h>
 
 using namespace Qt::StringLiterals;
@@ -1160,6 +1164,199 @@ static void testToQStringVariant()
 #endif
 }
 
+static void testTimeClockQString()
+{
+    using Coco::Time::clockQString;
+    using Coco::Time::RoundUp;
+
+    check(clockQString(0, RoundUp::Yes) == u"0:00"_s, "clockQString(0)");
+    check(
+        clockQString(-5, RoundUp::Yes) == u"0:00"_s,
+        "clockQString(negative) reads 0:00");
+    check(
+        clockQString(1, RoundUp::Yes) == u"0:01"_s,
+        "clockQString rounds a part second up");
+    check(
+        clockQString(999, RoundUp::No) == u"0:00"_s,
+        "clockQString rounds a part second down");
+    check(
+        clockQString(1000, RoundUp::Yes) == u"0:01"_s
+            && clockQString(1000, RoundUp::No) == u"0:01"_s,
+        "clockQString(one second) either way");
+    check(
+        clockQString(1001, RoundUp::Yes) == u"0:02"_s,
+        "clockQString rounds up past a second");
+    check(
+        clockQString(1999, RoundUp::No) == u"0:01"_s,
+        "clockQString rounds down short of two seconds");
+    check(
+        clockQString(25 * 60 * 1000, RoundUp::Yes) == u"25:00"_s,
+        "clockQString(25 min)");
+    check(
+        clockQString(3599 * 1000, RoundUp::Yes) == u"59:59"_s,
+        "clockQString below an hour");
+    check(
+        clockQString(3600 * 1000, RoundUp::Yes) == u"1:00:00"_s,
+        "clockQString(one hour)");
+    check(
+        clockQString(3600 * 1000 - 1, RoundUp::Yes) == u"1:00:00"_s,
+        "clockQString rounds up into the hour");
+    check(
+        clockQString(3600 * 1000 + 1, RoundUp::Yes) == u"1:00:01"_s,
+        "clockQString rounds up past an hour");
+    check(
+        clockQString((2 * 3600 + 5 * 60 + 9) * 1000, RoundUp::No)
+            == u"2:05:09"_s,
+        "clockQString pads minutes and seconds after hours");
+}
+
+static void testTimeCountdown()
+{
+    using Coco::Time::Countdown;
+
+    {
+        Countdown countdown{};
+
+        check(countdown.isIdle(), "Countdown starts idle");
+        check(
+            !countdown.isRunning(0) && !countdown.isPaused()
+                && !countdown.isFinished(0),
+            "idle Countdown isn't running, paused, or finished");
+        check(countdown.remainingMs(0) == 0, "idle Countdown has nothing left");
+        check(countdown.durationMs() == 0, "idle Countdown has no duration");
+    }
+
+    // Kept by its end time: what is left depends only on the time asked
+    // about, never on how often it was asked
+    {
+        Countdown countdown{};
+        countdown.start(10'000, 1'000);
+
+        check(countdown.isRunning(1'000), "Countdown runs once started");
+        check(countdown.durationMs() == 10'000, "Countdown keeps its duration");
+        check(
+            countdown.remainingMs(4'000) == 7'000,
+            "Countdown counts down from its start");
+        check(
+            countdown.isFinished(11'000) && !countdown.isRunning(11'000),
+            "Countdown finishes at its end time");
+        check(
+            countdown.remainingMs(20'000) == 0,
+            "Countdown never has less than nothing left");
+        check(
+            countdown.remainingMs(0) == 10'000,
+            "Countdown never has more than its duration left");
+    }
+
+    {
+        Countdown countdown{};
+        countdown.start(10'000, 0);
+        countdown.pause(3'000);
+
+        check(countdown.isPaused(), "Countdown pauses");
+        check(!countdown.isRunning(3'000), "paused Countdown isn't running");
+        check(
+            countdown.remainingMs(100'000) == 7'000,
+            "paused Countdown doesn't count down");
+
+        countdown.resume(50'000);
+
+        check(countdown.isRunning(50'000), "Countdown resumes");
+        check(
+            countdown.remainingMs(50'000) == 7'000,
+            "resumed Countdown goes on from what was left");
+        check(
+            countdown.isFinished(57'000),
+            "resumed Countdown finishes when what was left runs out");
+    }
+
+    {
+        Countdown countdown{};
+        countdown.start(1'000, 0);
+        countdown.pause(2'000);
+
+        check(
+            !countdown.isPaused() && countdown.isFinished(2'000),
+            "a finished Countdown doesn't pause");
+    }
+
+    {
+        Countdown countdown{};
+        countdown.start(10'000, 0);
+        countdown.resume(5'000);
+
+        check(
+            countdown.remainingMs(5'000) == 5'000,
+            "resume does nothing to a running Countdown");
+    }
+
+    {
+        Countdown countdown{};
+        countdown.start(10'000, 0);
+        countdown.pause(2'000);
+        countdown.start(5'000, 9'000);
+
+        check(
+            !countdown.isPaused() && countdown.remainingMs(9'000) == 5'000,
+            "start begins again from the full duration");
+    }
+
+    {
+        Countdown countdown{};
+        countdown.start(10'000, 0);
+        countdown.reset();
+
+        check(countdown.isIdle(), "reset makes a Countdown idle");
+        check(countdown.durationMs() == 0, "reset clears the duration");
+    }
+
+    {
+        Countdown countdown{};
+        countdown.start(0, 5);
+
+        check(countdown.isFinished(5), "a zero Countdown finishes at once");
+    }
+}
+
+// now(), nowQString, and QTime::currentTime() read the same local clock, so
+// their times of day agree to within the moment between the calls. On a machine
+// whose local time is UTC, UTC and local can't be told apart, so this can only
+// catch a UTC time on a machine with an offset
+static void testTimeNow()
+{
+    auto written = Coco::Time::nowQString(u"HH:mm:ss");
+    auto from_now = QTime::fromString(written, u"HH:mm:ss");
+    auto from_qtime = QTime::currentTime();
+
+    check(from_now.isValid(), "Time::nowQString writes its pattern");
+
+    auto apart = std::abs(
+        from_now.msecsSinceStartOfDay() / 1000
+        - from_qtime.msecsSinceStartOfDay() / 1000);
+    auto day = 24 * 60 * 60;
+
+    if (apart > day / 2) {
+        apart = day - apart;
+    }
+
+    check(apart <= 2, "Time::nowQString is the local time");
+
+    auto now = Coco::Time::now();
+    auto now_apart = std::abs(
+        now.time().msecsSinceStartOfDay() / 1000
+        - from_qtime.msecsSinceStartOfDay() / 1000);
+
+    if (now_apart > day / 2) {
+        now_apart = day - now_apart;
+    }
+
+    check(now.isValid(), "Time::now() is valid");
+    check(now_apart <= 2, "Time::now() is the local time");
+    check(
+        Coco::Time::nowQString(u"yyyy").size() == 4,
+        "Time::nowQString writes a four-digit year");
+}
+
 int main(int argc, char* argv[])
 {
     QCoreApplication app(argc, argv);
@@ -1204,6 +1401,11 @@ int main(int argc, char* argv[])
     check(Coco::toQString(u"hi"_s) == u"hi"_s, "toQString(QString)");
     testToQString();
     testToQStringVariant();
+
+    // --- Time -------------------------------------------------------------
+    testTimeClockQString();
+    testTimeCountdown();
+    testTimeNow();
 
     // --- Optional: Qt Xml -------------------------------------------------
 #if defined(COCO_HAS_XML)

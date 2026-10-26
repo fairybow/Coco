@@ -50,10 +50,7 @@ QTextStream logStream_{};
 LogSink logSink_{};
 QtMessageHandler qtHandler_ = nullptr;
 
-QString timestamp_()
-{
-    return Time::nowQString(u"yyyy-MM-dd | HH:mm:ss.zzz");
-}
+QString timestamp_() { return Time::nowQString(u"yyyy-MM-dd | HH:mm:ss.zzz"); }
 
 inline void
 prune_(const Path& dir, const QString& prefix, const QString& ext, int cap)

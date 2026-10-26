@@ -1180,8 +1180,8 @@ static void testTimeClockQString()
         clockQString(999, RoundUp::No) == u"0:00"_s,
         "clockQString rounds a part second down");
     check(
-        clockQString(1000, RoundUp::Yes) == u"0:01"_s
-            && clockQString(1000, RoundUp::No) == u"0:01"_s,
+        clockQString(1000, RoundUp::Yes) == u"0:01"_s &&
+            clockQString(1000, RoundUp::No) == u"0:01"_s,
         "clockQString(one second) either way");
     check(
         clockQString(1001, RoundUp::Yes) == u"0:02"_s,
@@ -1205,8 +1205,8 @@ static void testTimeClockQString()
         clockQString(3600 * 1000 + 1, RoundUp::Yes) == u"1:00:01"_s,
         "clockQString rounds up past an hour");
     check(
-        clockQString((2 * 3600 + 5 * 60 + 9) * 1000, RoundUp::No)
-            == u"2:05:09"_s,
+        clockQString((2 * 3600 + 5 * 60 + 9) * 1000, RoundUp::No) ==
+            u"2:05:09"_s,
         "clockQString pads minutes and seconds after hours");
 }
 
@@ -1219,8 +1219,8 @@ static void testTimeCountdown()
 
         check(countdown.isIdle(), "Countdown starts idle");
         check(
-            !countdown.isRunning(0) && !countdown.isPaused()
-                && !countdown.isFinished(0),
+            !countdown.isRunning(0) && !countdown.isPaused() &&
+                !countdown.isFinished(0),
             "idle Countdown isn't running, paused, or finished");
         check(countdown.remainingMs(0) == 0, "idle Countdown has nothing left");
         check(countdown.durationMs() == 0, "idle Countdown has no duration");
@@ -1331,8 +1331,8 @@ static void testTimeNow()
     check(from_now.isValid(), "Time::nowQString writes its pattern");
 
     auto apart = std::abs(
-        from_now.msecsSinceStartOfDay() / 1000
-        - from_qtime.msecsSinceStartOfDay() / 1000);
+        from_now.msecsSinceStartOfDay() / 1000 -
+        from_qtime.msecsSinceStartOfDay() / 1000);
     auto day = 24 * 60 * 60;
 
     if (apart > day / 2) {
@@ -1343,8 +1343,8 @@ static void testTimeNow()
 
     auto now = Coco::Time::now();
     auto now_apart = std::abs(
-        now.time().msecsSinceStartOfDay() / 1000
-        - from_qtime.msecsSinceStartOfDay() / 1000);
+        now.time().msecsSinceStartOfDay() / 1000 -
+        from_qtime.msecsSinceStartOfDay() / 1000);
 
     if (now_apart > day / 2) {
         now_apart = day - now_apart;

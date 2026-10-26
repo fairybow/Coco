@@ -38,6 +38,7 @@
 #include <QStringList>
 #include <QTextStream>
 #include <QWidget>
+#include <QtTypes>
 
 #include "Coco/Bool.h"
 
@@ -192,6 +193,15 @@ public:
     }
 
     bool exists() const { return QFileInfo(d_->qstr()).exists(); }
+
+    // When what's at the path was last modified, in milliseconds since the
+    // Unix epoch by the wall clock (as Time::epoch counts). 0 when nothing
+    // exists at the path
+    qint64 lastModifiedEpochMs() const
+    {
+        QFileInfo info(d_->qstr());
+        return info.exists() ? info.lastModified().toMSecsSinceEpoch() : 0;
+    }
 
     // The path as the file system resolves it: absolute, with symlinks
     // followed and "." and ".." gone. Empty when nothing exists at the path,

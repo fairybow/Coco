@@ -1,6 +1,7 @@
 /*
  * Coco — Common code for my Qt projects
  * Copyright (C) 2025-2026 fairybow
+ * <https://github.com/fairybow/Coco>
  *
  * This program is free software, redistributable and/or modifiable under the
  * terms of the GNU GPL v3. It's distributed in the hope that it will be useful
